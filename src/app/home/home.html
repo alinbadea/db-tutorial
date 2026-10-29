@@ -1,0 +1,13 @@
+<h1 class="mb-2 text-3xl font-bold text-slate-900">SQL Tutorial</h1>
+<p class="mb-6 text-slate-600">Choose a database to start learning.</p>
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+  @for (db of databases.value() ?? []; track db.id) {
+    <a
+      [routerLink]="['/', db.id]"
+      class="rounded-lg border border-slate-200 p-5 transition hover:border-blue-500 hover:shadow"
+    >
+      <h2 class="mb-1 text-lg font-semibold text-slate-900">{{ db.name }}</h2>
+      <p class="text-sm text-slate-600">{{ db.description }}</p>
+    </a>
+  }
+</div>

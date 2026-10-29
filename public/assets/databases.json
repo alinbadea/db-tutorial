@@ -1,0 +1,5 @@
+[
+  { "id": "01_eCommerce", "name": "eCommerce", "description": "An online shop with clients, products, categories, orders and order details." },
+  { "id": "02_Library", "name": "Library", "description": "A public library tracking titles, physical books, authors, publishers, clients and rentals." },
+  { "id": "03_Attendance", "name": "Attendance", "description": "A school system recording students, teachers, subjects, class enrollments and daily attendance." }
+]

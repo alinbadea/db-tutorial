@@ -1,59 +1,38 @@
-# Website
+# SQL Tutorial
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 22.2.5.
+An Angular site that shows SQL tutorial chapters written in Markdown, rendered with [ngx-markdown](https://github.com/jfcere/ngx-markdown). SQL code blocks are highlighted with Prism.
 
-## Development server
-
-To start a local development server, run:
+## Development
 
 ```bash
-ng serve
+npm install
+npm start      # http://localhost:4200/
+npm test
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+## Content
 
-## Code scaffolding
+All tutorial content lives in `public/assets/` and is served as static files:
 
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
-
-```bash
-ng generate component component-name
+```
+public/assets/
+  databases.json      # the databases shown in the top menu
+  db1/
+    toc.json          # table of contents for db1, in reading order
+    01-intro.md
+    ...
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+- **Rename or describe a database**: edit `name` / `description` in `databases.json`. The `id` must match the folder name. It also appears in the URL.
+- **Add a chapter**: put the `.md` file in the database's folder and add `{ "title": "...", "file": "03-joins.md" }` to its `toc.json`.
+- **Images**: put them next to the chapters and reference them from the site root, e.g. `![diagram](assets/db1/img/schema.png)`.
 
-```bash
-ng generate --help
-```
+URLs use hash routing (`#/db1/01-intro`), so deep links and page refreshes work on GitHub Pages.
 
-## Building
+## Deploying to GitHub Pages
 
-To build the project run:
+1. Push the repo to GitHub, with `main` as the default branch.
+2. In the repo, go to **Settings → Pages → Source** and select **GitHub Actions**.
+3. Every push to `main` runs `.github/workflows/deploy.yml`, which builds with `npm run build:gh` and publishes `dist/website/browser`.
 
-```bash
-ng build
-```
-
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Vitest](https://vitest.dev/) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+`build:gh` uses a relative base href (`./`), so the site works both at `username.github.io` and at `username.github.io/<repo>/`.

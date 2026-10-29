@@ -1,0 +1,10 @@
+[
+  { "title": "Normalization (UNF to 3NF)", "file": "01_normalization.md" },
+  { "title": "DDL: Creating the Database", "file": "02_ddl.md" },
+  { "title": "INSERT Statements", "file": "03_insert.md" },
+  { "title": "SELECT: Basic Queries", "file": "04_select_basics.md" },
+  { "title": "SELECT: JOINs", "file": "05_select_joins.md" },
+  { "title": "SELECT: Grouping and Aggregates", "file": "06_select_grouping.md" },
+  { "title": "UPDATE Statements", "file": "07_update.md" },
+  { "title": "DELETE Statements", "file": "08_delete.md" }
+]
