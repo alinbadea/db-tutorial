@@ -1,40 +1,40 @@
-# Attendance Database — Worksheet 1: Database Normalization (UNF to 3NF)
+# Baza de date Attendance — Fișa de lucru 1: Normalizarea bazei de date (UNF până la 3NF)
 
-## Learning Objectives
-- Understand the data anomalies that arise in an unnormalized school attendance system
-- Transform a flat table through 1NF, 2NF, and 3NF step by step
-- Distinguish between a student's *enrollment* in a subject (Classes) and a *daily attendance record* (Attendance)
-- Describe the final Attendance schema and the relationships between all five tables
-
----
-
-## Why Normalize?
-
-A school tracks which students attend which subjects taught by which teachers. Without normalization:
-
-**Insertion Anomaly:** You cannot add a new teacher to the system unless that teacher is already assigned to teach a class on some date. There is no way to record "Teacher X is available" without an attendance entry.
-
-**Update Anomaly:** If a teacher's name is misspelled, it must be corrected in every attendance row that teacher appears in — potentially hundreds of rows.
-
-**Deletion Anomaly:** If you delete the only attendance record for a specific subject, you might lose all information about that subject (name, credits) even though the subject is still taught.
+## Obiective de învățare
+- Înțelegerea anomaliilor de date care apar într-un sistem școlar de prezență nenormalizat
+- Transformarea pas cu pas a unui tabel plat prin 1NF, 2NF și 3NF
+- Diferențierea între *înscrierea* unui elev la o materie (Classes) și o *înregistrare zilnică de prezență* (Attendance)
+- Descrierea schemei finale Attendance și a relațiilor dintre toate cele cinci tabele
 
 ---
 
-## The Three Normal Forms — Quick Reference
+## De ce normalizăm?
 
-| Normal Form | Rule | Key Question |
+O școală urmărește ce elevi participă la ce materii, predate de ce profesori. Fără normalizare:
+
+**Anomalia de inserare:** Nu poți adăuga un profesor nou în sistem decât dacă acesta este deja repartizat să predea o oră la o anumită dată. Nu există nicio modalitate de a înregistra „Profesorul X este disponibil” fără o înregistrare de prezență.
+
+**Anomalia de actualizare:** Dacă numele unui profesor este scris greșit, trebuie corectat în fiecare rând de prezență în care apare acel profesor — posibil sute de rânduri.
+
+**Anomalia de ștergere:** Dacă ștergi singura înregistrare de prezență pentru o anumită materie, poți pierde toate informațiile despre acea materie (nume, credite), chiar dacă materia se predă în continuare.
+
+---
+
+## Cele trei forme normale — Referință rapidă
+
+| Forma normală | Regulă | Întrebare-cheie |
 |---|---|---|
-| **1NF** | Atomic values, no repeating groups, every row uniquely identifiable | "Are there multi-valued cells or column groups?" |
-| **2NF** | 1NF + no partial dependencies on a composite key | "Does every non-key column depend on the *whole* key?" |
-| **3NF** | 2NF + no transitive dependencies | "Does any non-key column determine another non-key column?" |
+| **1NF** | Valori atomice, fără grupuri repetitive, fiecare rând identificabil în mod unic | „Există celule cu mai multe valori sau grupuri de coloane?” |
+| **2NF** | 1NF + fără dependențe parțiale față de o cheie compusă | „Depinde fiecare coloană non-cheie de *întreaga* cheie?” |
+| **3NF** | 2NF + fără dependențe tranzitive | „Există vreo coloană non-cheie care determină o altă coloană non-cheie?” |
 
 ---
 
-## Step 1 — Unnormalized Form (UNF)
+## Pasul 1 — Forma nenormalizată (UNF)
 
-A naive design stores all attendance information in a single flat table:
+Un proiect naiv stochează toate informațiile despre prezență într-un singur tabel plat:
 
-**Table: attendance_flat**
+**Tabel: attendance_flat**
 
 | AttendanceID | AttendanceDate | StudentFirstName | StudentLastName | StudentEmail | StudentGrade | SubjectName | SubjectCredits | TeacherFirstName | TeacherLastName | TeacherEmail | TeacherSpecialization | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -46,22 +46,22 @@ A naive design stores all attendance information in a single flat table:
 | 6 | 2024-09-05 | Maria | Popescu | maria@school.ro | 10A | Mathematics | 4 | Ion | Munteanu | munteanu@school.ro | Mathematics | Present |
 | 7 | 2024-09-05 | Ana | Dumitrescu | ana@school.ro | 10B | Literature | 3 | Mihai | Pop | pop@school.ro | Literature | Present |
 
-**Problems visible here:**
-- Student data (name, email, grade) is repeated for every attendance record
-- Subject data (name, credits) is repeated for every class session
-- Teacher data (name, email, specialization) repeats across many rows
-- The relationship between a student and a subject (enrollment) is mixed with daily attendance
-- If "Mathematics" changes its credit count, every row containing Mathematics must be updated
+**Probleme vizibile aici:**
+- Datele elevului (nume, email, clasă) se repetă pentru fiecare înregistrare de prezență
+- Datele materiei (nume, credite) se repetă pentru fiecare oră
+- Datele profesorului (nume, email, specializare) se repetă în multe rânduri
+- Relația dintre un elev și o materie (înscrierea) este amestecată cu prezența zilnică
+- Dacă „Mathematics” își schimbă numărul de credite, fiecare rând care conține Mathematics trebuie actualizat
 
 ---
 
-## Step 2 — First Normal Form (1NF)
+## Pasul 2 — Prima formă normală (1NF)
 
-**Rules:** Atomic values, no repeating groups, every row uniquely identifiable.
+**Reguli:** Valori atomice, fără grupuri repetitive, fiecare rând identificabil în mod unic.
 
-The flat table already has atomic values and no repeating column groups. Every row can be uniquely identified by `AttendanceID`.
+Tabelul plat are deja valori atomice și nu are grupuri de coloane repetitive. Fiecare rând poate fi identificat în mod unic prin `AttendanceID`.
 
-**Table: attendance_1nf** (same structure, cleaner key assignment)
+**Tabel: attendance_1nf** (aceeași structură, cu o cheie atribuită mai clar)
 
 | AttendanceID (PK) | AttendanceDate | StudentFirstName | StudentLastName | StudentEmail | StudentGrade | SubjectName | SubjectCredits | TeacherFirstName | TeacherLastName | TeacherEmail | TeacherSpec | Status |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -70,27 +70,27 @@ The flat table already has atomic values and no repeating column groups. Every r
 
 PK: `AttendanceID`
 
-**Now in 1NF.** Every row is unique and all values are atomic. But massive redundancy remains.
+**Acum în 1NF.** Fiecare rând este unic și toate valorile sunt atomice. Dar rămâne o redundanță masivă.
 
 ---
 
-## Step 3 — Second Normal Form (2NF)
+## Pasul 3 — A doua formă normală (2NF)
 
-**Rules:** 1NF + every non-key column depends on the **whole** primary key.
+**Reguli:** 1NF + fiecare coloană non-cheie depinde de **întreaga** cheie primară.
 
-Since `AttendanceID` is a single-column PK, there are no partial dependencies by definition. However, examining functional dependencies reveals separate entities that should live in their own tables:
+Deoarece `AttendanceID` este o cheie primară formată dintr-o singură coloană, prin definiție nu există dependențe parțiale. Totuși, analiza dependențelor funcționale scoate la iveală entități separate, care ar trebui să aibă propriile tabele:
 
-| Column Group | Belongs to Entity | Should be in |
+| Grup de coloane | Aparține entității | Ar trebui să fie în |
 |---|---|---|
-| StudentFirstName, StudentLastName, StudentEmail, StudentGrade | Student | Students table |
-| SubjectName, SubjectCredits | Subject | Subjects table |
-| TeacherFirstName, TeacherLastName, TeacherEmail, TeacherSpec | Teacher | Teachers table |
-| StudentID + SubjectID + AcademicYear + Semester | Enrollment (Class) | Classes table |
-| ClassID + TeacherID + AttendanceDate + Status | Daily attendance | Attendance table |
+| StudentFirstName, StudentLastName, StudentEmail, StudentGrade | Elev | Tabelul Students |
+| SubjectName, SubjectCredits | Materie | Tabelul Subjects |
+| TeacherFirstName, TeacherLastName, TeacherEmail, TeacherSpec | Profesor | Tabelul Teachers |
+| StudentID + SubjectID + AcademicYear + Semester | Înscriere (Class) | Tabelul Classes |
+| ClassID + TeacherID + AttendanceDate + Status | Prezența zilnică | Tabelul Attendance |
 
-**After splitting into separate entity tables:**
+**După separarea în tabele distincte pentru fiecare entitate:**
 
-**Table: students_2nf**
+**Tabel: students_2nf**
 
 | StudentID | FirstName | LastName | Email | Grade |
 |---|---|---|---|---|
@@ -98,7 +98,7 @@ Since `AttendanceID` is a single-column PK, there are no partial dependencies by
 | 2 | Ion | Ionescu | ion@school.ro | 10A |
 | 3 | Ana | Dumitrescu | ana@school.ro | 10B |
 
-**Table: teachers_2nf**
+**Tabel: teachers_2nf**
 
 | TeacherID | FirstName | LastName | Email | Specialization |
 |---|---|---|---|---|
@@ -106,7 +106,7 @@ Since `AttendanceID` is a single-column PK, there are no partial dependencies by
 | 2 | Elena | Radu | radu@school.ro | Physics |
 | 3 | Mihai | Pop | pop@school.ro | Literature |
 
-**Table: subjects_2nf**
+**Tabel: subjects_2nf**
 
 | SubjectID | SubjectName | Credits |
 |---|---|---|
@@ -114,7 +114,7 @@ Since `AttendanceID` is a single-column PK, there are no partial dependencies by
 | 2 | Physics | 3 |
 | 3 | Literature | 3 |
 
-**Table: classes_2nf** (enrollment: student + subject + academic context)
+**Tabel: classes_2nf** (înscriere: elev + materie + context academic)
 
 | ClassID | StudentID | SubjectID | AcademicYear | Semester |
 |---|---|---|---|---|
@@ -125,7 +125,7 @@ Since `AttendanceID` is a single-column PK, there are no partial dependencies by
 | 5 | 2 | 2 | 2024 | Fall |
 | 6 | 3 | 3 | 2024 | Fall |
 
-**Table: attendance_2nf**
+**Tabel: attendance_2nf**
 
 | AttendanceID | ClassID | TeacherID | AttendanceDate | Status |
 |---|---|---|---|---|
@@ -139,36 +139,36 @@ Since `AttendanceID` is a single-column PK, there are no partial dependencies by
 
 ---
 
-## Step 4 — Third Normal Form (3NF)
+## Pasul 4 — A treia formă normală (3NF)
 
-**Rules:** 2NF + no transitive dependencies.
+**Reguli:** 2NF + fără dependențe tranzitive.
 
-Examining the 2NF tables:
+Examinăm tabelele 2NF:
 
-**In `teachers_2nf`:** Is there a transitive dependency?
+**În `teachers_2nf`:** Există o dependență tranzitivă?
 ```
 TeacherID → Specialization
 ```
-`Specialization` is an attribute of the teacher, not derived from another non-key column. This is a direct dependency — no violation.
+`Specialization` este un atribut al profesorului, nu este derivat dintr-o altă coloană non-cheie. Aceasta este o dependență directă — nu există nicio încălcare.
 
-**In `subjects_2nf`:** Could `Credits` depend on `SubjectName`?
+**În `subjects_2nf`:** Ar putea `Credits` să depindă de `SubjectName`?
 ```
 SubjectID → SubjectName → Credits (?)
 ```
-If Credits were determined by the subject name across all tables (a business rule), then `Credits` would transitively depend on `SubjectID` through `SubjectName`. In practice, `SubjectName` is just a descriptive label — different subjects with the same name could have different credits — so we treat `Credits` as depending directly on `SubjectID`. No violation.
+Dacă numărul de credite ar fi determinat de numele materiei în toate tabelele (o regulă de business), atunci `Credits` ar depinde tranzitiv de `SubjectID` prin intermediul `SubjectName`. În practică, `SubjectName` este doar o etichetă descriptivă — materii diferite cu același nume ar putea avea credite diferite — așa că tratăm `Credits` ca depinzând direct de `SubjectID`. Nu există nicio încălcare.
 
-**In `classes_2nf`:** Is there a dependency between non-key columns?
+**În `classes_2nf`:** Există o dependență între coloanele non-cheie?
 ```
-ClassID → SubjectID → (SubjectName, SubjectCredits) — but those are in Subjects table ✓
-ClassID → StudentID → (StudentName, ...) — but those are in Students table ✓
+ClassID → SubjectID → (SubjectName, SubjectCredits) — dar acestea sunt în tabelul Subjects ✓
+ClassID → StudentID → (StudentName, ...) — dar acestea sunt în tabelul Students ✓
 ```
-No transitive dependencies — the 2NF design is already clean.
+Nu există dependențe tranzitive — proiectul 2NF este deja curat.
 
-The 2NF tables are already in 3NF. The key normalization insight here was recognizing the **two levels of structure**: the enrollment (Classes) and the daily event (Attendance).
+Tabelele 2NF sunt deja în 3NF. Ideea-cheie a normalizării aici a fost recunoașterea celor **două niveluri de structură**: înscrierea (Classes) și evenimentul zilnic (Attendance).
 
 ---
 
-## Final Schema Summary
+## Rezumatul schemei finale
 
 ```
 Students
@@ -207,41 +207,41 @@ Attendance
   Status
 ```
 
-**Relationships:**
-- `Classes.StudentID` → `Students.StudentID` (a student can enroll in many subjects)
-- `Classes.SubjectID` → `Subjects.SubjectID` (a subject can be taken by many students)
-- `Attendance.ClassID` → `Classes.ClassID` (each attendance record is for one enrollment)
-- `Attendance.TeacherID` → `Teachers.TeacherID` (which teacher ran the class on that date)
+**Relații:**
+- `Classes.StudentID` → `Students.StudentID` (un elev se poate înscrie la mai multe materii)
+- `Classes.SubjectID` → `Subjects.SubjectID` (o materie poate fi urmată de mai mulți elevi)
+- `Attendance.ClassID` → `Classes.ClassID` (fiecare înregistrare de prezență corespunde unei singure înscrieri)
+- `Attendance.TeacherID` → `Teachers.TeacherID` (ce profesor a ținut ora la acea dată)
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-In the UNF table, why does "Mathematics" with 4 credits appear multiple times? What anomaly would occur if the credits changed to 5?
+**Exercițiul 1 (Ușor)**
+În tabelul UNF, de ce „Mathematics” cu 4 credite apare de mai multe ori? Ce anomalie ar apărea dacă numărul de credite s-ar schimba la 5?
 
-**Exercise 2 (Easy)**
-In the 2NF design, explain what a row in the `Classes` table represents. Why is it called an "enrollment" table rather than a "classes" table?
+**Exercițiul 2 (Ușor)**
+În proiectul 2NF, explică ce reprezintă un rând din tabelul `Classes`. De ce este numit un tabel de „înscrieri” și nu un tabel de „ore”?
 
-**Exercise 3 (Medium)**
-Why is `TeacherID` stored in `Attendance` rather than in `Classes`? What real-world scenario does this design support?
+**Exercițiul 3 (Mediu)**
+De ce este stocat `TeacherID` în `Attendance` și nu în `Classes`? Ce scenariu din lumea reală permite acest proiect?
 
-**Exercise 4 (Medium)**
-A colleague proposes adding a `TeacherName` column directly to the `Attendance` table (alongside `TeacherID`) to avoid a JOIN when displaying attendance. What normalization form does this violate and why?
+**Exercițiul 4 (Mediu)**
+Un coleg propune adăugarea unei coloane `TeacherName` direct în tabelul `Attendance` (alături de `TeacherID`), pentru a evita un JOIN la afișarea prezenței. Ce formă normală încalcă acest lucru și de ce?
 
-**Exercise 5 (Hard)**
-Suppose the school requires tracking that a specific teacher is the *primary teacher* for a subject (a subject has one main teacher). How would you add this to the normalized schema? Show which table to modify and what column(s) to add, without violating 3NF.
+**Exercițiul 5 (Dificil)**
+Să presupunem că școala cere să se înregistreze faptul că un anumit profesor este *profesorul principal* al unei materii (o materie are un singur profesor principal). Cum ai adăuga acest lucru în schema normalizată? Arată ce tabel trebuie modificat și ce coloană (coloane) trebuie adăugată, fără a încălca 3NF.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1:** "Mathematics" appears because it has been attended by multiple students on multiple days. This is the update anomaly: changing credits from 4 to 5 requires updating every row where Mathematics appears — and if even one row is missed, the data becomes inconsistent.
+**Exercițiul 1:** „Mathematics” apare de mai multe ori pentru că a fost urmată de mai mulți elevi, în mai multe zile. Aceasta este anomalia de actualizare: schimbarea creditelor de la 4 la 5 necesită actualizarea fiecărui rând în care apare Mathematics — iar dacă se ratează chiar și un singur rând, datele devin inconsecvente.
 
-**Exercise 2:** A row in `Classes` represents one student's enrollment in one subject for a given academic year and semester. It is called "Classes" in this schema (meaning "a student's class/course enrollment") but it functions as the junction/bridge table between Students and Subjects in a many-to-many relationship.
+**Exercițiul 2:** Un rând din `Classes` reprezintă înscrierea unui elev la o materie, pentru un anumit an școlar și semestru. În această schemă se numește „Classes” (în sensul de „înscrierea unui elev la o oră/un curs”), dar funcționează ca tabel de legătură între Students și Subjects într-o relație mulți-la-mulți.
 
-**Exercise 3:** `TeacherID` is in `Attendance` because different teachers can teach the same subject on different days (substitute teachers, shared courses). If `TeacherID` were in `Classes`, it would imply one fixed teacher per enrollment — which doesn't support substitutes. By putting it in `Attendance`, we record which specific teacher ran each individual session.
+**Exercițiul 3:** `TeacherID` se află în `Attendance` deoarece profesori diferiți pot preda aceeași materie în zile diferite (profesori suplinitori, cursuri comune). Dacă `TeacherID` ar fi în `Classes`, ar însemna un profesor fix pentru fiecare înscriere — ceea ce nu permite suplinirile. Punându-l în `Attendance`, înregistrăm ce profesor anume a ținut fiecare oră în parte.
 
-**Exercise 4:** Storing `TeacherName` alongside `TeacherID` in `Attendance` creates a transitive dependency: `AttendanceID → TeacherID → TeacherName`. The teacher's name is determined by `TeacherID`, not by the attendance record itself. This violates 3NF. The correct approach is to retrieve the name via a JOIN to the `Teachers` table.
+**Exercițiul 4:** Stocarea `TeacherName` alături de `TeacherID` în `Attendance` creează o dependență tranzitivă: `AttendanceID → TeacherID → TeacherName`. Numele profesorului este determinat de `TeacherID`, nu de înregistrarea de prezență în sine. Acest lucru încalcă 3NF. Abordarea corectă este obținerea numelui printr-un JOIN cu tabelul `Teachers`.
 
-**Exercise 5:** Add a `PrimaryTeacherID` column (FK → Teachers.TeacherID, nullable) to the `Subjects` table. This represents "the primary teacher responsible for this subject." It does not violate 3NF because `PrimaryTeacherID` is a direct attribute of the subject. Example: `ALTER TABLE Subjects ADD PrimaryTeacherID INT NULL REFERENCES Teachers(TeacherID);`
+**Exercițiul 5:** Adaugă o coloană `PrimaryTeacherID` (FK → Teachers.TeacherID, poate fi NULL) în tabelul `Subjects`. Aceasta reprezintă „profesorul principal responsabil de această materie”. Nu încalcă 3NF, deoarece `PrimaryTeacherID` este un atribut direct al materiei. Exemplu: `ALTER TABLE Subjects ADD PrimaryTeacherID INT NULL REFERENCES Teachers(TeacherID);`

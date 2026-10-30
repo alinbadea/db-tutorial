@@ -1,26 +1,26 @@
-# Library Database — Worksheet 6: SELECT — Grouping and Aggregates
+# Baza de date Library — Fișa de lucru 6: SELECT — Grupare și funcții de agregare
 
-## Learning Objectives
-- Apply aggregate functions (COUNT, SUM, AVG, MIN, MAX) to library data
-- Group results by single and multiple columns
-- Filter groups using HAVING
-- Combine JOINs with GROUP BY to produce meaningful library reports
+## Obiective de învățare
+- Aplicarea funcțiilor de agregare (COUNT, SUM, AVG, MIN, MAX) pe datele bibliotecii
+- Gruparea rezultatelor după una sau mai multe coloane
+- Filtrarea grupurilor folosind HAVING
+- Combinarea JOIN-urilor cu GROUP BY pentru a produce rapoarte relevante despre bibliotecă
 
 ---
 
-## Aggregate Functions
+## Funcții de agregare
 
 ### COUNT
 
 ```sql
--- Total number of physical books in the library
+-- Numărul total de cărți fizice din bibliotecă
 SELECT COUNT(*) AS TotalBooks FROM Books;
 
--- Number of books that have a recorded acquisition date
+-- Numărul de cărți care au data achiziției înregistrată
 SELECT COUNT(AcquisitionDate) AS BooksWithDate FROM Books;
 
--- COUNT(*) vs COUNT(column) — important difference
--- ReturnDate is NULL for unreturned rentals
+-- COUNT(*) vs COUNT(coloană) — diferență importantă
+-- ReturnDate este NULL pentru împrumuturile nereturnate
 SELECT
     COUNT(*)             AS TotalRentals,
     COUNT(ReturnDate)    AS ReturnedRentals,
@@ -31,10 +31,10 @@ FROM Rentals;
 ### SUM
 
 ```sql
--- Total number of rental days across all rentals
+-- Numărul total de zile de împrumut, pentru toate împrumuturile
 SELECT SUM(RentalDays) AS TotalRentalDays FROM Rentals;
 
--- Total overdue days for books not yet returned
+-- Totalul zilelor de întârziere pentru cărțile încă nereturnate
 SELECT SUM(DATEDIFF(DAY, DueDate, GETDATE())) AS TotalOverdueDays
 FROM   Rentals
 WHERE  ReturnDate IS NULL
@@ -44,27 +44,27 @@ AND    DueDate < GETDATE();
 ### AVG
 
 ```sql
--- Average rental period
+-- Perioada medie de împrumut
 SELECT AVG(CAST(RentalDays AS DECIMAL(10,2))) AS AvgRentalDays FROM Rentals;
 
--- Average publication year of titles in the catalogue
+-- Anul mediu de publicare al titlurilor din catalog
 SELECT AVG(CAST(PublishedYear AS DECIMAL(10,2))) AS AvgPublicationYear
 FROM   Titles
 WHERE  PublishedYear IS NOT NULL;
 ```
 
-### MIN and MAX
+### MIN și MAX
 
 ```sql
--- Earliest and most recent rental
+-- Cel mai vechi și cel mai recent împrumut
 SELECT MIN(RentalDate) AS FirstRental, MAX(RentalDate) AS LatestRental FROM Rentals;
 
--- Oldest and newest title in the catalogue
+-- Cel mai vechi și cel mai nou titlu din catalog
 SELECT MIN(PublishedYear) AS OldestTitle, MAX(PublishedYear) AS NewestTitle
 FROM   Titles
 WHERE  PublishedYear IS NOT NULL;
 
--- Earliest book acquisition
+-- Cea mai veche achiziție de carte
 SELECT MIN(AcquisitionDate) AS OldestBook FROM Books WHERE AcquisitionDate IS NOT NULL;
 ```
 
@@ -72,44 +72,44 @@ SELECT MIN(AcquisitionDate) AS OldestBook FROM Books WHERE AcquisitionDate IS NO
 
 ## GROUP BY
 
-### Single Column
+### O singură coloană
 
 ```sql
--- Number of titles per genre
+-- Numărul de titluri pe gen
 SELECT Genre, COUNT(*) AS TitleCount
 FROM   Titles
 WHERE  Genre IS NOT NULL
 GROUP BY Genre
 ORDER BY TitleCount DESC;
 
--- Number of physical copies per title
+-- Numărul de exemplare fizice pe titlu
 SELECT TitleID, COUNT(*) AS CopyCount
 FROM   Books
 GROUP BY TitleID
 ORDER BY CopyCount DESC;
 
--- Number of rentals per client
+-- Numărul de împrumuturi pe client
 SELECT ClientID, COUNT(*) AS RentalCount
 FROM   Rentals
 GROUP BY ClientID
 ORDER BY RentalCount DESC;
 
--- Books per availability status
+-- Cărțile pe statusul de disponibilitate
 SELECT IsAvailable, COUNT(*) AS BookCount
 FROM   Books
 GROUP BY IsAvailable;
 ```
 
-### Multiple Columns
+### Mai multe coloane
 
 ```sql
--- Number of rentals per client per rental-days duration
+-- Numărul de împrumuturi pe client și pe durata împrumutului (în zile)
 SELECT ClientID, RentalDays, COUNT(*) AS RentalCount
 FROM   Rentals
 GROUP BY ClientID, RentalDays
 ORDER BY ClientID, RentalDays;
 
--- Books per title per condition
+-- Cărțile pe titlu și pe stare
 SELECT TitleID, Condition, COUNT(*) AS Copies
 FROM   Books
 GROUP BY TitleID, Condition
@@ -121,20 +121,20 @@ ORDER BY TitleID;
 ## HAVING
 
 ```sql
--- Clients who have rented more than 2 books
+-- Clienții care au împrumutat mai mult de 2 cărți
 SELECT ClientID, COUNT(*) AS RentalCount
 FROM   Rentals
 GROUP BY ClientID
 HAVING COUNT(*) > 2;
 
--- Genres that have at least 2 titles
+-- Genurile care au cel puțin 2 titluri
 SELECT Genre, COUNT(*) AS TitleCount
 FROM   Titles
 WHERE  Genre IS NOT NULL
 GROUP BY Genre
 HAVING COUNT(*) >= 2;
 
--- Titles that have more than 1 physical copy
+-- Titlurile care au mai mult de un exemplar fizic
 SELECT TitleID, COUNT(*) AS CopyCount
 FROM   Books
 GROUP BY TitleID
@@ -143,9 +143,9 @@ HAVING COUNT(*) > 1;
 
 ---
 
-## GROUP BY with JOINs
+## GROUP BY cu JOIN-uri
 
-### Example 1 — Number of books per genre (with genre name)
+### Exemplul 1 — Numărul de cărți pe gen (cu numele genului)
 
 ```sql
 SELECT
@@ -159,7 +159,7 @@ GROUP BY t.Genre
 ORDER BY TotalCopies DESC;
 ```
 
-### Example 2 — Rental count per client with client name
+### Exemplul 2 — Numărul de împrumuturi pe client, cu numele clientului
 
 ```sql
 SELECT
@@ -173,7 +173,7 @@ GROUP BY cl.ClientID, cl.FirstName, cl.LastName
 ORDER BY TotalRentals DESC;
 ```
 
-### Example 3 — Most rented titles with author name (3 tables)
+### Exemplul 3 — Cele mai împrumutate titluri, cu numele autorului (3 tabele)
 
 ```sql
 SELECT
@@ -189,7 +189,7 @@ GROUP BY t.TitleID, t.Title, a.FirstName, a.LastName, t.Genre
 ORDER BY TimesRented DESC;
 ```
 
-### Example 4 — Monthly rental activity with HAVING
+### Exemplul 4 — Activitatea lunară de împrumut, cu HAVING
 
 ```sql
 SELECT
@@ -206,17 +206,17 @@ ORDER BY RentalYear, RentalMonth;
 
 ---
 
-## NULL Values in Aggregates
+## Valori NULL în agregări
 
 ```sql
--- AVG ignores NULLs — result is based only on non-NULL rows
+-- AVG ignoră valorile NULL — rezultatul se bazează doar pe rândurile non-NULL
 SELECT AVG(CAST(PublishedYear AS DECIMAL)) AS AvgYear FROM Titles;
--- Only titles where PublishedYear is NOT NULL are included
+-- Sunt incluse doar titlurile la care PublishedYear NU este NULL
 
--- To treat NULLs as 0 (or another default):
+-- Pentru a trata valorile NULL ca 0 (sau altă valoare implicită):
 SELECT AVG(ISNULL(CAST(PublishedYear AS DECIMAL), 0)) AS AvgYearWithZeros FROM Titles;
 
--- COUNT(*) counts ALL rows; COUNT(column) skips NULLs
+-- COUNT(*) numără TOATE rândurile; COUNT(coloană) omite valorile NULL
 SELECT
     COUNT(*)           AS AllTitles,
     COUNT(PublishedYear) AS TitlesWithYear,
@@ -226,69 +226,69 @@ FROM Titles;
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-Count the total number of rentals in the `Rentals` table.
+**Exercițiul 1 (Ușor)**
+Numără totalul împrumuturilor din tabelul `Rentals`.
 
-**Exercise 2 (Easy)**
-Find the earliest and most recent `MembershipDate` in the `Clients` table.
+**Exercițiul 2 (Ușor)**
+Găsește cea mai veche și cea mai recentă valoare `MembershipDate` din tabelul `Clients`.
 
-**Exercise 3 (Easy)**
-Count how many books are available (IsAvailable = 1) and how many are not.
+**Exercițiul 3 (Ușor)**
+Numără câte cărți sunt disponibile (IsAvailable = 1) și câte nu sunt.
 
-**Exercise 4 (Medium)**
-Show the number of physical book copies per title (TitleID). Sort by copy count descending.
+**Exercițiul 4 (Mediu)**
+Afișează numărul de exemplare fizice pe titlu (TitleID). Sortează descrescător după numărul de exemplare.
 
-**Exercise 5 (Medium)**
-List all genres with more than 1 title. Show the genre name and count.
+**Exercițiul 5 (Mediu)**
+Listează toate genurile cu mai mult de un titlu. Afișează numele genului și numărul.
 
-**Exercise 6 (Medium)**
-Show the total number of rentals and total rental days per client. Only include clients with at least 2 rentals.
+**Exercițiul 6 (Mediu)**
+Afișează numărul total de împrumuturi și totalul zilelor de împrumut pe client. Include doar clienții cu cel puțin 2 împrumuturi.
 
-**Exercise 7 (Medium)**
-Join `Titles` and `Authors`, then show how many titles each author has written. Show author full name and title count. Sort by count descending.
+**Exercițiul 7 (Mediu)**
+Unește `Titles` și `Authors`, apoi afișează câte titluri a scris fiecare autor. Afișează numele complet al autorului și numărul de titluri. Sortează descrescător după număr.
 
-**Exercise 8 (Hard)**
-For each genre, show the genre name, number of unique titles, total number of physical copies, and average publication year. Include genres with no physical copies (use LEFT JOIN). Sort by title count descending.
+**Exercițiul 8 (Dificil)**
+Pentru fiecare gen, afișează numele genului, numărul de titluri unice, numărul total de exemplare fizice și anul mediu de publicare. Include genurile fără exemplare fizice (folosește LEFT JOIN). Sortează descrescător după numărul de titluri.
 
-**Exercise 9 (Hard)**
-Show each publisher name along with how many distinct titles they have published and how many physical copies. Only include publishers that have published at least 2 copies. Sort by copy count descending.
+**Exercițiul 9 (Dificil)**
+Afișează numele fiecărei edituri, împreună cu numărul de titluri distincte publicate și numărul de exemplare fizice. Include doar editurile care au publicat cel puțin 2 exemplare. Sortează descrescător după numărul de exemplare.
 
-**Exercise 10 (Hard)**
-For each client who has unreturned rentals, show their full name, number of unreturned books, and the total overdue days (use DATEDIFF on DueDate vs today, only for overdue items). Sort by total overdue days descending.
+**Exercițiul 10 (Dificil)**
+Pentru fiecare client care are împrumuturi nereturnate, afișează numele complet, numărul de cărți nereturnate și totalul zilelor de întârziere (folosește DATEDIFF între DueDate și data de azi, doar pentru împrumuturile întârziate). Sortează descrescător după totalul zilelor de întârziere.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1**
+**Exercițiul 1**
 ```sql
 SELECT COUNT(*) AS TotalRentals FROM Rentals;
 ```
 
-**Exercise 2**
+**Exercițiul 2**
 ```sql
 SELECT MIN(MembershipDate) AS Earliest, MAX(MembershipDate) AS Latest FROM Clients;
 ```
 
-**Exercise 3**
+**Exercițiul 3**
 ```sql
 SELECT IsAvailable, COUNT(*) AS BookCount FROM Books GROUP BY IsAvailable;
 ```
 
-**Exercise 4**
+**Exercițiul 4**
 ```sql
 SELECT TitleID, COUNT(*) AS CopyCount FROM Books GROUP BY TitleID ORDER BY CopyCount DESC;
 ```
 
-**Exercise 5**
+**Exercițiul 5**
 ```sql
 SELECT Genre, COUNT(*) AS TitleCount FROM Titles WHERE Genre IS NOT NULL
 GROUP BY Genre HAVING COUNT(*) > 1 ORDER BY TitleCount DESC;
 ```
 
-**Exercise 6**
+**Exercițiul 6**
 ```sql
 SELECT ClientID, COUNT(*) AS TotalRentals, SUM(RentalDays) AS TotalDays
 FROM   Rentals
@@ -296,7 +296,7 @@ GROUP BY ClientID
 HAVING COUNT(*) >= 2;
 ```
 
-**Exercise 7**
+**Exercițiul 7**
 ```sql
 SELECT a.FirstName + ' ' + a.LastName AS Author, COUNT(t.TitleID) AS TitleCount
 FROM   Authors AS a
@@ -305,7 +305,7 @@ GROUP BY a.AuthorID, a.FirstName, a.LastName
 ORDER BY TitleCount DESC;
 ```
 
-**Exercise 8**
+**Exercițiul 8**
 ```sql
 SELECT t.Genre,
        COUNT(DISTINCT t.TitleID)   AS UniqueTitles,
@@ -318,7 +318,7 @@ GROUP BY t.Genre
 ORDER BY UniqueTitles DESC;
 ```
 
-**Exercise 9**
+**Exercițiul 9**
 ```sql
 SELECT p.PublisherName,
        COUNT(DISTINCT b.TitleID) AS DistinctTitles,
@@ -330,7 +330,7 @@ HAVING COUNT(b.BookID) >= 2
 ORDER BY TotalCopies DESC;
 ```
 
-**Exercise 10**
+**Exercițiul 10**
 ```sql
 SELECT cl.FirstName + ' ' + cl.LastName AS ClientName,
        COUNT(r.RentalID) AS UnreturnedBooks,

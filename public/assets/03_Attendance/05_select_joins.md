@@ -1,40 +1,40 @@
-# Attendance Database — Worksheet 5: SELECT — JOINs
+# Baza de date Attendance — Fișa de lucru 5: SELECT — JOIN-uri
 
-## Learning Objectives
-- Join all 5 Attendance database tables to answer real school reporting questions
-- Use INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN
-- Find students with no attendance, subjects with no enrollments, and other anti-join scenarios
-- Write clean multi-table queries using table aliases
-
----
-
-## Why JOINs?
-
-The Attendance database separates concerns across 5 tables. To answer "Which students were absent on September 3?" we need to join Attendance → Classes → Students. JOINs let us reconstruct the full picture without storing redundant data.
+## Obiective de învățare
+- Unirea tuturor celor 5 tabele ale bazei de date Attendance pentru a răspunde la întrebări reale de raportare școlară
+- Folosirea INNER JOIN, LEFT JOIN, RIGHT JOIN și FULL OUTER JOIN
+- Găsirea elevilor fără prezență, a materiilor fără înscrieri și a altor scenarii de tip anti-join
+- Scrierea de interogări curate pe mai multe tabele folosind aliasuri de tabel
 
 ---
 
-## JOIN Types — Overview
+## De ce JOIN-uri?
 
-| JOIN | Returns |
+Baza de date Attendance împarte responsabilitățile în 5 tabele. Pentru a răspunde la întrebarea „Ce elevi au absentat pe 3 septembrie?” trebuie să unim Attendance → Classes → Students. JOIN-urile ne permit să reconstruim imaginea completă fără a stoca date redundante.
+
+---
+
+## Tipuri de JOIN — Prezentare generală
+
+| JOIN | Returnează |
 |---|---|
-| `INNER JOIN` | Only rows with a match in **both** tables |
-| `LEFT JOIN` | All from left + matched right rows (NULL if no match) |
-| `RIGHT JOIN` | All from right + matched left rows (NULL if no match) |
-| `FULL OUTER JOIN` | All rows from both tables; NULLs on the unmatched side |
+| `INNER JOIN` | Doar rândurile care au corespondent în **ambele** tabele |
+| `LEFT JOIN` | Toate din stânga + rândurile corespondente din dreapta (NULL dacă nu există corespondent) |
+| `RIGHT JOIN` | Toate din dreapta + rândurile corespondente din stânga (NULL dacă nu există corespondent) |
+| `FULL OUTER JOIN` | Toate rândurile din ambele tabele; NULL pe partea fără corespondent |
 
 ---
 
-## Table Aliases
+## Aliasuri de tabel
 
 ```sql
--- Without aliases
+-- Fără aliasuri
 SELECT Students.FirstName, Subjects.SubjectName
 FROM   Classes
 INNER JOIN Students ON Classes.StudentID = Students.StudentID
 INNER JOIN Subjects ON Classes.SubjectID = Subjects.SubjectID;
 
--- With aliases (much cleaner)
+-- Cu aliasuri (mult mai curat)
 SELECT s.FirstName, sub.SubjectName
 FROM   Classes   AS cl
 INNER JOIN Students AS s   ON cl.StudentID = s.StudentID
@@ -45,7 +45,7 @@ INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID;
 
 ## INNER JOIN
 
-### Example 1 — Classes with student and subject names
+### Exemplul 1 — Înscrierile cu numele elevilor și ale materiilor
 
 ```sql
 SELECT
@@ -61,7 +61,7 @@ INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
 ORDER BY cl.AcademicYear, cl.Semester, sub.SubjectName, s.LastName;
 ```
 
-### Example 2 — Attendance with student and teacher names
+### Exemplul 2 — Prezența cu numele elevilor și ale profesorilor
 
 ```sql
 SELECT
@@ -78,7 +78,7 @@ INNER JOIN Teachers AS t   ON a.TeacherID  = t.TeacherID
 ORDER BY a.AttendanceDate, s.LastName;
 ```
 
-### Example 3 — Full attendance report (all 5 tables)
+### Exemplul 3 — Raport complet de prezență (toate cele 5 tabele)
 
 ```sql
 SELECT
@@ -102,7 +102,7 @@ INNER JOIN Teachers AS t   ON a.TeacherID  = t.TeacherID
 ORDER BY a.AttendanceDate, s.LastName, sub.SubjectName;
 ```
 
-### Example 4 — Absent or late students on a specific date
+### Exemplul 4 — Elevii absenți sau întârziați la o anumită dată
 
 ```sql
 SELECT
@@ -123,7 +123,7 @@ ORDER BY sub.SubjectName, s.LastName;
 
 ## LEFT OUTER JOIN
 
-### Example 1 — All students and their attendance records (including students with none)
+### Exemplul 1 — Toți elevii și înregistrările lor de prezență (inclusiv elevii fără nicio înregistrare)
 
 ```sql
 SELECT
@@ -138,7 +138,7 @@ LEFT JOIN Attendance AS a  ON cl.ClassID   = a.ClassID
 ORDER BY s.StudentID, a.AttendanceDate;
 ```
 
-### Example 2 — All enrolled students and their attendance count per subject
+### Exemplul 2 — Toți elevii înscriși și numărul lor de prezențe pe materie
 
 ```sql
 SELECT
@@ -153,7 +153,7 @@ GROUP BY s.StudentID, s.FirstName, s.LastName, sub.SubjectName
 ORDER BY s.LastName, sub.SubjectName;
 ```
 
-### Anti-join — Students with no attendance records at all
+### Anti-join — Elevii fără nicio înregistrare de prezență
 
 ```sql
 SELECT s.StudentID, s.FirstName + ' ' + s.LastName AS StudentName, s.Grade
@@ -163,7 +163,7 @@ LEFT JOIN Attendance AS a ON cl.ClassID = a.ClassID
 WHERE  a.AttendanceID IS NULL;
 ```
 
-### Anti-join — Subjects that have no enrollments (no students in Classes table)
+### Anti-join — Materiile fără înscrieri (niciun elev în tabelul Classes)
 
 ```sql
 SELECT sub.SubjectID, sub.SubjectName, sub.Credits
@@ -177,7 +177,7 @@ WHERE  cl.ClassID IS NULL;
 ## RIGHT OUTER JOIN
 
 ```sql
--- All teachers, including those who have never taken attendance
+-- Toți profesorii, inclusiv cei care nu au făcut niciodată prezența
 SELECT
     t.FirstName + ' ' + t.LastName AS TeacherName,
     t.Specialization,
@@ -193,7 +193,7 @@ ORDER BY t.LastName, a.AttendanceDate;
 ## FULL OUTER JOIN
 
 ```sql
--- All students and all classes — show unmatched on both sides
+-- Toți elevii și toate înscrierile — afișăm și rândurile fără corespondent din ambele părți
 SELECT
     s.FirstName + ' ' + s.LastName AS StudentName,
     cl.ClassID,
@@ -206,9 +206,9 @@ ORDER BY s.StudentID, cl.ClassID;
 
 ---
 
-## Joining All 5 Tables
+## Unirea celor 5 tabele
 
-A comprehensive daily roll call view:
+O vedere cuprinzătoare a catalogului zilnic de prezență:
 
 ```sql
 SELECT
@@ -230,57 +230,57 @@ ORDER BY a.AttendanceDate, s.Grade, sub.SubjectName;
 
 ---
 
-## Common Mistakes
+## Greșeli frecvente
 
 ```sql
--- MISTAKE: Joining on wrong column
+-- GREȘEALĂ: JOIN pe coloana greșită
 SELECT s.FirstName, sub.SubjectName
 FROM   Classes AS cl
-INNER JOIN Students AS s   ON cl.ClassID  = s.StudentID  -- WRONG! Should be cl.StudentID
+INNER JOIN Students AS s   ON cl.ClassID  = s.StudentID  -- GREȘIT! Ar trebui să fie cl.StudentID
 INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID;
 
--- MISTAKE: Missing JOIN condition gives Cartesian product
+-- GREȘEALĂ: Lipsa condiției de JOIN produce un produs cartezian
 SELECT s.FirstName, t.FirstName
 FROM   Students AS s
-INNER JOIN Teachers AS t;  -- Error: ON clause required
+INNER JOIN Teachers AS t;  -- Eroare: clauza ON este obligatorie
 
--- CORRECT: there is no direct FK between Students and Teachers
--- Always route through Classes → Attendance → Teachers
+-- CORECT: nu există o FK directă între Students și Teachers
+-- Trecem întotdeauna prin Classes → Attendance → Teachers
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-Show the full names of all students enrolled in the `'Mathematics'` subject (SubjectID = 1) in Fall 2024.
+**Exercițiul 1 (Ușor)**
+Afișează numele complete ale tuturor elevilor înscriși la materia `'Mathematics'` (SubjectID = 1) în Fall 2024.
 
-**Exercise 2 (Easy)**
-Show all attendance records from `'2024-09-04'` with the student's full name and subject name.
+**Exercițiul 2 (Ușor)**
+Afișează toate înregistrările de prezență din `'2024-09-04'`, cu numele complet al elevului și numele materiei.
 
-**Exercise 3 (Medium)**
-Find all students who have **never** had any attendance record. Show their full name and grade.
+**Exercițiul 3 (Mediu)**
+Găsește toți elevii care **nu au avut niciodată** vreo înregistrare de prezență. Afișează numele complet și clasa.
 
-**Exercise 4 (Medium)**
-Show all subjects along with how many students are enrolled in each. Include subjects with no enrollments (show 0). Sort by enrollment count descending.
+**Exercițiul 4 (Mediu)**
+Afișează toate materiile, împreună cu numărul de elevi înscriși la fiecare. Include materiile fără înscrieri (afișează 0). Sortează descrescător după numărul de înscrieri.
 
-**Exercise 5 (Medium)**
-List all attendance records where the status is `'Absent'`, showing student name, subject name, teacher name, and attendance date. Sort by date.
+**Exercițiul 5 (Mediu)**
+Listează toate înregistrările de prezență cu statusul `'Absent'`, afișând numele elevului, numele materiei, numele profesorului și data. Sortează după dată.
 
-**Exercise 6 (Medium)**
-Show all teachers and the number of distinct dates on which they have taken attendance. Include teachers who have taken attendance zero times. Sort by date count descending.
+**Exercițiul 6 (Mediu)**
+Afișează toți profesorii și numărul de date distincte în care au făcut prezența. Include profesorii care nu au făcut prezența niciodată. Sortează descrescător după numărul de date.
 
-**Exercise 7 (Hard)**
-For each student, show their full name, grade, number of subjects enrolled in, total attendance records, and count of absences. Sort by absence count descending.
+**Exercițiul 7 (Dificil)**
+Pentru fiecare elev, afișează numele complet, clasa, numărul de materii la care este înscris, numărul total de înregistrări de prezență și numărul de absențe. Sortează descrescător după numărul de absențe.
 
-**Exercise 8 (Hard)**
-Show every student-subject combination from `Classes` along with their latest attendance status (from the most recent `Attendance` record). Students with no attendance should show NULL for status.
+**Exercițiul 8 (Dificil)**
+Afișează fiecare combinație elev-materie din `Classes`, împreună cu cel mai recent status de prezență (din cea mai recentă înregistrare din `Attendance`). Elevii fără prezență trebuie să aibă NULL la status.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1**
+**Exercițiul 1**
 ```sql
 SELECT s.FirstName + ' ' + s.LastName AS StudentName
 FROM   Classes  AS cl
@@ -290,7 +290,7 @@ WHERE  sub.SubjectName = 'Mathematics'
 AND    cl.AcademicYear = 2024 AND cl.Semester = 'Fall';
 ```
 
-**Exercise 2**
+**Exercițiul 2**
 ```sql
 SELECT a.AttendanceDate, s.FirstName + ' ' + s.LastName AS StudentName,
        sub.SubjectName, a.Status
@@ -301,7 +301,7 @@ INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
 WHERE  a.AttendanceDate = '2024-09-04';
 ```
 
-**Exercise 3**
+**Exercițiul 3**
 ```sql
 SELECT s.FirstName + ' ' + s.LastName AS StudentName, s.Grade
 FROM   Students AS s
@@ -310,7 +310,7 @@ LEFT JOIN Attendance AS a  ON cl.ClassID  = a.ClassID
 WHERE  a.AttendanceID IS NULL;
 ```
 
-**Exercise 4**
+**Exercițiul 4**
 ```sql
 SELECT sub.SubjectName, COUNT(cl.ClassID) AS EnrolledStudents
 FROM   Subjects AS sub
@@ -319,7 +319,7 @@ GROUP BY sub.SubjectID, sub.SubjectName
 ORDER BY EnrolledStudents DESC;
 ```
 
-**Exercise 5**
+**Exercițiul 5**
 ```sql
 SELECT s.FirstName + ' ' + s.LastName AS StudentName,
        sub.SubjectName,
@@ -334,7 +334,7 @@ WHERE  a.Status = 'Absent'
 ORDER BY a.AttendanceDate;
 ```
 
-**Exercise 6**
+**Exercițiul 6**
 ```sql
 SELECT t.FirstName + ' ' + t.LastName AS TeacherName,
        COUNT(DISTINCT a.AttendanceDate) AS DistinctDates
@@ -344,7 +344,7 @@ GROUP BY t.TeacherID, t.FirstName, t.LastName
 ORDER BY DistinctDates DESC;
 ```
 
-**Exercise 7**
+**Exercițiul 7**
 ```sql
 SELECT s.FirstName + ' ' + s.LastName AS FullName,
        s.Grade,
@@ -358,7 +358,7 @@ GROUP BY s.StudentID, s.FirstName, s.LastName, s.Grade
 ORDER BY Absences DESC;
 ```
 
-**Exercise 8**
+**Exercițiul 8**
 ```sql
 SELECT s.FirstName + ' ' + s.LastName AS StudentName,
        sub.SubjectName,

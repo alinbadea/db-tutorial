@@ -1,14 +1,14 @@
-# Attendance Database — Worksheet 7: UPDATE Statements
+# Baza de date Attendance — Fișa de lucru 7: Instrucțiuni UPDATE
 
-## Learning Objectives
-- Update attendance records, student data, and class enrollments safely
-- Use JOINs in UPDATE to modify rows based on conditions in related tables
-- Capture before/after state with the OUTPUT clause
-- Wrap risky updates in transactions
+## Obiective de învățare
+- Actualizarea în siguranță a înregistrărilor de prezență, a datelor elevilor și a înscrierilor
+- Folosirea JOIN-urilor în UPDATE pentru a modifica rânduri pe baza condițiilor din tabele asociate
+- Capturarea stării dinainte/de după cu clauza OUTPUT
+- Includerea actualizărilor riscante în tranzacții
 
 ---
 
-## UPDATE Syntax
+## Sintaxa UPDATE
 
 ```sql
 UPDATE table_name
@@ -17,36 +17,36 @@ SET    column1 = value1,
 WHERE  condition;
 ```
 
-> **WARNING:** Without a WHERE clause every row is updated. Always preview with SELECT first.
+> **ATENȚIE:** Fără clauza WHERE, fiecare rând este actualizat. Previzualizează întotdeauna mai întâi cu SELECT.
 
 ---
 
-## Best Practice: Preview Before Updating
+## Bună practică: previzualizează înainte de actualizare
 
 ```sql
--- Preview which attendance records will be updated
+-- Previzualizăm ce înregistrări de prezență vor fi actualizate
 SELECT AttendanceID, Status FROM Attendance WHERE ClassID = 1;
 
--- Then update
+-- Apoi actualizăm
 UPDATE Attendance SET Status = 'Present' WHERE ClassID = 1;
 ```
 
 ---
 
-## Basic UPDATE — Single Column
+## UPDATE de bază — o singură coloană
 
 ```sql
--- Correct an attendance record
+-- Corectăm o înregistrare de prezență
 UPDATE Attendance
 SET    Status = 'Late'
 WHERE  AttendanceID = 3;
 
--- Update a student's grade
+-- Actualizăm clasa unui elev
 UPDATE Students
 SET    Grade = '11A'
 WHERE  StudentID = 1;
 
--- Fix a typo in a teacher's specialization
+-- Corectăm o greșeală de scriere în specializarea unui profesor
 UPDATE Teachers
 SET    Specialization = 'Mathematics'
 WHERE  TeacherID = 1 AND Specialization = 'Maths';
@@ -54,16 +54,16 @@ WHERE  TeacherID = 1 AND Specialization = 'Maths';
 
 ---
 
-## UPDATE Multiple Columns
+## UPDATE pe mai multe coloane
 
 ```sql
--- Correct a student's contact details
+-- Corectăm datele de contact ale unui elev
 UPDATE Students
 SET    Email = 'maria.p.new@school.ro',
        Grade = '11A'
 WHERE  StudentID = 1;
 
--- Update teacher name (e.g., name change after marriage)
+-- Actualizăm numele unui profesor (de ex., schimbare de nume după căsătorie)
 UPDATE Teachers
 SET    LastName = 'Munteanu-Pop',
        Email    = 'munteanu.pop@school.ro'
@@ -72,17 +72,17 @@ WHERE  TeacherID = 1;
 
 ---
 
-## UPDATE with Complex WHERE
+## UPDATE cu WHERE complex
 
-### IN clause
+### Clauza IN
 
 ```sql
--- Mark several specific attendance records as 'Present'
+-- Marcăm mai multe înregistrări de prezență ca 'Present'
 UPDATE Attendance
 SET    Status = 'Present'
 WHERE  AttendanceID IN (3, 5, 7);
 
--- Update grade for multiple students
+-- Actualizăm clasa mai multor elevi
 UPDATE Students
 SET    Grade = '11A'
 WHERE  StudentID IN (1, 2);
@@ -91,8 +91,8 @@ WHERE  StudentID IN (1, 2);
 ### BETWEEN
 
 ```sql
--- Set all attendance from September 3-5 for a cancelled week to 'Absent'
--- (Only affects unrerecorded/excused absence scenario)
+-- Setăm la 'Absent' toată prezența din 3–5 septembrie, pentru o săptămână anulată
+-- (Afectează doar scenariul absențelor neînregistrate/motivate)
 UPDATE Attendance
 SET    Status = 'Absent'
 WHERE  AttendanceDate BETWEEN '2024-09-03' AND '2024-09-05'
@@ -102,7 +102,7 @@ AND    Status = 'Present';
 ### LIKE
 
 ```sql
--- Standardize specialization naming
+-- Standardizăm denumirile specializărilor
 UPDATE Teachers
 SET    Specialization = 'Information Technology'
 WHERE  Specialization LIKE '%IT%' OR Specialization LIKE '%Informatics%';
@@ -110,10 +110,10 @@ WHERE  Specialization LIKE '%IT%' OR Specialization LIKE '%Informatics%';
 
 ---
 
-## UPDATE with Subquery in WHERE
+## UPDATE cu subinterogare în WHERE
 
 ```sql
--- Mark as 'Absent' all attendance for students in grade 10B on a specific date
+-- Marcăm ca 'Absent' toată prezența elevilor din clasa 10B la o anumită dată
 UPDATE Attendance
 SET    Status = 'Absent'
 WHERE  AttendanceDate = '2024-09-05'
@@ -124,7 +124,7 @@ AND    ClassID IN (
     WHERE  s.Grade = '10B'
 );
 
--- Remove late status for classes of a specific subject
+-- Eliminăm statusul de întârziere pentru înscrierile la o anumită materie
 UPDATE Attendance
 SET    Status = 'Present'
 WHERE  Status = 'Late'
@@ -135,25 +135,25 @@ AND    ClassID IN (
 
 ---
 
-## UPDATE with Subquery in SET
+## UPDATE cu subinterogare în SET
 
 ```sql
--- Reassign all attendance records for TeacherID=2 to TeacherID=1
--- (when a teacher takes over another's classes)
+-- Reatribuim toate înregistrările de prezență ale TeacherID=2 către TeacherID=1
+-- (când un profesor preia orele altuia)
 UPDATE Attendance
 SET    TeacherID = 1
 WHERE  TeacherID = 2;
--- (Simple, but shows how to reassign)
+-- (Simplu, dar arată cum se face reatribuirea)
 ```
 
 ---
 
-## UPDATE with JOIN (T-SQL FROM Clause)
+## UPDATE cu JOIN (clauza FROM din T-SQL)
 
-### Example 1 — Update student grades based on their enrollment year
+### Exemplul 1 — Actualizarea claselor elevilor în funcție de anul înscrierii
 
 ```sql
--- Preview
+-- Previzualizare
 SELECT s.StudentID, s.FirstName, s.Grade,
        CASE WHEN YEAR(s.EnrollmentDate) = 2021 THEN '12A'
             WHEN YEAR(s.EnrollmentDate) = 2022 THEN '11A'
@@ -161,7 +161,7 @@ SELECT s.StudentID, s.FirstName, s.Grade,
        END AS NewGrade
 FROM   Students AS s;
 
--- Update
+-- Actualizare
 UPDATE s
 SET    s.Grade = CASE WHEN YEAR(s.EnrollmentDate) = 2021 THEN '12A'
                       WHEN YEAR(s.EnrollmentDate) = 2022 THEN '11A'
@@ -171,18 +171,18 @@ SET    s.Grade = CASE WHEN YEAR(s.EnrollmentDate) = 2021 THEN '12A'
 FROM   Students AS s;
 ```
 
-### Example 2 — Change the teacher for all Mathematics attendance records
+### Exemplul 2 — Schimbarea profesorului pentru toate înregistrările de prezență de la Mathematics
 
 ```sql
--- All Math sessions should now be taught by TeacherID 1
--- Preview
+-- Toate orele de Math ar trebui acum să fie predate de TeacherID 1
+-- Previzualizare
 SELECT a.AttendanceID, a.TeacherID, sub.SubjectName
 FROM   Attendance AS a
 INNER JOIN Classes  AS cl  ON a.ClassID    = cl.ClassID
 INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
 WHERE  sub.SubjectName = 'Mathematics';
 
--- Update
+-- Actualizare
 UPDATE a
 SET    a.TeacherID = 1
 FROM   Attendance AS a
@@ -191,11 +191,11 @@ INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
 WHERE  sub.SubjectName = 'Mathematics';
 ```
 
-### Example 3 — Mark all attendance as 'Absent' for a grade that had a cancelled school day
+### Exemplul 3 — Marcarea întregii prezențe ca 'Absent' pentru o clasă care a avut o zi de școală anulată
 
 ```sql
--- All grade 10A students' attendance on 2024-09-05 should be 'Absent'
--- Preview
+-- Prezența tuturor elevilor din clasa 10A pe 2024-09-05 trebuie să fie 'Absent'
+-- Previzualizare
 SELECT a.AttendanceID, s.Grade, a.AttendanceDate, a.Status
 FROM   Attendance AS a
 INNER JOIN Classes  AS cl ON a.ClassID    = cl.ClassID
@@ -203,7 +203,7 @@ INNER JOIN Students AS s  ON cl.StudentID = s.StudentID
 WHERE  a.AttendanceDate = '2024-09-05'
 AND    s.Grade = '10A';
 
--- Update
+-- Actualizare
 UPDATE a
 SET    a.Status = 'Absent'
 FROM   Attendance AS a
@@ -213,34 +213,34 @@ WHERE  a.AttendanceDate = '2024-09-05'
 AND    s.Grade = '10A';
 ```
 
-### Example 4 — Promote students (update grade) and reassign their classes to a new semester
+### Exemplul 4 — Promovarea elevilor (actualizarea clasei) și mutarea înscrierilor lor într-un semestru nou
 
 ```sql
--- Two separate updates in one logical operation: promote grade 10A to 11A,
--- and update their Fall 2024 classes to Spring 2025
+-- Două actualizări separate într-o singură operație logică: promovăm clasa 10A în 11A
+-- și mutăm înscrierile lor din Fall 2024 în Spring 2025
 
--- Step 1: Update student grades
+-- Pasul 1: Actualizăm clasele elevilor
 UPDATE Students
 SET    Grade = '11A'
 WHERE  Grade = '10A';
 
--- Step 2: Update semester for their existing classes
+-- Pasul 2: Actualizăm semestrul înscrierilor existente
 UPDATE cl
 SET    cl.Semester     = 'Spring',
        cl.AcademicYear = 2025
 FROM   Classes  AS cl
 INNER JOIN Students AS s ON cl.StudentID = s.StudentID
-WHERE  s.Grade = '11A'           -- now '11A' after step 1
+WHERE  s.Grade = '11A'           -- acum '11A' după pasul 1
 AND    cl.AcademicYear = 2024
 AND    cl.Semester = 'Fall';
 ```
 
 ---
 
-## UPDATE with OUTPUT Clause
+## UPDATE cu clauza OUTPUT
 
 ```sql
--- Audit log: capture attendance status changes
+-- Jurnal de audit: capturăm modificările statusului de prezență
 DECLARE @StatusChanges TABLE (
     AttendanceID INT,
     OldStatus    NVARCHAR(20),
@@ -263,52 +263,52 @@ SELECT * FROM @StatusChanges;
 
 ---
 
-## Transactions for Safety
+## Tranzacții pentru siguranță
 
 ```sql
 BEGIN TRANSACTION;
 
--- Reassign all attendance for TeacherID=3 to TeacherID=1 (teacher leaves)
+-- Reatribuim toată prezența de la TeacherID=3 la TeacherID=1 (profesorul pleacă)
 UPDATE Attendance
 SET    TeacherID = 1
 WHERE  TeacherID = 3;
 
--- Review
+-- Verificare
 SELECT TeacherID, COUNT(*) AS Records
 FROM   Attendance
 GROUP BY TeacherID;
 
 COMMIT TRANSACTION;
--- ROLLBACK TRANSACTION if the results look wrong
+-- ROLLBACK TRANSACTION dacă rezultatele par greșite
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Update the `Specialization` of the teacher with `TeacherID = 2` to `'Applied Physics'`.
+**Exercițiul 1**
+Actualizează `Specialization` pentru profesorul cu `TeacherID = 2` la `'Applied Physics'`.
 
-**Exercise 2**
-Change all `'Late'` attendance records to `'Present'` for `ClassID = 4`.
+**Exercițiul 2**
+Schimbă toate înregistrările de prezență `'Late'` în `'Present'` pentru `ClassID = 4`.
 
-**Exercise 3**
-Using a subquery in WHERE, update all attendance records to `'Absent'` for students in grade `'10B'` on `'2024-09-05'`.
+**Exercițiul 3**
+Folosind o subinterogare în WHERE, actualizează la `'Absent'` toate înregistrările de prezență ale elevilor din clasa `'10B'` din `'2024-09-05'`.
 
-**Exercise 4**
-Using `UPDATE ... FROM ... JOIN`, change the teacher for all Literature class (`SubjectName = 'Literature'`) attendance records to `TeacherID = 3`.
+**Exercițiul 4**
+Folosind `UPDATE ... FROM ... JOIN`, schimbă profesorul la `TeacherID = 3` pentru toate înregistrările de prezență de la Literature (`SubjectName = 'Literature'`).
 
-**Exercise 5**
-Using `UPDATE ... FROM ... JOIN`, update the `AcademicYear` from `2024` to `2025` for all classes where the enrolled student is in grade `'11A'`.
+**Exercițiul 5**
+Folosind `UPDATE ... FROM ... JOIN`, actualizează `AcademicYear` din `2024` în `2025` pentru toate înscrierile în care elevul este în clasa `'11A'`.
 
-**Exercise 6**
-Using `UPDATE ... FROM ... JOIN` with a 3-table join, mark all attendance records as `'Absent'` for students whose email ends in `'@school.ro'` on `'2024-09-03'`.
+**Exercițiul 6**
+Folosind `UPDATE ... FROM ... JOIN` cu un JOIN pe 3 tabele, marchează ca `'Absent'` toate înregistrările de prezență din `'2024-09-03'` ale elevilor al căror email se termină cu `'@school.ro'`.
 
-**Exercise 7**
-Using `UPDATE` with `OUTPUT`, change all `'Absent'` attendance records to `'Present'` on `'2024-09-04'`, and capture the `AttendanceID`, old status, and new status in a table variable. Display the results.
+**Exercițiul 7**
+Folosind `UPDATE` cu `OUTPUT`, schimbă toate înregistrările de prezență `'Absent'` în `'Present'` pentru `'2024-09-04'` și capturează `AttendanceID`, statusul vechi și statusul nou într-o variabilă de tip tabel. Afișează rezultatele.
 
-**Exercise 8**
-Write a transaction that:
-1. Promotes all students with `Grade = '10A'` to `Grade = '11A'`
-2. Verifies the change with a SELECT
-3. COMMITs or ROLLBACKs with a comment explaining the choice
+**Exercițiul 8**
+Scrie o tranzacție care:
+1. Promovează toți elevii cu `Grade = '10A'` la `Grade = '11A'`
+2. Verifică modificarea cu un SELECT
+3. Face COMMIT sau ROLLBACK, cu un comentariu care explică alegerea

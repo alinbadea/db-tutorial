@@ -1,14 +1,14 @@
-# Attendance Database — Worksheet 4: SELECT — Basic Queries
+# Baza de date Attendance — Fișa de lucru 4: SELECT — Interogări de bază
 
-## Learning Objectives
-- Query individual Attendance database tables with SELECT
-- Filter records with WHERE using various operators suited to attendance data
-- Sort and limit results
-- Use built-in date and string functions in the context of school attendance
+## Obiective de învățare
+- Interogarea tabelelor individuale ale bazei de date Attendance cu SELECT
+- Filtrarea înregistrărilor cu WHERE, folosind diverși operatori potriviți pentru datele de prezență
+- Sortarea și limitarea rezultatelor
+- Folosirea funcțiilor predefinite pentru date calendaristice și șiruri de caractere în contextul prezenței școlare
 
 ---
 
-## SELECT Syntax
+## Sintaxa SELECT
 
 ```sql
 SELECT [TOP n] [DISTINCT] column_list
@@ -19,7 +19,7 @@ ORDER BY column [ASC | DESC];
 
 ---
 
-## 1. Selecting All Columns
+## 1. Selectarea tuturor coloanelor
 
 ```sql
 SELECT * FROM Students;
@@ -29,25 +29,25 @@ SELECT * FROM Attendance;
 
 ---
 
-## 2. Selecting Specific Columns
+## 2. Selectarea anumitor coloane
 
 ```sql
--- Student roster
+-- Lista elevilor
 SELECT StudentID, FirstName, LastName, Email, Grade
 FROM   Students;
 
--- Subject catalogue
+-- Catalogul materiilor
 SELECT SubjectID, SubjectName, Credits
 FROM   Subjects;
 
--- Attendance log
+-- Registrul de prezență
 SELECT AttendanceID, ClassID, TeacherID, AttendanceDate, Status
 FROM   Attendance;
 ```
 
 ---
 
-## 3. Column Aliases
+## 3. Aliasuri de coloane
 
 ```sql
 SELECT
@@ -65,17 +65,17 @@ FROM Subjects;
 
 ---
 
-## 4. Computed Columns
+## 4. Coloane calculate
 
 ```sql
--- Days since a student enrolled
+-- Zilele trecute de la înscrierea unui elev
 SELECT
     FirstName + ' ' + LastName AS StudentName,
     EnrollmentDate,
     DATEDIFF(DAY, EnrollmentDate, GETDATE()) AS DaysEnrolled
 FROM Students;
 
--- Day of the week for each attendance record
+-- Ziua săptămânii pentru fiecare înregistrare de prezență
 SELECT
     AttendanceID,
     AttendanceDate,
@@ -86,69 +86,69 @@ FROM Attendance;
 
 ---
 
-## 5. Filtering with WHERE
+## 5. Filtrarea cu WHERE
 
-### Equality and Inequality
+### Egalitate și inegalitate
 
 ```sql
--- Students in grade 10A
+-- Elevii din clasa 10A
 SELECT FirstName, LastName, Grade FROM Students WHERE Grade = '10A';
 
--- Attendance records that are NOT 'Present'
+-- Înregistrările de prezență care NU sunt 'Present'
 SELECT AttendanceID, ClassID, Status FROM Attendance WHERE Status <> 'Present';
 
--- Subjects with more than 3 credits
+-- Materiile cu mai mult de 3 credite
 SELECT SubjectName, Credits FROM Subjects WHERE Credits > 3;
 ```
 
-### Comparison Operators
+### Operatori de comparație
 
 ```sql
--- Students who enrolled after 2022-09-01
+-- Elevii înscriși după 2022-09-01
 SELECT FirstName, LastName, EnrollmentDate
 FROM   Students
 WHERE  EnrollmentDate > '2022-09-01';
 
--- Attendance on or after a specific date
+-- Prezența la o anumită dată sau după aceasta
 SELECT AttendanceID, AttendanceDate, Status
 FROM   Attendance
 WHERE  AttendanceDate >= '2024-09-05';
 
--- Subjects with 3 or fewer credits
+-- Materiile cu 3 credite sau mai puține
 SELECT SubjectName, Credits FROM Subjects WHERE Credits <= 3;
 ```
 
 ### BETWEEN … AND
 
 ```sql
--- Students who enrolled between September 2022 and September 2023
+-- Elevii înscriși între septembrie 2022 și septembrie 2023
 SELECT FirstName, LastName, EnrollmentDate
 FROM   Students
 WHERE  EnrollmentDate BETWEEN '2022-09-01' AND '2023-08-31';
 
--- Attendance records from the first week of September 2024
+-- Înregistrările de prezență din prima săptămână a lunii septembrie 2024
 SELECT AttendanceID, ClassID, AttendanceDate, Status
 FROM   Attendance
 WHERE  AttendanceDate BETWEEN '2024-09-01' AND '2024-09-07';
 
--- Subjects with 2 to 4 credits
+-- Materiile cu 2 până la 4 credite
 SELECT SubjectName, Credits FROM Subjects WHERE Credits BETWEEN 2 AND 4;
 ```
 
 ### IN
 
 ```sql
--- Attendance for specific statuses
+-- Prezența cu anumite statusuri
 SELECT AttendanceID, ClassID, Status
 FROM   Attendance
 WHERE  Status IN ('Absent', 'Late');
 
--- Students in grades 10A or 10B
+-- Elevii din clasele 10A sau 10B
 SELECT FirstName, LastName, Grade
 FROM   Students
 WHERE  Grade IN ('10A', '10B');
 
--- Attendance records for specific classes
+-- Înregistrările de prezență pentru anumite înscrieri (ClassID)
 SELECT AttendanceID, ClassID, AttendanceDate
 FROM   Attendance
 WHERE  ClassID IN (1, 2, 3);
@@ -157,53 +157,53 @@ WHERE  ClassID IN (1, 2, 3);
 ### LIKE
 
 ```sql
--- Teachers whose specialization starts with 'Math'
+-- Profesorii a căror specializare începe cu 'Math'
 SELECT FirstName, LastName, Specialization
 FROM   Teachers
 WHERE  Specialization LIKE 'Math%';
 
--- Students whose last name starts with 'P'
+-- Elevii al căror nume de familie începe cu 'P'
 SELECT FirstName, LastName FROM Students WHERE LastName LIKE 'P%';
 
--- Teachers with a school email
+-- Profesorii cu email de la școală
 SELECT FirstName, LastName, Email
 FROM   Teachers
 WHERE  Email LIKE '%@school.ro';
 
--- Subjects containing 'y' in their name
+-- Materiile care conțin 'y' în nume
 SELECT SubjectName FROM Subjects WHERE SubjectName LIKE '%y%';
 ```
 
 ### IS NULL / IS NOT NULL
 
 ```sql
--- Students with no grade assigned
+-- Elevii fără clasă atribuită
 SELECT FirstName, LastName FROM Students WHERE Grade IS NULL;
 
--- Students who have a grade assigned
+-- Elevii care au o clasă atribuită
 SELECT FirstName, LastName, Grade FROM Students WHERE Grade IS NOT NULL;
 
--- Teachers with no specialization recorded
+-- Profesorii fără specializare înregistrată
 SELECT FirstName, LastName FROM Teachers WHERE Specialization IS NULL;
 ```
 
 ---
 
-## 6. Combining Conditions
+## 6. Combinarea condițiilor
 
 ```sql
--- Absent or Late attendance from September 3, 2024
+-- Prezența Absent sau Late din 3 septembrie 2024
 SELECT AttendanceID, ClassID, Status
 FROM   Attendance
 WHERE  AttendanceDate = '2024-09-03'
 AND    Status IN ('Absent', 'Late');
 
--- Students in grade 10A or 11A
+-- Elevii din clasa 10A sau 11A
 SELECT FirstName, LastName, Grade
 FROM   Students
 WHERE  Grade = '10A' OR Grade = '11A';
 
--- Classes in Fall 2024 for a specific subject
+-- Înscrierile din Fall 2024 la o anumită materie
 SELECT ClassID, StudentID, AcademicYear, Semester
 FROM   Classes
 WHERE  SubjectID = 1
@@ -213,19 +213,19 @@ AND    Semester = 'Fall';
 
 ---
 
-## 7. Sorting with ORDER BY
+## 7. Sortarea cu ORDER BY
 
 ```sql
--- Students sorted alphabetically by last name
+-- Elevii sortați alfabetic după numele de familie
 SELECT FirstName, LastName, Grade FROM Students ORDER BY LastName ASC;
 
--- Attendance sorted by date descending (most recent first)
+-- Prezența sortată descrescător după dată (cele mai recente primele)
 SELECT AttendanceID, AttendanceDate, Status FROM Attendance ORDER BY AttendanceDate DESC;
 
--- Subjects sorted by credits (most to least), then alphabetically
+-- Materiile sortate după credite (de la cele mai multe la cele mai puține), apoi alfabetic
 SELECT SubjectName, Credits FROM Subjects ORDER BY Credits DESC, SubjectName ASC;
 
--- Classes sorted by academic year and semester
+-- Înscrierile sortate după anul școlar și semestru
 SELECT ClassID, StudentID, SubjectID, AcademicYear, Semester
 FROM   Classes
 ORDER BY AcademicYear DESC, Semester ASC;
@@ -233,20 +233,20 @@ ORDER BY AcademicYear DESC, Semester ASC;
 
 ---
 
-## 8. Limiting Results with TOP
+## 8. Limitarea rezultatelor cu TOP
 
 ```sql
--- The 3 most recently enrolled students
+-- Cei mai recent înscriși 3 elevi
 SELECT TOP 3 FirstName, LastName, EnrollmentDate
 FROM   Students
 ORDER BY EnrollmentDate DESC;
 
--- The most recent attendance record
+-- Cea mai recentă înregistrare de prezență
 SELECT TOP 1 AttendanceID, ClassID, AttendanceDate, Status
 FROM   Attendance
 ORDER BY AttendanceDate DESC;
 
--- Top 50% of subjects by credit value
+-- Primele 50% dintre materii după numărul de credite
 SELECT TOP 50 PERCENT SubjectName, Credits
 FROM   Subjects
 ORDER BY Credits DESC;
@@ -257,32 +257,32 @@ ORDER BY Credits DESC;
 ## 9. DISTINCT
 
 ```sql
--- What grades are represented in the student body?
+-- Ce clase sunt reprezentate printre elevi?
 SELECT DISTINCT Grade FROM Students WHERE Grade IS NOT NULL ORDER BY Grade;
 
--- Which teacher IDs appear in attendance records?
+-- Ce ID-uri de profesori apar în înregistrările de prezență?
 SELECT DISTINCT TeacherID FROM Attendance ORDER BY TeacherID;
 
--- Which attendance statuses are in use?
+-- Ce statusuri de prezență sunt folosite?
 SELECT DISTINCT Status FROM Attendance;
 
--- How many distinct students have at least one attendance record?
+-- Câte înscrieri distincte au cel puțin o înregistrare de prezență?
 SELECT COUNT(DISTINCT ClassID) AS ClassesWithAttendance FROM Attendance;
 ```
 
 ---
 
-## 10. Useful Built-in Functions
+## 10. Funcții predefinite utile
 
 ```sql
--- String functions
+-- Funcții pentru șiruri de caractere
 SELECT
     UPPER(FirstName + ' ' + LastName)   AS UpperName,
     LEN(Email)                          AS EmailLength,
     LEFT(Grade, 2)                      AS GradeYear
 FROM Students;
 
--- Date functions on attendance
+-- Funcții pentru date calendaristice aplicate prezenței
 SELECT
     AttendanceDate,
     YEAR(AttendanceDate)                AS Year,
@@ -292,53 +292,53 @@ SELECT
     DATENAME(MONTH, AttendanceDate)     AS MonthName
 FROM Attendance;
 
--- NULL handling
+-- Tratarea valorilor NULL
 SELECT
     FirstName,
     LastName,
     ISNULL(Grade, 'Unassigned')         AS GradeDisplay,
     ISNULL(Specialization, 'General')   AS SpecializationDisplay
 FROM Students
-CROSS JOIN Teachers;  -- (illustrative only)
+CROSS JOIN Teachers;  -- (doar cu titlu ilustrativ)
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-List all students in grade `'10B'`. Show their full name and email.
+**Exercițiul 1 (Ușor)**
+Listează toți elevii din clasa `'10B'`. Afișează numele complet și emailul.
 
-**Exercise 2 (Easy)**
-Show all attendance records with `Status = 'Absent'`. Display `AttendanceID`, `ClassID`, `AttendanceDate`.
+**Exercițiul 2 (Ușor)**
+Afișează toate înregistrările de prezență cu `Status = 'Absent'`. Afișează `AttendanceID`, `ClassID`, `AttendanceDate`.
 
-**Exercise 3 (Easy)**
-List all subjects with 3 or more credits, sorted by credits descending.
+**Exercițiul 3 (Ușor)**
+Listează toate materiile cu 3 sau mai multe credite, sortate descrescător după credite.
 
-**Exercise 4 (Medium)**
-Find all students who enrolled between `'2022-09-01'` and `'2023-08-31'`. Show full name and enrollment date.
+**Exercițiul 4 (Mediu)**
+Găsește toți elevii înscriși între `'2022-09-01'` și `'2023-08-31'`. Afișează numele complet și data înscrierii.
 
-**Exercise 5 (Medium)**
-Show attendance records from September 4 and 5, 2024. Include `AttendanceID`, `ClassID`, `AttendanceDate`, and `Status`. Sort by date then ClassID.
+**Exercițiul 5 (Mediu)**
+Afișează înregistrările de prezență din 4 și 5 septembrie 2024. Include `AttendanceID`, `ClassID`, `AttendanceDate` și `Status`. Sortează după dată, apoi după ClassID.
 
-**Exercise 6 (Medium)**
-Find all teachers whose email ends in `'@school.ro'` and whose specialization starts with `'M'`.
+**Exercițiul 6 (Mediu)**
+Găsește toți profesorii al căror email se termină cu `'@school.ro'` și a căror specializare începe cu `'M'`.
 
-**Exercise 7 (Medium)**
-Show the distinct list of grades present in the `Students` table.
+**Exercițiul 7 (Mediu)**
+Afișează lista distinctă a claselor (Grade) prezente în tabelul `Students`.
 
-**Exercise 8 (Medium)**
-Show the 3 most recently enrolled students (most recent first). Display full name and enrollment date.
+**Exercițiul 8 (Mediu)**
+Afișează cei mai recent înscriși 3 elevi (cel mai recent primul). Afișează numele complet și data înscrierii.
 
-**Exercise 9 (Hard)**
-Show each attendance record with `AttendanceID`, `ClassID`, `AttendanceDate`, `Status`, the day-of-week name, and a column `IsWeekend` that shows 1 if the attendance falls on Saturday or Sunday (use `DATEPART(WEEKDAY, ...)`), otherwise 0.
+**Exercițiul 9 (Dificil)**
+Afișează fiecare înregistrare de prezență cu `AttendanceID`, `ClassID`, `AttendanceDate`, `Status`, numele zilei săptămânii și o coloană `IsWeekend` care are valoarea 1 dacă prezența cade sâmbăta sau duminica (folosește `DATEPART(WEEKDAY, ...)`), altfel 0.
 
-**Exercise 10 (Hard)**
-Show classes from Fall 2024 where the `StudentID` is in a grade starting with `'10'`. (Hint: join Classes to Students with a subquery or IN clause.)
+**Exercițiul 10 (Dificil)**
+Afișează înscrierile din Fall 2024 ale elevilor dintr-o clasă care începe cu `'10'`. (Indiciu: leagă Classes de Students printr-o subinterogare sau o clauză IN.)
 
 ---
 
-## Answers
+## Răspunsuri
 
 1. `SELECT FirstName + ' ' + LastName AS FullName, Email FROM Students WHERE Grade = '10B';`
 2. `SELECT AttendanceID, ClassID, AttendanceDate FROM Attendance WHERE Status = 'Absent';`

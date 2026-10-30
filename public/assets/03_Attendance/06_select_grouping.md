@@ -1,26 +1,26 @@
-# Attendance Database — Worksheet 6: SELECT — Grouping and Aggregates
+# Baza de date Attendance — Fișa de lucru 6: SELECT — Grupare și funcții de agregare
 
-## Learning Objectives
-- Apply aggregate functions to summarise attendance data
-- Group results by student, subject, teacher, date, and grade
-- Filter groups with HAVING to highlight attendance issues
-- Combine JOINs with GROUP BY to build school attendance reports
+## Obiective de învățare
+- Aplicarea funcțiilor de agregare pentru a sintetiza datele de prezență
+- Gruparea rezultatelor după elev, materie, profesor, dată și clasă
+- Filtrarea grupurilor cu HAVING pentru a evidenția problemele de prezență
+- Combinarea JOIN-urilor cu GROUP BY pentru a construi rapoarte de prezență școlară
 
 ---
 
-## Aggregate Functions
+## Funcții de agregare
 
 ### COUNT
 
 ```sql
--- Total number of attendance records
+-- Numărul total de înregistrări de prezență
 SELECT COUNT(*) AS TotalRecords FROM Attendance;
 
--- Attendance records per status
+-- Înregistrările de prezență pe status
 SELECT Status, COUNT(*) AS Count FROM Attendance GROUP BY Status;
 
--- COUNT(*) vs COUNT(column) with NULL
--- AttendanceDate should never be NULL, but illustrates the concept:
+-- COUNT(*) vs COUNT(coloană) când există NULL
+-- AttendanceDate nu ar trebui să fie niciodată NULL, dar exemplul ilustrează conceptul:
 SELECT
     COUNT(*)             AS TotalRows,
     COUNT(AttendanceDate) AS RowsWithDate
@@ -30,21 +30,21 @@ FROM Attendance;
 ### SUM
 
 ```sql
--- Total absences across all records
+-- Totalul absențelor din toate înregistrările
 SELECT SUM(CASE WHEN Status = 'Absent' THEN 1 ELSE 0 END) AS TotalAbsences
 FROM   Attendance;
 
--- Total credits for all subjects
+-- Totalul creditelor pentru toate materiile
 SELECT SUM(Credits) AS TotalCredits FROM Subjects;
 ```
 
 ### AVG
 
 ```sql
--- Average credits per subject
+-- Media creditelor pe materie
 SELECT AVG(CAST(Credits AS DECIMAL(10,2))) AS AvgCredits FROM Subjects;
 
--- Average number of attendance records per class (ClassID)
+-- Numărul mediu de înregistrări de prezență pe înscriere (ClassID)
 SELECT AVG(cnt) AS AvgSessionsPerClass
 FROM (
     SELECT ClassID, COUNT(*) AS cnt
@@ -53,17 +53,17 @@ FROM (
 ) AS sub;
 ```
 
-### MIN and MAX
+### MIN și MAX
 
 ```sql
--- Earliest and most recent attendance dates
+-- Cea mai veche și cea mai recentă dată de prezență
 SELECT MIN(AttendanceDate) AS FirstSession, MAX(AttendanceDate) AS LastSession
 FROM   Attendance;
 
--- Smallest and largest credit counts
+-- Cel mai mic și cel mai mare număr de credite
 SELECT MIN(Credits) AS MinCredits, MAX(Credits) AS MaxCredits FROM Subjects;
 
--- Earliest and latest enrollment dates
+-- Cea mai veche și cea mai recentă dată de înscriere
 SELECT MIN(EnrollmentDate) AS FirstEnrolled, MAX(EnrollmentDate) AS LastEnrolled
 FROM   Students;
 ```
@@ -72,44 +72,44 @@ FROM   Students;
 
 ## GROUP BY
 
-### Single Column
+### O singură coloană
 
 ```sql
--- Attendance count per status
+-- Numărul de prezențe pe status
 SELECT Status, COUNT(*) AS Count
 FROM   Attendance
 GROUP BY Status
 ORDER BY Count DESC;
 
--- Number of enrollments per subject
+-- Numărul de înscrieri pe materie
 SELECT SubjectID, COUNT(*) AS StudentCount
 FROM   Classes
 GROUP BY SubjectID
 ORDER BY StudentCount DESC;
 
--- Number of attendance records per teacher
+-- Numărul de înregistrări de prezență pe profesor
 SELECT TeacherID, COUNT(*) AS SessionsTaught
 FROM   Attendance
 GROUP BY TeacherID
 ORDER BY SessionsTaught DESC;
 
--- Enrollments per academic year
+-- Înscrierile pe an școlar
 SELECT AcademicYear, COUNT(*) AS EnrollmentCount
 FROM   Classes
 GROUP BY AcademicYear
 ORDER BY AcademicYear;
 ```
 
-### Multiple Columns
+### Mai multe coloane
 
 ```sql
--- Attendance breakdown per class per status
+-- Defalcarea prezenței pe înscriere și pe status
 SELECT ClassID, Status, COUNT(*) AS Count
 FROM   Attendance
 GROUP BY ClassID, Status
 ORDER BY ClassID, Status;
 
--- Enrollments per subject per semester
+-- Înscrierile pe materie și pe semestru
 SELECT SubjectID, Semester, COUNT(*) AS StudentCount
 FROM   Classes
 GROUP BY SubjectID, Semester
@@ -121,20 +121,20 @@ ORDER BY SubjectID, Semester;
 ## HAVING
 
 ```sql
--- Classes with more than 2 absences
+-- Înscrierile cu mai mult de 2 absențe
 SELECT ClassID, COUNT(*) AS AbsenceCount
 FROM   Attendance
 WHERE  Status = 'Absent'
 GROUP BY ClassID
 HAVING COUNT(*) > 2;
 
--- Subjects with 3 or more enrolled students
+-- Materiile cu 3 sau mai mulți elevi înscriși
 SELECT SubjectID, COUNT(*) AS StudentCount
 FROM   Classes
 GROUP BY SubjectID
 HAVING COUNT(*) >= 3;
 
--- Teachers who have taught more than 1 session
+-- Profesorii care au ținut mai mult de o oră
 SELECT TeacherID, COUNT(*) AS SessionCount
 FROM   Attendance
 GROUP BY TeacherID
@@ -143,9 +143,9 @@ HAVING COUNT(*) > 1;
 
 ---
 
-## GROUP BY with JOINs
+## GROUP BY cu JOIN-uri
 
-### Example 1 — Attendance summary per student with full name
+### Exemplul 1 — Rezumatul prezenței pe elev, cu numele complet
 
 ```sql
 SELECT
@@ -162,7 +162,7 @@ GROUP BY s.StudentID, s.FirstName, s.LastName, s.Grade
 ORDER BY Absent DESC, s.LastName;
 ```
 
-### Example 2 — Subject attendance rates
+### Exemplul 2 — Rata de prezență pe materie
 
 ```sql
 SELECT
@@ -181,7 +181,7 @@ GROUP BY sub.SubjectID, sub.SubjectName
 ORDER BY AttendanceRatePct ASC;
 ```
 
-### Example 3 — Teacher workload summary
+### Exemplul 3 — Rezumatul încărcării profesorilor
 
 ```sql
 SELECT
@@ -197,9 +197,9 @@ GROUP BY t.TeacherID, t.FirstName, t.LastName, t.Specialization
 ORDER BY TotalStudentSessions DESC;
 ```
 
-### Example 4 — Flagging at-risk students (HAVING + JOINs)
+### Exemplul 4 — Identificarea elevilor cu risc (HAVING + JOIN-uri)
 
-Students whose absence count for any subject exceeds 2:
+Elevii care au cel puțin 2 absențe la o materie:
 
 ```sql
 SELECT
@@ -218,17 +218,17 @@ ORDER BY AbsenceCount DESC;
 
 ---
 
-## NULL Values in Aggregates
+## Valori NULL în agregări
 
 ```sql
--- AVG and SUM ignore NULLs
--- Grade is nullable — AVG would fail on NVARCHAR; use COUNT instead
+-- AVG și SUM ignoră valorile NULL
+-- Grade acceptă NULL — AVG ar eșua pe NVARCHAR; folosim COUNT în schimb
 SELECT
     COUNT(Grade)  AS StudentsWithGrade,
     COUNT(*)      AS TotalStudents
 FROM Students;
 
--- ISNULL to substitute a default value before aggregating
+-- ISNULL pentru a înlocui cu o valoare implicită înainte de agregare
 SELECT
     SUM(ISNULL(Credits, 0)) AS TotalCreditsIncludingNulls
 FROM Subjects;
@@ -236,58 +236,58 @@ FROM Subjects;
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-Count the number of attendance records for each `Status` value. Show `Status` and `Count`.
+**Exercițiul 1 (Ușor)**
+Numără înregistrările de prezență pentru fiecare valoare `Status`. Afișează `Status` și `Count`.
 
-**Exercise 2 (Easy)**
-Show the total number of students enrolled in each subject (grouped by `SubjectID`). Sort by count descending.
+**Exercițiul 2 (Ușor)**
+Afișează numărul total de elevi înscriși la fiecare materie (grupat după `SubjectID`). Sortează descrescător după număr.
 
-**Exercise 3 (Easy)**
-Find the minimum and maximum enrollment dates in `Students`.
+**Exercițiul 3 (Ușor)**
+Găsește cea mai veche și cea mai recentă dată de înscriere din `Students`.
 
-**Exercise 4 (Medium)**
-Show each subject name alongside the number of students enrolled in it for `AcademicYear = 2024`. Join `Subjects` and `Classes`.
+**Exercițiul 4 (Mediu)**
+Afișează numele fiecărei materii alături de numărul de elevi înscriși la ea pentru `AcademicYear = 2024`. Unește `Subjects` și `Classes`.
 
-**Exercise 5 (Medium)**
-List all classes (`ClassID`) that have at least 3 attendance records. Show `ClassID` and the count.
+**Exercițiul 5 (Mediu)**
+Listează toate înscrierile (`ClassID`) care au cel puțin 3 înregistrări de prezență. Afișează `ClassID` și numărul.
 
-**Exercise 6 (Medium)**
-Show each teacher's name and the number of distinct students they have taught (via Attendance → Classes → Students). Sort by student count descending.
+**Exercițiul 6 (Mediu)**
+Afișează numele fiecărui profesor și numărul de elevi distincți cărora le-a predat (prin Attendance → Classes → Students). Sortează descrescător după numărul de elevi.
 
-**Exercise 7 (Hard)**
-For each grade (e.g., 10A, 10B), show the total number of Present, Absent, and Late records. Join through Students → Classes → Attendance.
+**Exercițiul 7 (Dificil)**
+Pentru fiecare clasă (de ex., 10A, 10B), afișează numărul total de înregistrări Present, Absent și Late. Unește tabelele pe traseul Students → Classes → Attendance.
 
-**Exercise 8 (Hard)**
-Calculate the attendance rate (Present / Total × 100) per subject. Show subject name, total sessions, total present, and attendance rate as a percentage. Use `NULLIF` to avoid division by zero.
+**Exercițiul 8 (Dificil)**
+Calculează rata de prezență (Present / Total × 100) pe materie. Afișează numele materiei, numărul total de ore, numărul total de prezențe și rata de prezență ca procent. Folosește `NULLIF` pentru a evita împărțirea la zero.
 
-**Exercise 9 (Hard)**
-For each student, show their name, grade, and their absence rate per subject (absences / total sessions × 100). Only show student-subject combinations where the absence rate is above 20%.
+**Exercițiul 9 (Dificil)**
+Pentru fiecare elev, afișează numele, clasa și rata de absență pe materie (absențe / total ore × 100). Afișează doar combinațiile elev-materie la care rata de absență depășește 20%.
 
-**Exercise 10 (Hard)**
-Show a daily attendance summary: for each date, show how many students were Present, Absent, and Late. Include only dates that had at least 3 attendance records.
+**Exercițiul 10 (Dificil)**
+Afișează un rezumat zilnic al prezenței: pentru fiecare dată, câți elevi au fost Present, Absent și Late. Include doar datele care au cel puțin 3 înregistrări de prezență.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1**
+**Exercițiul 1**
 ```sql
 SELECT Status, COUNT(*) AS Count FROM Attendance GROUP BY Status ORDER BY Count DESC;
 ```
 
-**Exercise 2**
+**Exercițiul 2**
 ```sql
 SELECT SubjectID, COUNT(*) AS StudentCount FROM Classes GROUP BY SubjectID ORDER BY StudentCount DESC;
 ```
 
-**Exercise 3**
+**Exercițiul 3**
 ```sql
 SELECT MIN(EnrollmentDate) AS MinDate, MAX(EnrollmentDate) AS MaxDate FROM Students;
 ```
 
-**Exercise 4**
+**Exercițiul 4**
 ```sql
 SELECT sub.SubjectName, COUNT(cl.ClassID) AS StudentCount
 FROM   Subjects AS sub
@@ -297,7 +297,7 @@ GROUP BY sub.SubjectID, sub.SubjectName
 ORDER BY StudentCount DESC;
 ```
 
-**Exercise 5**
+**Exercițiul 5**
 ```sql
 SELECT ClassID, COUNT(*) AS AttendanceCount
 FROM   Attendance
@@ -305,7 +305,7 @@ GROUP BY ClassID
 HAVING COUNT(*) >= 3;
 ```
 
-**Exercise 6**
+**Exercițiul 6**
 ```sql
 SELECT t.FirstName + ' ' + t.LastName AS TeacherName,
        COUNT(DISTINCT cl.StudentID) AS DistinctStudents
@@ -316,7 +316,7 @@ GROUP BY t.TeacherID, t.FirstName, t.LastName
 ORDER BY DistinctStudents DESC;
 ```
 
-**Exercise 7**
+**Exercițiul 7**
 ```sql
 SELECT s.Grade,
        SUM(CASE WHEN a.Status = 'Present' THEN 1 ELSE 0 END) AS Present,
@@ -329,7 +329,7 @@ GROUP BY s.Grade
 ORDER BY s.Grade;
 ```
 
-**Exercise 8**
+**Exercițiul 8**
 ```sql
 SELECT sub.SubjectName,
        COUNT(a.AttendanceID) AS TotalSessions,
@@ -343,7 +343,7 @@ GROUP BY sub.SubjectID, sub.SubjectName
 ORDER BY AttendanceRate ASC;
 ```
 
-**Exercise 9**
+**Exercițiul 9**
 ```sql
 SELECT s.FirstName + ' ' + s.LastName AS StudentName, s.Grade,
        sub.SubjectName,
@@ -359,7 +359,7 @@ HAVING 100.0 * SUM(CASE WHEN a.Status = 'Absent' THEN 1 ELSE 0 END)
 ORDER BY AbsenceRate DESC;
 ```
 
-**Exercise 10**
+**Exercițiul 10**
 ```sql
 SELECT a.AttendanceDate,
        SUM(CASE WHEN a.Status = 'Present' THEN 1 ELSE 0 END) AS Present,

@@ -1,61 +1,61 @@
-# eCommerce Database — Worksheet 3: INSERT Statements
+# Baza de date eCommerce — Fișa de lucru 3: Instrucțiuni INSERT
 
-## Learning Objectives
-- Write `INSERT` statements using all major T-SQL forms
-- Understand why a column list is best practice
-- Insert multiple rows in a single statement
-- Use `INSERT...SELECT` and the `OUTPUT` clause
-- Work correctly with `IDENTITY` columns
+## Obiective de învățare
+- Scrierea instrucțiunilor `INSERT` folosind toate formele principale din T-SQL
+- Înțelegerea motivului pentru care o listă de coloane este o bună practică
+- Inserarea mai multor rânduri într-o singură instrucțiune
+- Folosirea `INSERT...SELECT` și a clauzei `OUTPUT`
+- Lucrul corect cu coloanele `IDENTITY`
 
 ---
 
-## INSERT Syntax
+## Sintaxa INSERT
 
 ```sql
 INSERT INTO table_name (column1, column2, ...)
 VALUES (value1, value2, ...);
 ```
 
-All parts explained:
-- `INSERT INTO` — keyword introducing the target table
-- `(column1, column2, ...)` — optional but recommended column list
-- `VALUES (...)` — the data to insert
+Explicarea tuturor părților:
+- `INSERT INTO` — cuvântul-cheie care introduce tabelul țintă
+- `(column1, column2, ...)` — lista de coloane, opțională, dar recomandată
+- `VALUES (...)` — datele de inserat
 
 ---
 
-## Method 1: INSERT Without a Column List
+## Metoda 1: INSERT fără listă de coloane
 
-You omit the column names and supply values in the exact order columns were defined in the table.
+Omiți numele coloanelor și furnizezi valorile exact în ordinea în care au fost definite coloanele în tabel.
 
 ```sql
 INSERT INTO Categories
 VALUES ('Electronics', 'Electronic devices and accessories');
 ```
 
-> **Warning:** This breaks the moment anyone adds, reorders, or removes a column from the table. It also requires you to supply values for every non-IDENTITY column. Avoid this in production code.
+> **Atenție:** Această formă nu mai funcționează din momentul în care cineva adaugă, reordonează sau elimină o coloană din tabel. De asemenea, te obligă să furnizezi valori pentru fiecare coloană care nu este IDENTITY. Evit-o în codul de producție.
 
 ---
 
-## Method 2: INSERT With a Column List (Best Practice)
+## Metoda 2: INSERT cu listă de coloane (bună practică)
 
-Always name the columns you are inserting into:
+Numește întotdeauna coloanele în care inserezi:
 
 ```sql
 INSERT INTO Categories (CategoryName, Description)
 VALUES ('Electronics', 'Electronic devices and accessories');
 ```
 
-**Why this is better:**
-- Order of columns does not matter
-- IDENTITY columns are automatically skipped
-- Nullable columns can be omitted (they receive NULL)
-- If the table schema changes, the INSERT still works as long as required columns are provided
+**De ce este mai bine:**
+- Ordinea coloanelor nu contează
+- Coloanele IDENTITY sunt omise automat
+- Coloanele care acceptă NULL pot fi omise (primesc NULL)
+- Dacă schema tabelului se schimbă, INSERT-ul funcționează în continuare, atât timp cât sunt furnizate coloanele obligatorii
 
 ---
 
-## Method 3: Inserting Multiple Rows in One Statement
+## Metoda 3: Inserarea mai multor rânduri într-o singură instrucțiune
 
-T-SQL lets you supply multiple `VALUES` clauses separated by commas:
+T-SQL îți permite să furnizezi mai multe seturi de valori în `VALUES`, separate prin virgule:
 
 ```sql
 INSERT INTO Categories (CategoryName, Description)
@@ -67,26 +67,26 @@ VALUES
     ('Home & Garden', 'Furniture, gardening, and home decor');
 ```
 
-**Performance benefit:** One network round-trip and one transaction for all rows, which is faster than five separate `INSERT` statements.
+**Avantaj de performanță:** O singură comunicare prin rețea și o singură tranzacție pentru toate rândurile, ceea ce este mai rapid decât cinci instrucțiuni `INSERT` separate.
 
 ---
 
-## Method 4: INSERT … SELECT
+## Metoda 4: INSERT … SELECT
 
-Insert the results of a query into a table. Useful for copying data, populating from a staging table, or deriving rows from existing data.
+Inserează rezultatele unei interogări într-un tabel. Util pentru copierea datelor, popularea dintr-un tabel intermediar (staging) sau derivarea de rânduri din date existente.
 
 ```sql
--- Copy all Electronics products to an ArchiveProducts table
+-- Copiem toate produsele din categoria Electronics în tabelul ArchiveProducts
 INSERT INTO ArchiveProducts (ProductName, Price, Stock)
 SELECT ProductName, Price, Stock
 FROM   Products
 WHERE  CategoryID = (SELECT CategoryID FROM Categories WHERE CategoryName = 'Electronics');
 ```
 
-Using a CTE (Common Table Expression) to build the inserted rows:
+Folosirea unui CTE (Common Table Expression — expresie de tabel comună) pentru a construi rândurile:
 
 ```sql
--- Recalculate TotalAmount for each order from its detail rows
+-- Recalculăm TotalAmount pentru fiecare comandă pe baza rândurilor sale de detaliu
 WITH OrderTotals AS (
     SELECT OrderID, SUM(Quantity * UnitPrice) AS Calculated
     FROM   OrderDetails
@@ -100,31 +100,31 @@ JOIN   OrderTotals ot ON o.OrderID = ot.OrderID;
 
 ---
 
-## IDENTITY Columns
+## Coloane IDENTITY
 
-`IDENTITY(seed, increment)` tells SQL Server to generate the PK value automatically.
+`IDENTITY(seed, increment)` îi spune lui SQL Server să genereze automat valoarea cheii primare.
 
-- `seed` — the value for the first row (usually 1)
-- `increment` — how much to add for each new row (usually 1)
+- `seed` — valoarea pentru primul rând (de obicei 1)
+- `increment` — cât se adaugă pentru fiecare rând nou (de obicei 1)
 
-**You never include an IDENTITY column in an INSERT.** SQL Server fills it in automatically.
+**Nu incluzi niciodată o coloană IDENTITY într-un INSERT.** SQL Server o completează automat.
 
 ```sql
--- Correct: CategoryID is omitted; SQL Server assigns it
+-- Corect: CategoryID este omis; SQL Server îl atribuie
 INSERT INTO Categories (CategoryName, Description)
 VALUES ('Toys', 'Children toys and games');
 
--- Retrieve the ID just generated (scope-safe)
-SELECT SCOPE_IDENTITY();          -- recommended: ID from this session and scope
-SELECT @@IDENTITY;                 -- ID from this session (any scope — avoid if triggers exist)
-SELECT IDENT_CURRENT('Categories'); -- most recent ID inserted into that table by anyone
+-- Obținem ID-ul tocmai generat (sigur față de domeniul de vizibilitate)
+SELECT SCOPE_IDENTITY();          -- recomandat: ID-ul din această sesiune și acest domeniu
+SELECT @@IDENTITY;                 -- ID-ul din această sesiune (orice domeniu — evită dacă există triggere)
+SELECT IDENT_CURRENT('Categories'); -- cel mai recent ID inserat în acel tabel, de oricine
 ```
 
 ---
 
 ## SET IDENTITY_INSERT
 
-Occasionally you need to supply a specific PK value (e.g., restoring from a backup or filling a gap). Enable this temporarily:
+Ocazional trebuie să furnizezi o anumită valoare pentru cheia primară (de ex., la restaurarea dintr-o copie de siguranță sau pentru a umple un gol). Activează temporar această opțiune:
 
 ```sql
 SET IDENTITY_INSERT Categories ON;
@@ -135,22 +135,22 @@ VALUES (99, 'Legacy', 'Old category for migration purposes');
 SET IDENTITY_INSERT Categories OFF;
 ```
 
-> **Important:** Only one table at a time can have `IDENTITY_INSERT ON` within a session. Always turn it OFF when done.
+> **Important:** Într-o sesiune, doar un singur tabel o dată poate avea `IDENTITY_INSERT ON`. Dezactivează-l întotdeauna (OFF) după ce ai terminat.
 
 ---
 
-## INSERT with OUTPUT Clause
+## INSERT cu clauza OUTPUT
 
-`OUTPUT` lets you capture the rows that were just inserted, including auto-generated IDENTITY values.
+`OUTPUT` îți permite să capturezi rândurile tocmai inserate, inclusiv valorile IDENTITY generate automat.
 
 ```sql
--- Capture the new CategoryID immediately after inserting
+-- Capturăm noul CategoryID imediat după inserare
 INSERT INTO Categories (CategoryName, Description)
 OUTPUT INSERTED.CategoryID, INSERTED.CategoryName
 VALUES ('Automotive', 'Car accessories and parts');
 ```
 
-Save the output into a table variable:
+Salvăm rezultatul într-o variabilă de tip tabel:
 
 ```sql
 DECLARE @NewIDs TABLE (CategoryID INT, CategoryName NVARCHAR(100));
@@ -165,16 +165,16 @@ SELECT * FROM @NewIDs;
 
 ---
 
-## Complete Sample Data Script
+## Script complet cu date de exemplu
 
-Run this script after creating the database with Worksheet 2. Insert in the correct FK order: Categories → Clients → Products → Orders → OrderDetails.
+Rulează acest script după ce ai creat baza de date cu Fișa de lucru 2. Inserează în ordinea corectă impusă de cheile străine: Categories → Clients → Products → Orders → OrderDetails.
 
 ```sql
 USE eCommerceDB;
 GO
 
 -- ===========================
--- Categories (5 rows)
+-- Categories (5 rânduri)
 -- ===========================
 INSERT INTO Categories (CategoryName, Description)
 VALUES
@@ -186,7 +186,7 @@ VALUES
 GO
 
 -- ===========================
--- Clients (6 rows)
+-- Clients (6 rânduri)
 -- ===========================
 INSERT INTO Clients (FirstName, LastName, Email, Phone, Address, City, Country)
 VALUES
@@ -199,7 +199,7 @@ VALUES
 GO
 
 -- ===========================
--- Products (8 rows)
+-- Products (8 rânduri)
 -- ===========================
 INSERT INTO Products (ProductName, Description, Price, Stock, CategoryID)
 VALUES
@@ -214,7 +214,7 @@ VALUES
 GO
 
 -- ===========================
--- Orders (6 rows)
+-- Orders (6 rânduri)
 -- ===========================
 INSERT INTO Orders (ClientID, OrderDate, ShippingAddress, Status)
 VALUES
@@ -227,23 +227,23 @@ VALUES
 GO
 
 -- ===========================
--- OrderDetails (10 rows)
+-- OrderDetails (10 rânduri)
 -- ===========================
 INSERT INTO OrderDetails (OrderID, ProductID, Quantity, UnitPrice)
 VALUES
-    (1, 1, 2,  29.99),   -- Order 1: 2x Wireless Mouse
-    (1, 2, 1,  74.99),   -- Order 1: 1x USB Keyboard
-    (2, 4, 1,  59.99),   -- Order 2: 1x SQL Server 2022 Guide
-    (2, 5, 2,  39.99),   -- Order 2: 2x Clean Code
-    (3, 6, 1,  89.99),   -- Order 3: 1x Running Shoes
-    (3, 7, 3,  19.99),   -- Order 3: 3x Cotton T-Shirt
-    (4, 1, 1,  29.99),   -- Order 4: 1x Wireless Mouse
-    (4, 3, 1, 399.99),   -- Order 4: 1x 27" Monitor
-    (5, 2, 2,  74.99),   -- Order 5: 2x USB Keyboard
-    (6, 8, 1,  24.99);   -- Order 6: 1x Garden Hoe
+    (1, 1, 2,  29.99),   -- Comanda 1: 2x Wireless Mouse
+    (1, 2, 1,  74.99),   -- Comanda 1: 1x USB Keyboard
+    (2, 4, 1,  59.99),   -- Comanda 2: 1x SQL Server 2022 Guide
+    (2, 5, 2,  39.99),   -- Comanda 2: 2x Clean Code
+    (3, 6, 1,  89.99),   -- Comanda 3: 1x Running Shoes
+    (3, 7, 3,  19.99),   -- Comanda 3: 3x Cotton T-Shirt
+    (4, 1, 1,  29.99),   -- Comanda 4: 1x Wireless Mouse
+    (4, 3, 1, 399.99),   -- Comanda 4: 1x 27" Monitor
+    (5, 2, 2,  74.99),   -- Comanda 5: 2x USB Keyboard
+    (6, 8, 1,  24.99);   -- Comanda 6: 1x Garden Hoe
 GO
 
--- Update TotalAmount based on actual order details
+-- Actualizăm TotalAmount pe baza detaliilor reale ale comenzilor
 UPDATE o
 SET o.TotalAmount = totals.Total
 FROM Orders o
@@ -257,19 +257,19 @@ GO
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Write an `INSERT` statement to add a new category called `"Automotive"` with the description `"Car parts and accessories"`. Retrieve the auto-generated `CategoryID` immediately after.
+**Exercițiul 1**
+Scrie o instrucțiune `INSERT` care adaugă o categorie nouă numită `"Automotive"` cu descrierea `"Car parts and accessories"`. Obține imediat după aceea valoarea `CategoryID` generată automat.
 
-**Exercise 2**
-Write a single `INSERT` statement that adds three new clients at once: one from New York (USA), one from Tokyo (Japan), and one from Sydney (Australia). Include only the required fields.
+**Exercițiul 2**
+Scrie o singură instrucțiune `INSERT` care adaugă trei clienți noi deodată: unul din New York (USA), unul din Tokyo (Japan) și unul din Sydney (Australia). Include doar câmpurile obligatorii.
 
-**Exercise 3**
-Using `INSERT...SELECT`, write a query that inserts into an `ArchiveOrders` table (assume it has the same structure as `Orders`) all orders whose `Status` is `'Cancelled'`.
+**Exercițiul 3**
+Folosind `INSERT...SELECT`, scrie o interogare care inserează într-un tabel `ArchiveOrders` (presupune că are aceeași structură ca `Orders`) toate comenzile al căror `Status` este `'Cancelled'`.
 
-**Exercise 4**
-An order has been manually placed in an external system and given `OrderID = 1000`. Write the statements to insert it into the `Orders` table with that specific ID, then insert two `OrderDetails` rows for it.
+**Exercițiul 4**
+O comandă a fost plasată manual într-un sistem extern și a primit `OrderID = 1000`. Scrie instrucțiunile pentru a o insera în tabelul `Orders` cu acel ID anume, apoi inserează două rânduri `OrderDetails` pentru ea.
 
-**Exercise 5**
-Write an `INSERT` with an `OUTPUT` clause that inserts a new product and returns its auto-generated `ProductID`, `ProductName`, and `Price` in the result set.
+**Exercițiul 5**
+Scrie un `INSERT` cu clauza `OUTPUT` care inserează un produs nou și returnează în setul de rezultate valorile `ProductID` (generată automat), `ProductName` și `Price`.

@@ -1,14 +1,14 @@
-# eCommerce Database — Worksheet 4: SELECT — Basic Queries
+# Baza de date eCommerce — Fișa de lucru 4: SELECT — Interogări de bază
 
-## Learning Objectives
-- Write `SELECT` statements to retrieve specific columns and filter rows
-- Use `WHERE` with comparison, range, list, pattern, and NULL operators
-- Sort results with `ORDER BY` and limit them with `TOP`
-- Apply `DISTINCT` and compute derived columns in the select list
+## Obiective de învățare
+- Scrierea instrucțiunilor `SELECT` pentru a extrage anumite coloane și a filtra rândurile
+- Folosirea `WHERE` cu operatori de comparație, interval, listă, model (pattern) și NULL
+- Sortarea rezultatelor cu `ORDER BY` și limitarea lor cu `TOP`
+- Aplicarea `DISTINCT` și calcularea coloanelor derivate în lista SELECT
 
 ---
 
-## SELECT Syntax
+## Sintaxa SELECT
 
 ```sql
 SELECT  [TOP n] [DISTINCT] column_list
@@ -19,68 +19,68 @@ ORDER BY column [ASC | DESC];
 
 ---
 
-## 1. Selecting All Columns (SELECT *)
+## 1. Selectarea tuturor coloanelor (SELECT *)
 
 ```sql
--- Every column from Categories
+-- Toate coloanele din Categories
 SELECT * FROM Categories;
 
--- Every column from Orders
+-- Toate coloanele din Orders
 SELECT * FROM Orders;
 ```
 
-> **Note:** `SELECT *` is convenient for exploration but avoid it in production queries. If a column is added or reordered, queries that depend on column position will break or return unexpected data.
+> **Notă:** `SELECT *` este comod pentru explorare, dar evită-l în interogările de producție. Dacă o coloană este adăugată sau reordonată, interogările care depind de poziția coloanelor nu vor mai funcționa sau vor returna date neașteptate.
 
 ---
 
-## 2. Selecting Specific Columns
+## 2. Selectarea anumitor coloane
 
 ```sql
--- Product catalogue view
+-- Catalogul de produse
 SELECT ProductName, Price, Stock
 FROM   Products;
 
--- Client contact list
+-- Lista de contacte a clienților
 SELECT FirstName, LastName, Email, City, Country
 FROM   Clients;
 
--- Order summary
+-- Rezumatul comenzilor
 SELECT OrderID, OrderDate, Status, TotalAmount
 FROM   Orders;
 ```
 
 ---
 
-## 3. Column Aliases (AS)
+## 3. Aliasuri de coloane (AS)
 
-Rename a column in the result set without changing the table.
+Redenumește o coloană în setul de rezultate fără a modifica tabelul.
 
 ```sql
--- Rename columns for readability
+-- Redenumim coloanele pentru lizibilitate
 SELECT
     FirstName + ' ' + LastName  AS FullName,
     Email                       AS ContactEmail,
-    City                        AS [Home City]       -- brackets allow spaces
+    City                        AS [Home City]       -- parantezele drepte permit spații
 FROM Clients;
 
--- Computed column with alias
+-- Coloană calculată, cu alias
 SELECT
     ProductName,
     Price          AS ListPrice,
     Price * 0.9    AS DiscountedPrice
 FROM Products;
 
--- Alias without the AS keyword (space only — works but less readable)
+-- Alias fără cuvântul-cheie AS (doar un spațiu — funcționează, dar e mai puțin lizibil)
 SELECT OrderID OrderNumber, OrderDate PlacedOn
 FROM   Orders;
 ```
 
 ---
 
-## 4. Arithmetic in SELECT
+## 4. Operații aritmetice în SELECT
 
 ```sql
--- Line total for each order detail
+-- Totalul liniei pentru fiecare detaliu de comandă
 SELECT
     OrderDetailID,
     Quantity,
@@ -89,14 +89,14 @@ SELECT
     Quantity * UnitPrice * 0.20   AS VATAmount
 FROM OrderDetails;
 
--- Days since an order was placed
+-- Zilele trecute de la plasarea unei comenzi
 SELECT
     OrderID,
     OrderDate,
     DATEDIFF(DAY, OrderDate, GETDATE()) AS DaysSinceOrder
 FROM Orders;
 
--- Stock value per product
+-- Valoarea stocului pentru fiecare produs
 SELECT
     ProductName,
     Stock,
@@ -107,119 +107,119 @@ FROM Products;
 
 ---
 
-## 5. Filtering with WHERE
+## 5. Filtrarea cu WHERE
 
-### Equality and Inequality
+### Egalitate și inegalitate
 
 ```sql
--- Orders that have been delivered
+-- Comenzile care au fost livrate
 SELECT * FROM Orders WHERE Status = 'Delivered';
 
--- Products that are NOT in Electronics (CategoryID 1)
+-- Produsele care NU sunt în Electronics (CategoryID 1)
 SELECT ProductName, Price FROM Products WHERE CategoryID <> 1;
 
--- Clients who are not from the UK
+-- Clienții care nu sunt din UK
 SELECT FirstName, LastName, Country FROM Clients WHERE Country != 'UK';
 ```
 
-### Comparison Operators
+### Operatori de comparație
 
 ```sql
--- Products that cost more than €50
+-- Produsele care costă mai mult de 50 €
 SELECT ProductName, Price FROM Products WHERE Price > 50.00;
 
--- Products priced at €30 or less
+-- Produsele cu prețul de 30 € sau mai puțin
 SELECT ProductName, Price FROM Products WHERE Price <= 30.00;
 
--- Orders placed before 12 January 2024
+-- Comenzile plasate înainte de 12 ianuarie 2024
 SELECT OrderID, OrderDate FROM Orders WHERE OrderDate < '2024-01-12';
 
--- Orders placed on or after 15 January 2024
+-- Comenzile plasate pe 15 ianuarie 2024 sau după
 SELECT OrderID, OrderDate, Status FROM Orders WHERE OrderDate >= '2024-01-15';
 ```
 
 ### BETWEEN … AND
 
 ```sql
--- Products priced between €20 and €80 (inclusive)
+-- Produsele cu prețul între 20 € și 80 € (inclusiv)
 SELECT ProductName, Price
 FROM   Products
 WHERE  Price BETWEEN 20.00 AND 80.00;
 
--- Orders placed in the first two weeks of January 2024
+-- Comenzile plasate în primele două săptămâni din ianuarie 2024
 SELECT OrderID, OrderDate, ClientID
 FROM   Orders
 WHERE  OrderDate BETWEEN '2024-01-01' AND '2024-01-14';
 ```
 
-### IN (list of values)
+### IN (listă de valori)
 
 ```sql
--- Orders with specific statuses
+-- Comenzile cu anumite statusuri
 SELECT OrderID, Status, TotalAmount
 FROM   Orders
 WHERE  Status IN ('Pending', 'Processing');
 
--- Clients from selected countries
+-- Clienții din anumite țări
 SELECT FirstName, LastName, Country
 FROM   Clients
 WHERE  Country IN ('UK', 'France', 'Germany');
 ```
 
-### LIKE — Pattern Matching
+### LIKE — Potrivirea după model
 
-`%` matches any sequence of zero or more characters.  
-`_` matches exactly one character.
+`%` se potrivește cu orice secvență de zero sau mai multe caractere.  
+`_` se potrivește cu exact un caracter.
 
 ```sql
--- Products whose name starts with 'Wire'
+-- Produsele al căror nume începe cu 'Wire'
 SELECT ProductName, Price FROM Products WHERE ProductName LIKE 'Wire%';
 
--- Products whose name ends with 'e'
+-- Produsele al căror nume se termină cu 'e'
 SELECT ProductName FROM Products WHERE ProductName LIKE '%e';
 
--- Products whose name contains 'keyboard' (case-insensitive by default)
+-- Produsele al căror nume conține 'keyboard' (implicit nu se face distincție între majuscule și minuscule)
 SELECT ProductName FROM Products WHERE ProductName LIKE '%keyboard%';
 
--- Clients whose last name is four letters
+-- Clienții al căror nume de familie are patru litere
 SELECT FirstName, LastName FROM Clients WHERE LastName LIKE '____';
 
--- Clients with a Gmail address
+-- Clienții cu o adresă Gmail
 SELECT FirstName, LastName, Email FROM Clients WHERE Email LIKE '%@gmail.com';
 ```
 
 ### IS NULL / IS NOT NULL
 
 ```sql
--- Orders with no shipping address recorded
+-- Comenzile fără adresă de livrare înregistrată
 SELECT OrderID, OrderDate FROM Orders WHERE ShippingAddress IS NULL;
 
--- Products that have a description
+-- Produsele care au o descriere
 SELECT ProductName, Description FROM Products WHERE Description IS NOT NULL;
 ```
 
 ---
 
-## 6. Combining Conditions: AND, OR, NOT
+## 6. Combinarea condițiilor: AND, OR, NOT
 
 ```sql
--- Electronics products priced under €100
+-- Produsele Electronics cu prețul sub 100 €
 SELECT ProductName, Price
 FROM   Products
 WHERE  CategoryID = 1
 AND    Price < 100.00;
 
--- Orders that are Pending OR Processing
+-- Comenzile care sunt Pending SAU Processing
 SELECT OrderID, Status FROM Orders
 WHERE  Status = 'Pending' OR Status = 'Processing';
 
--- Clients NOT from Spain or Italy
+-- Clienții care NU sunt din Spain sau Italy
 SELECT FirstName, LastName, Country
 FROM   Clients
 WHERE  Country NOT IN ('Spain', 'Italy');
 
--- Use parentheses to control precedence
--- Orders: (Delivered AND > €100) OR (Shipped AND > €200)
+-- Folosim paranteze pentru a controla precedența
+-- Comenzi: (Delivered ȘI > 100 €) SAU (Shipped ȘI > 200 €)
 SELECT OrderID, Status, TotalAmount
 FROM   Orders
 WHERE  (Status = 'Delivered' AND TotalAmount > 100)
@@ -228,45 +228,45 @@ OR     (Status = 'Shipped'   AND TotalAmount > 200);
 
 ---
 
-## 7. Sorting with ORDER BY
+## 7. Sortarea cu ORDER BY
 
 ```sql
--- Products sorted cheapest first
+-- Produsele sortate de la cel mai ieftin
 SELECT ProductName, Price FROM Products ORDER BY Price ASC;
 
--- Products sorted most expensive first
+-- Produsele sortate de la cel mai scump
 SELECT ProductName, Price FROM Products ORDER BY Price DESC;
 
--- Clients sorted by country, then by last name within each country
+-- Clienții sortați după țară, apoi după numele de familie în cadrul fiecărei țări
 SELECT FirstName, LastName, Country, City
 FROM   Clients
 ORDER BY Country ASC, LastName ASC;
 
--- Orders sorted by most recent first
+-- Comenzile sortate de la cea mai recentă
 SELECT OrderID, OrderDate, Status FROM Orders ORDER BY OrderDate DESC;
 
--- Sort by a computed/aliased column using its position
+-- Sortăm după o coloană calculată/cu alias folosind poziția ei
 SELECT ProductName, Price, Stock, Price * Stock AS StockValue
 FROM   Products
-ORDER BY 4 DESC;     -- column 4 in the SELECT list = StockValue
+ORDER BY 4 DESC;     -- coloana 4 din lista SELECT = StockValue
 ```
 
 ---
 
-## 8. Limiting Results with TOP
+## 8. Limitarea rezultatelor cu TOP
 
 ```sql
--- The 3 most expensive products
+-- Cele mai scumpe 3 produse
 SELECT TOP 3 ProductName, Price
 FROM   Products
 ORDER BY Price DESC;
 
--- Top 20% of products by price
+-- Primele 20% dintre produse după preț
 SELECT TOP 20 PERCENT ProductName, Price
 FROM   Products
 ORDER BY Price DESC;
 
--- Top 2 most recent orders — including ties on OrderDate
+-- Cele mai recente 2 comenzi — inclusiv egalitățile pe OrderDate
 SELECT TOP 2 WITH TIES OrderID, OrderDate
 FROM   Orders
 ORDER BY OrderDate DESC;
@@ -276,25 +276,25 @@ ORDER BY OrderDate DESC;
 
 ## 9. DISTINCT
 
-Remove duplicate values from the result set.
+Elimină valorile duplicate din setul de rezultate.
 
 ```sql
--- Which countries do our clients come from?
+-- Din ce țări provin clienții noștri?
 SELECT DISTINCT Country FROM Clients ORDER BY Country;
 
--- Which categories have products in them?
+-- Ce categorii conțin produse?
 SELECT DISTINCT CategoryID FROM Products;
 
--- How many distinct cities are our clients in?
+-- În câte orașe distincte se află clienții noștri?
 SELECT COUNT(DISTINCT City) AS UniqueCities FROM Clients;
 ```
 
 ---
 
-## 10. Useful Built-in Functions
+## 10. Funcții predefinite utile
 
 ```sql
--- String functions
+-- Funcții pentru șiruri de caractere
 SELECT
     UPPER(FirstName)                     AS UpperName,
     LOWER(LastName)                      AS LowerName,
@@ -302,7 +302,7 @@ SELECT
     SUBSTRING(Email, 1, CHARINDEX('@', Email) - 1) AS Username
 FROM Clients;
 
--- Date functions
+-- Funcții pentru date calendaristice
 SELECT
     OrderID,
     OrderDate,
@@ -313,7 +313,7 @@ SELECT
     DATEDIFF(DAY, OrderDate, GETDATE())  AS DaysSinceOrder
 FROM Orders;
 
--- Type conversion
+-- Conversie de tip
 SELECT
     OrderID,
     CAST(TotalAmount AS NVARCHAR(50)) AS TotalText,
@@ -323,41 +323,41 @@ FROM Orders;
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-Retrieve the `ProductName` and `Price` of all products in the Books category (CategoryID = 2).
+**Exercițiul 1 (Ușor)**
+Extrage `ProductName` și `Price` pentru toate produsele din categoria Books (CategoryID = 2).
 
-**Exercise 2 (Easy)**
-List all clients who live in either `'London'` or `'Paris'`, showing their full name and city.
+**Exercițiul 2 (Ușor)**
+Listează toți clienții care locuiesc fie în `'London'`, fie în `'Paris'`, afișând numele complet și orașul.
 
-**Exercise 3 (Easy)**
-Show the `OrderID`, `OrderDate`, and `TotalAmount` of all orders with a `TotalAmount` between 50 and 200, sorted by amount descending.
+**Exercițiul 3 (Ușor)**
+Afișează `OrderID`, `OrderDate` și `TotalAmount` pentru toate comenzile cu `TotalAmount` între 50 și 200, sortate descrescător după sumă.
 
-**Exercise 4 (Medium)**
-Find all products whose name contains the word `'Key'` (case-insensitive). Show the name, price, and stock.
+**Exercițiul 4 (Mediu)**
+Găsește toate produsele al căror nume conține cuvântul `'Key'` (fără a ține cont de majuscule). Afișează numele, prețul și stocul.
 
-**Exercise 5 (Medium)**
-List all orders that are either `'Pending'` or `'Processing'` placed after `2024-01-12`. Show `OrderID`, `Status`, and `OrderDate`.
+**Exercițiul 5 (Mediu)**
+Listează toate comenzile cu statusul `'Pending'` sau `'Processing'` plasate după `2024-01-12`. Afișează `OrderID`, `Status` și `OrderDate`.
 
-**Exercise 6 (Medium)**
-Retrieve the top 3 products with the highest stock value (Stock × Price). Show `ProductName`, `Stock`, `Price`, and the computed `StockValue`, sorted descending.
+**Exercițiul 6 (Mediu)**
+Extrage primele 3 produse cu cea mai mare valoare a stocului (Stock × Price). Afișează `ProductName`, `Stock`, `Price` și valoarea calculată `StockValue`, sortate descrescător.
 
-**Exercise 7 (Medium)**
-Show the distinct list of order statuses that currently exist in the `Orders` table.
+**Exercițiul 7 (Mediu)**
+Afișează lista distinctă a statusurilor de comandă care există în prezent în tabelul `Orders`.
 
-**Exercise 8 (Medium)**
-List all clients whose email does NOT end in `@mail.com`. Show full name and email.
+**Exercițiul 8 (Mediu)**
+Listează toți clienții al căror email NU se termină cu `@mail.com`. Afișează numele complet și emailul.
 
-**Exercise 9 (Hard)**
-Show `OrderDetailID`, `Quantity`, `UnitPrice`, the computed line total, and a column called `PriceCategory` that uses a `CASE` expression to label lines: `'Low'` if UnitPrice < 30, `'Medium'` if 30–100, `'High'` if > 100.
+**Exercițiul 9 (Dificil)**
+Afișează `OrderDetailID`, `Quantity`, `UnitPrice`, totalul calculat al liniei și o coloană numită `PriceCategory` care folosește o expresie `CASE` pentru a eticheta liniile: `'Low'` dacă UnitPrice < 30, `'Medium'` dacă este între 30 și 100, `'High'` dacă este > 100.
 
-**Exercise 10 (Hard)**
-Find all orders where `TotalAmount` is `NULL`. For each, calculate the expected total by summing `Quantity * UnitPrice` from `OrderDetails` — show `OrderID`, `OrderDate`, and the calculated total. (Hint: use a subquery in the SELECT list or a WHERE clause.)
+**Exercițiul 10 (Dificil)**
+Găsește toate comenzile la care `TotalAmount` este `NULL`. Pentru fiecare, calculează totalul așteptat însumând `Quantity * UnitPrice` din `OrderDetails` — afișează `OrderID`, `OrderDate` și totalul calculat. (Indiciu: folosește o subinterogare în lista SELECT sau în clauza WHERE.)
 
 ---
 
-## Answers
+## Răspunsuri
 
 1. `SELECT ProductName, Price FROM Products WHERE CategoryID = 2;`
 2. `SELECT FirstName + ' ' + LastName AS FullName, City FROM Clients WHERE City IN ('London', 'Paris');`

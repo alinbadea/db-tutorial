@@ -1,14 +1,14 @@
-# Library Database — Worksheet 7: UPDATE Statements
+# Baza de date Library — Fișa de lucru 7: Instrucțiuni UPDATE
 
-## Learning Objectives
-- Write UPDATE statements to modify library data safely
-- Use subqueries and JOINs in UPDATE to change rows based on related table data
-- Capture audit trails with the OUTPUT clause
-- Apply transactions for safe batch updates
+## Obiective de învățare
+- Scrierea instrucțiunilor UPDATE pentru a modifica în siguranță datele bibliotecii
+- Folosirea subinterogărilor și a JOIN-urilor în UPDATE pentru a modifica rânduri pe baza datelor din tabele asociate
+- Capturarea istoricului modificărilor (audit) cu clauza OUTPUT
+- Aplicarea tranzacțiilor pentru actualizări în lot sigure
 
 ---
 
-## UPDATE Syntax
+## Sintaxa UPDATE
 
 ```sql
 UPDATE table_name
@@ -17,36 +17,36 @@ SET    column1 = value1,
 WHERE  condition;
 ```
 
-> **WARNING:** Without a WHERE clause, every row in the table is updated. Always preview with a SELECT first.
+> **ATENȚIE:** Fără clauza WHERE, fiecare rând din tabel este actualizat. Previzualizează întotdeauna mai întâi cu un SELECT.
 
 ---
 
-## Best Practice: Preview Before Updating
+## Bună practică: previzualizează înainte de actualizare
 
 ```sql
--- Preview which books will be marked as unavailable
+-- Previzualizăm ce cărți vor fi marcate ca indisponibile
 SELECT BookID, IsAvailable FROM Books WHERE TitleID = 1;
 
--- Then update
+-- Apoi actualizăm
 UPDATE Books SET IsAvailable = 0 WHERE TitleID = 1;
 ```
 
 ---
 
-## Basic UPDATE — Single Column
+## UPDATE de bază — o singură coloană
 
 ```sql
--- Correct a client's phone number
+-- Corectăm numărul de telefon al unui client
 UPDATE Clients
 SET    Phone = '555-9999'
 WHERE  ClientID = 3;
 
--- Update a book's condition after inspection
+-- Actualizăm starea unei cărți după verificare
 UPDATE Books
 SET    Condition = 'Fair'
 WHERE  BookID = 4;
 
--- Mark a rental as returned
+-- Marcăm un împrumut ca returnat
 UPDATE Rentals
 SET    ReturnDate = GETDATE()
 WHERE  RentalID = 2;
@@ -54,17 +54,17 @@ WHERE  RentalID = 2;
 
 ---
 
-## UPDATE Multiple Columns
+## UPDATE pe mai multe coloane
 
 ```sql
--- Update a publisher's contact details
+-- Actualizăm datele de contact ale unei edituri
 UPDATE Publishers
 SET    Phone   = '020-1234-5678',
        Email   = 'contact@penguin.co.uk',
        Address = '80 Strand, London, WC2R 0RL'
 WHERE  PublisherName = 'Penguin Books';
 
--- Update a client's address and phone
+-- Actualizăm adresa și telefonul unui client
 UPDATE Clients
 SET    Address = 'Calea Florilor 10, Bucharest',
        Phone   = '555-1234'
@@ -73,12 +73,12 @@ WHERE  ClientID = 1;
 
 ---
 
-## UPDATE with Complex WHERE
+## UPDATE cu WHERE complex
 
-### IN clause
+### Clauza IN
 
 ```sql
--- Mark all Technology books as priority items (add condition check)
+-- Marcăm cărțile Technology în stare Fair ca fiind în stare Good (cu verificarea stării)
 UPDATE Books
 SET    Condition = 'Good'
 WHERE  TitleID IN (
@@ -90,7 +90,7 @@ AND    Condition = 'Fair';
 ### BETWEEN
 
 ```sql
--- Extend due date for all rentals made in a specific period
+-- Prelungim termenul pentru toate împrumuturile făcute într-o anumită perioadă
 UPDATE Rentals
 SET    DueDate = DATEADD(DAY, 7, DueDate)
 WHERE  RentalDate BETWEEN '2024-01-10' AND '2024-01-15'
@@ -100,7 +100,7 @@ AND    ReturnDate IS NULL;
 ### LIKE
 
 ```sql
--- Update email domain for a client migration
+-- Actualizăm domeniul de email în cadrul unei migrări a clienților
 UPDATE Clients
 SET    Email = REPLACE(Email, '@mail.com', '@library.org')
 WHERE  Email LIKE '%@mail.com';
@@ -108,10 +108,10 @@ WHERE  Email LIKE '%@mail.com';
 
 ---
 
-## UPDATE with Subquery in WHERE
+## UPDATE cu subinterogare în WHERE
 
 ```sql
--- Mark as returned all rentals for books that have been lost (condition = 'Poor')
+-- Marcăm ca returnate toate împrumuturile cărților pierdute (condition = 'Poor')
 UPDATE Rentals
 SET    ReturnDate = GETDATE()
 WHERE  ReturnDate IS NULL
@@ -119,7 +119,7 @@ AND    BookID IN (
     SELECT BookID FROM Books WHERE Condition = 'Poor'
 );
 
--- Reset availability for all books that have no active rentals
+-- Resetăm disponibilitatea pentru toate cărțile care nu au împrumuturi active
 UPDATE Books
 SET    IsAvailable = 1
 WHERE  BookID NOT IN (
@@ -129,10 +129,10 @@ WHERE  BookID NOT IN (
 
 ---
 
-## UPDATE with Subquery in SET
+## UPDATE cu subinterogare în SET
 
 ```sql
--- Derive the DueDate from RentalDate + RentalDays for rows where DueDate was not set
+-- Calculăm DueDate din RentalDate + RentalDays pentru rândurile la care DueDate nu a fost setat
 UPDATE Rentals
 SET    DueDate = DATEADD(DAY, RentalDays, RentalDate)
 WHERE  DueDate IS NULL;
@@ -140,21 +140,21 @@ WHERE  DueDate IS NULL;
 
 ---
 
-## UPDATE with JOIN (T-SQL FROM Clause)
+## UPDATE cu JOIN (clauza FROM din T-SQL)
 
-### Example 1 — Mark a book as unavailable when it is rented out
+### Exemplul 1 — Marcarea unei cărți ca indisponibilă atunci când este împrumutată
 
-When a rental is created, the corresponding book should be marked unavailable. This JOIN syncs the two tables.
+Când se creează un împrumut, cartea corespunzătoare ar trebui marcată ca indisponibilă. Acest JOIN sincronizează cele două tabele.
 
 ```sql
--- Preview
+-- Previzualizare
 SELECT b.BookID, b.IsAvailable, r.RentalID
 FROM   Books AS b
 INNER JOIN Rentals AS r ON b.BookID = r.BookID
 WHERE  r.ReturnDate IS NULL
 AND    b.IsAvailable = 1;
 
--- Update
+-- Actualizare
 UPDATE b
 SET    b.IsAvailable = 0
 FROM   Books   AS b
@@ -162,14 +162,14 @@ INNER JOIN Rentals AS r ON b.BookID = r.BookID
 WHERE  r.ReturnDate IS NULL;
 ```
 
-### Example 2 — Mark books as available when their rental is returned
+### Exemplul 2 — Marcarea cărților ca disponibile atunci când sunt returnate
 
 ```sql
--- Update availability based on whether any active (unreturned) rental still exists
+-- Actualizăm disponibilitatea în funcție de existența unui împrumut activ (nereturnat)
 UPDATE b
 SET    b.IsAvailable = CASE
-    WHEN active.BookID IS NULL THEN 1   -- no active rental → available
-    ELSE 0                               -- still rented → unavailable
+    WHEN active.BookID IS NULL THEN 1   -- niciun împrumut activ → disponibilă
+    ELSE 0                               -- încă împrumutată → indisponibilă
 END
 FROM   Books AS b
 LEFT JOIN (
@@ -179,11 +179,11 @@ LEFT JOIN (
 ) AS active ON b.BookID = active.BookID;
 ```
 
-### Example 3 — Extend due dates for clients with a premium membership
+### Exemplul 3 — Prelungirea termenelor pentru clienții cu abonament premium
 
 ```sql
--- Suppose a PremiumClients table or a flag column identifies VIPs
--- Here we extend due dates for clients who joined before 2023
+-- Să presupunem că un tabel PremiumClients sau o coloană indicator identifică clienții VIP
+-- Aici prelungim termenele pentru clienții înscriși înainte de 2023
 UPDATE r
 SET    r.DueDate = DATEADD(DAY, 7, r.DueDate)
 FROM   Rentals  AS r
@@ -192,16 +192,16 @@ WHERE  cl.MembershipDate < '2023-01-01'
 AND    r.ReturnDate IS NULL;
 ```
 
-### Example 4 — Update book condition based on number of times rented
+### Exemplul 4 — Actualizarea stării cărții în funcție de numărul de împrumuturi
 
 ```sql
--- Books rented more than 3 times → downgrade condition one level
+-- Cărțile împrumutate de mai mult de 3 ori → starea coboară cu un nivel
 UPDATE b
 SET    b.Condition = CASE b.Condition
     WHEN 'New'  THEN 'Good'
     WHEN 'Good' THEN 'Fair'
     WHEN 'Fair' THEN 'Poor'
-    ELSE b.Condition   -- 'Poor' stays 'Poor'
+    ELSE b.Condition   -- 'Poor' rămâne 'Poor'
 END
 FROM   Books AS b
 INNER JOIN (
@@ -214,10 +214,10 @@ INNER JOIN (
 
 ---
 
-## UPDATE with OUTPUT Clause
+## UPDATE cu clauza OUTPUT
 
 ```sql
--- Return a book: update and capture the event
+-- Returnarea unei cărți: actualizăm și capturăm evenimentul
 DECLARE @ReturnLog TABLE (
     RentalID   INT,
     BookID     INT,
@@ -238,49 +238,49 @@ SELECT * FROM @ReturnLog;
 
 ---
 
-## Transactions for Safety
+## Tranzacții pentru siguranță
 
 ```sql
 BEGIN TRANSACTION;
 
--- Extend all active rentals by 3 days due to library closure
+-- Prelungim cu 3 zile toate împrumuturile active, din cauza închiderii bibliotecii
 UPDATE Rentals
 SET    DueDate = DATEADD(DAY, 3, DueDate)
 WHERE  ReturnDate IS NULL;
 
--- Review results
+-- Verificăm rezultatele
 SELECT RentalID, DueDate FROM Rentals WHERE ReturnDate IS NULL;
 
--- If correct:
+-- Dacă este corect:
 COMMIT TRANSACTION;
--- If wrong:
+-- Dacă este greșit:
 -- ROLLBACK TRANSACTION;
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Update the `Condition` of book with `BookID = 5` to `'Poor'`.
+**Exercițiul 1**
+Actualizează `Condition` pentru cartea cu `BookID = 5` la `'Poor'`.
 
-**Exercise 2**
-Update the `MembershipDate` of all clients whose email ends in `'@mail.com'` to `'2024-01-01'`.
+**Exercițiul 2**
+Actualizează `MembershipDate` la `'2024-01-01'` pentru toți clienții al căror email se termină cu `'@mail.com'`.
 
-**Exercise 3**
-Using a subquery in WHERE, mark as returned (`ReturnDate = GETDATE()`) all rentals for books whose condition is `'Poor'` and that are still unreturned.
+**Exercițiul 3**
+Folosind o subinterogare în WHERE, marchează ca returnate (`ReturnDate = GETDATE()`) toate împrumuturile cărților a căror stare este `'Poor'` și care sunt încă nereturnate.
 
-**Exercise 4**
-Using `UPDATE ... FROM ... JOIN`, set `IsAvailable = 1` for all books that have no unreturned rental currently open. Join `Books` to `Rentals` using a LEFT JOIN anti-join pattern.
+**Exercițiul 4**
+Folosind `UPDATE ... FROM ... JOIN`, setează `IsAvailable = 1` pentru toate cărțile care nu au în prezent niciun împrumut nereturnat. Unește `Books` cu `Rentals` folosind modelul anti-join cu LEFT JOIN.
 
-**Exercise 5**
-Using `UPDATE ... FROM ... JOIN`, update the `DueDate` in `Rentals` to `RentalDate + 21` days for all rentals of `'Fiction'` genre books. Join through `Rentals → Books → Titles`.
+**Exercițiul 5**
+Folosind `UPDATE ... FROM ... JOIN`, actualizează `DueDate` din `Rentals` la `RentalDate + 21` de zile pentru toate împrumuturile cărților din genul `'Fiction'`. Unește tabelele pe traseul `Rentals → Books → Titles`.
 
-**Exercise 6**
-Using `UPDATE` with `OUTPUT`, record all rentals that are past their due date — change their `RentalDays` to the actual days they were held (using `DATEDIFF(DAY, RentalDate, GETDATE())`), and capture the old and new `RentalDays` in a table variable.
+**Exercițiul 6**
+Folosind `UPDATE` cu `OUTPUT`, înregistrează toate împrumuturile cu termenul depășit — schimbă-le `RentalDays` la numărul real de zile în care cartea a fost ținută (folosind `DATEDIFF(DAY, RentalDate, GETDATE())`) și capturează valorile vechi și noi ale `RentalDays` într-o variabilă de tip tabel.
 
-**Exercise 7**
-Write a transaction that marks all unreturned rentals as returned (`ReturnDate = GETDATE()`) and simultaneously marks all affected books as available (`IsAvailable = 1`). Use two UPDATE statements inside a single transaction.
+**Exercițiul 7**
+Scrie o tranzacție care marchează toate împrumuturile nereturnate ca returnate (`ReturnDate = GETDATE()`) și, în același timp, marchează toate cărțile afectate ca disponibile (`IsAvailable = 1`). Folosește două instrucțiuni UPDATE în cadrul aceleiași tranzacții.
 
-**Exercise 8**
-Using a JOIN update, copy the publisher's email into a `ContactEmail` column in `Books` (assume you add this column first). Join `Books` to `Publishers` and set `Books.ContactEmail = Publishers.Email`.
+**Exercițiul 8**
+Folosind un UPDATE cu JOIN, copiază emailul editurii într-o coloană `ContactEmail` din `Books` (presupune că ai adăugat mai întâi această coloană). Unește `Books` cu `Publishers` și setează `Books.ContactEmail = Publishers.Email`.

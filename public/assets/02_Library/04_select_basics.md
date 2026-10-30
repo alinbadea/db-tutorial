@@ -1,14 +1,14 @@
-# Library Database — Worksheet 4: SELECT — Basic Queries
+# Baza de date Library — Fișa de lucru 4: SELECT — Interogări de bază
 
-## Learning Objectives
-- Retrieve data from individual library tables using SELECT
-- Filter records using WHERE with various operators
-- Sort and limit results
-- Use built-in string and date functions relevant to a library context
+## Obiective de învățare
+- Extragerea datelor din tabelele individuale ale bibliotecii folosind SELECT
+- Filtrarea înregistrărilor folosind WHERE cu diverși operatori
+- Sortarea și limitarea rezultatelor
+- Folosirea funcțiilor predefinite pentru șiruri de caractere și date calendaristice, relevante într-o bibliotecă
 
 ---
 
-## SELECT Syntax
+## Sintaxa SELECT
 
 ```sql
 SELECT [TOP n] [DISTINCT] column_list
@@ -19,7 +19,7 @@ ORDER BY column [ASC | DESC];
 
 ---
 
-## 1. Selecting All Columns
+## 1. Selectarea tuturor coloanelor
 
 ```sql
 SELECT * FROM Authors;
@@ -29,25 +29,25 @@ SELECT * FROM Rentals;
 
 ---
 
-## 2. Selecting Specific Columns
+## 2. Selectarea anumitor coloane
 
 ```sql
--- Book catalogue summary
+-- Rezumatul catalogului de cărți
 SELECT TitleID, Title, Genre, PublishedYear, ISBN
 FROM   Titles;
 
--- Rental activity
+-- Activitatea de împrumut
 SELECT RentalID, ClientID, BookID, RentalDate, DueDate, ReturnDate
 FROM   Rentals;
 
--- Client directory
+-- Lista clienților
 SELECT FirstName, LastName, Email, MembershipDate
 FROM   Clients;
 ```
 
 ---
 
-## 3. Column Aliases
+## 3. Aliasuri de coloane
 
 ```sql
 SELECT
@@ -66,10 +66,10 @@ FROM Titles;
 
 ---
 
-## 4. Computed Columns
+## 4. Coloane calculate
 
 ```sql
--- How many days is each rental?
+-- Câte zile durează fiecare împrumut?
 SELECT
     RentalID,
     RentalDate,
@@ -78,7 +78,7 @@ SELECT
     DATEDIFF(DAY, RentalDate, DueDate) AS ActualPeriod
 FROM Rentals;
 
--- Is the book overdue? (for unreturned rentals)
+-- Este cartea întârziată? (pentru împrumuturile nereturnate)
 SELECT
     RentalID,
     DueDate,
@@ -90,37 +90,37 @@ AND   DueDate < GETDATE();
 
 ---
 
-## 5. Filtering with WHERE
+## 5. Filtrarea cu WHERE
 
-### Equality and Inequality
+### Egalitate și inegalitate
 
 ```sql
--- Books currently available
+-- Cărțile disponibile în prezent
 SELECT BookID, TitleID, Condition FROM Books WHERE IsAvailable = 1;
 
--- Books not available (currently rented out)
+-- Cărțile indisponibile (împrumutate în prezent)
 SELECT BookID, TitleID FROM Books WHERE IsAvailable = 0;
 
--- Titles published after the year 2000
+-- Titlurile publicate după anul 2000
 SELECT Title, PublishedYear FROM Titles WHERE PublishedYear > 2000;
 
--- Authors who are NOT British
+-- Autorii care NU sunt britanici
 SELECT FirstName, LastName, Nationality FROM Authors WHERE Nationality <> 'British';
 ```
 
-### Comparison Operators
+### Operatori de comparație
 
 ```sql
--- Titles published before 1960
+-- Titlurile publicate înainte de 1960
 SELECT Title, PublishedYear FROM Titles WHERE PublishedYear < 1960;
 
--- Rentals due within the next 7 days (not yet returned)
+-- Împrumuturile cu termenul în următoarele 7 zile (încă nereturnate)
 SELECT RentalID, BookID, DueDate
 FROM   Rentals
 WHERE  ReturnDate IS NULL
 AND    DueDate <= DATEADD(DAY, 7, GETDATE());
 
--- Clients who joined on or after 2023-06-01
+-- Clienții înscriși pe 2023-06-01 sau după
 SELECT FirstName, LastName, MembershipDate
 FROM   Clients
 WHERE  MembershipDate >= '2023-06-01';
@@ -129,12 +129,12 @@ WHERE  MembershipDate >= '2023-06-01';
 ### BETWEEN … AND
 
 ```sql
--- Titles published between 1990 and 2010
+-- Titlurile publicate între 1990 și 2010
 SELECT Title, PublishedYear
 FROM   Titles
 WHERE  PublishedYear BETWEEN 1990 AND 2010;
 
--- Rentals made in January 2024
+-- Împrumuturile făcute în ianuarie 2024
 SELECT RentalID, ClientID, BookID, RentalDate
 FROM   Rentals
 WHERE  RentalDate BETWEEN '2024-01-01' AND '2024-01-31';
@@ -143,78 +143,78 @@ WHERE  RentalDate BETWEEN '2024-01-01' AND '2024-01-31';
 ### IN
 
 ```sql
--- Authors from specific nationalities
+-- Autorii de anumite naționalități
 SELECT FirstName, LastName, Nationality
 FROM   Authors
 WHERE  Nationality IN ('British', 'American', 'Swiss');
 
--- Books in a specific condition
+-- Cărțile aflate într-o anumită stare
 SELECT BookID, TitleID, Condition
 FROM   Books
 WHERE  Condition IN ('New', 'Good');
 
--- Titles in Fiction or Mystery genre
+-- Titlurile din genul Fiction sau Mystery
 SELECT Title, Genre FROM Titles WHERE Genre IN ('Fiction', 'Mystery');
 ```
 
 ### LIKE
 
 ```sql
--- Titles that start with 'The'
+-- Titlurile care încep cu 'The'
 SELECT Title, Genre FROM Titles WHERE Title LIKE 'The %';
 
--- Authors whose last name starts with 'M'
+-- Autorii al căror nume de familie începe cu 'M'
 SELECT FirstName, LastName FROM Authors WHERE LastName LIKE 'M%';
 
--- Clients with a Gmail address
+-- Clienții cu o adresă Gmail
 SELECT FirstName, LastName, Email FROM Clients WHERE Email LIKE '%@gmail.com';
 
--- ISBN numbers starting with '978-01'
+-- Codurile ISBN care încep cu '978-01'
 SELECT Title, ISBN FROM Titles WHERE ISBN LIKE '978-01%';
 
--- Authors with exactly 6 characters in their last name
+-- Autorii al căror nume de familie are exact 6 caractere
 SELECT FirstName, LastName FROM Authors WHERE LastName LIKE '______';
 ```
 
 ### IS NULL / IS NOT NULL
 
 ```sql
--- Rentals that have not been returned yet
+-- Împrumuturile care nu au fost încă returnate
 SELECT RentalID, ClientID, BookID, DueDate
 FROM   Rentals
 WHERE  ReturnDate IS NULL;
 
--- Authors with a known birth date
+-- Autorii cu data nașterii cunoscută
 SELECT FirstName, LastName, BirthDate
 FROM   Authors
 WHERE  BirthDate IS NOT NULL;
 
--- Titles without an ISBN recorded
+-- Titlurile fără ISBN înregistrat
 SELECT Title, Genre FROM Titles WHERE ISBN IS NULL;
 ```
 
 ---
 
-## 6. Combining Conditions
+## 6. Combinarea condițiilor
 
 ```sql
--- Technology books published after 2000
+-- Cărțile Technology publicate după 2000
 SELECT Title, Genre, PublishedYear
 FROM   Titles
 WHERE  Genre = 'Technology'
 AND    PublishedYear > 2000;
 
--- Fiction OR Mystery titles
+-- Titlurile Fiction SAU Mystery
 SELECT Title, Genre FROM Titles
 WHERE  Genre = 'Fiction' OR Genre = 'Mystery';
 
--- Available books in Good or New condition
+-- Cărțile disponibile, în stare Good sau New
 SELECT BookID, TitleID, Condition
 FROM   Books
 WHERE  IsAvailable = 1
 AND    Condition IN ('New', 'Good');
 
--- Rentals that are overdue (not returned and past due date)
+-- Împrumuturile întârziate (nereturnate și cu termenul depășit)
 SELECT RentalID, ClientID, DueDate,
        DATEDIFF(DAY, DueDate, GETDATE()) AS DaysLate
 FROM   Rentals
@@ -224,19 +224,19 @@ AND    DueDate < GETDATE();
 
 ---
 
-## 7. Sorting with ORDER BY
+## 7. Sortarea cu ORDER BY
 
 ```sql
--- Titles sorted by publication year (oldest first)
+-- Titlurile sortate după anul publicării (cele mai vechi primele)
 SELECT Title, PublishedYear FROM Titles ORDER BY PublishedYear ASC;
 
--- Clients sorted by last name alphabetically
+-- Clienții sortați alfabetic după numele de familie
 SELECT FirstName, LastName, Email FROM Clients ORDER BY LastName ASC;
 
--- Most recent rentals first
+-- Cele mai recente împrumuturi primele
 SELECT RentalID, RentalDate, DueDate FROM Rentals ORDER BY RentalDate DESC;
 
--- Books sorted by condition severity (custom order using CASE)
+-- Cărțile sortate după gradul de uzură (ordine personalizată folosind CASE)
 SELECT BookID, TitleID, Condition
 FROM   Books
 ORDER BY
@@ -250,20 +250,20 @@ ORDER BY
 
 ---
 
-## 8. Limiting Results with TOP
+## 8. Limitarea rezultatelor cu TOP
 
 ```sql
--- The 3 most recently acquired books
+-- Cele mai recent achiziționate 3 cărți
 SELECT TOP 3 BookID, TitleID, AcquisitionDate
 FROM   Books
 ORDER BY AcquisitionDate DESC;
 
--- The oldest 2 titles in the library
+-- Cele mai vechi 2 titluri din bibliotecă
 SELECT TOP 2 Title, PublishedYear
 FROM   Titles
 ORDER BY PublishedYear ASC;
 
--- Top 25% of clients by membership seniority
+-- Primii 25% dintre clienți după vechimea ca membru
 SELECT TOP 25 PERCENT FirstName, LastName, MembershipDate
 FROM   Clients
 ORDER BY MembershipDate ASC;
@@ -274,22 +274,22 @@ ORDER BY MembershipDate ASC;
 ## 9. DISTINCT
 
 ```sql
--- What genres are in the catalogue?
+-- Ce genuri există în catalog?
 SELECT DISTINCT Genre FROM Titles ORDER BY Genre;
 
--- Which nationalities are represented among authors?
+-- Ce naționalități sunt reprezentate printre autori?
 SELECT DISTINCT Nationality FROM Authors WHERE Nationality IS NOT NULL ORDER BY Nationality;
 
--- How many distinct clients have made rentals?
+-- Câți clienți distincți au făcut împrumuturi?
 SELECT COUNT(DISTINCT ClientID) AS ActiveBorrowers FROM Rentals;
 ```
 
 ---
 
-## 10. Useful Built-in Functions
+## 10. Funcții predefinite utile
 
 ```sql
--- String functions
+-- Funcții pentru șiruri de caractere
 SELECT
     UPPER(LastName)              AS UpperLastName,
     LOWER(FirstName)             AS LowerFirstName,
@@ -297,7 +297,7 @@ SELECT
     LEFT(Title, 20)              AS ShortTitle
 FROM Titles;
 
--- Date functions on rentals
+-- Funcții pentru date calendaristice aplicate împrumuturilor
 SELECT
     RentalID,
     RentalDate,
@@ -307,7 +307,7 @@ SELECT
     DATENAME(MONTH, RentalDate)           AS RentalMonth
 FROM Rentals;
 
--- Handling NULLs
+-- Tratarea valorilor NULL
 SELECT
     RentalID,
     ISNULL(CAST(ReturnDate AS NVARCHAR(20)), 'Not returned') AS ReturnStatus
@@ -316,41 +316,41 @@ FROM Rentals;
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-List all titles in the `'Fiction'` genre, sorted alphabetically by title.
+**Exercițiul 1 (Ușor)**
+Listează toate titlurile din genul `'Fiction'`, sortate alfabetic după titlu.
 
-**Exercise 2 (Easy)**
-Show all rentals that have not been returned yet (`ReturnDate IS NULL`). Display `RentalID`, `ClientID`, `BookID`, and `DueDate`.
+**Exercițiul 2 (Ușor)**
+Afișează toate împrumuturile care nu au fost încă returnate (`ReturnDate IS NULL`). Afișează `RentalID`, `ClientID`, `BookID` și `DueDate`.
 
-**Exercise 3 (Easy)**
-Find all authors who are `'British'`. Show their full name and birth date.
+**Exercițiul 3 (Ușor)**
+Găsește toți autorii care sunt `'British'`. Afișează numele complet și data nașterii.
 
-**Exercise 4 (Medium)**
-List all books where the condition is either `'Fair'` or `'Poor'` and the book is still available (`IsAvailable = 1`).
+**Exercițiul 4 (Mediu)**
+Listează toate cărțile a căror stare este `'Fair'` sau `'Poor'` și care sunt încă disponibile (`IsAvailable = 1`).
 
-**Exercise 5 (Medium)**
-Show all titles published between 1940 and 1999. Sort by `PublishedYear` descending.
+**Exercițiul 5 (Mediu)**
+Afișează toate titlurile publicate între 1940 și 1999. Sortează descrescător după `PublishedYear`.
 
-**Exercise 6 (Medium)**
-Find all rentals where the rental period was exactly 14 days. Show `RentalID`, `RentalDate`, `DueDate`, and `RentalDays`.
+**Exercițiul 6 (Mediu)**
+Găsește toate împrumuturile cu o perioadă de exact 14 zile. Afișează `RentalID`, `RentalDate`, `DueDate` și `RentalDays`.
 
-**Exercise 7 (Medium)**
-List all clients whose email does not end in `'@mail.com'`. Show full name and email.
+**Exercițiul 7 (Mediu)**
+Listează toți clienții al căror email nu se termină cu `'@mail.com'`. Afișează numele complet și emailul.
 
-**Exercise 8 (Medium)**
-Show the top 3 books most recently acquired by the library. Show `BookID`, `TitleID`, `AcquisitionDate`, and `Condition`.
+**Exercițiul 8 (Mediu)**
+Afișează cele mai recent achiziționate 3 cărți ale bibliotecii. Afișează `BookID`, `TitleID`, `AcquisitionDate` și `Condition`.
 
-**Exercise 9 (Hard)**
-For each rental that has not been returned, calculate and display `RentalID`, `BookID`, `DueDate`, and `DaysOverdue` (use `DATEDIFF`). Only show rentals that are actually overdue (due date is in the past). Sort by `DaysOverdue` descending.
+**Exercițiul 9 (Dificil)**
+Pentru fiecare împrumut nereturnat, calculează și afișează `RentalID`, `BookID`, `DueDate` și `DaysOverdue` (folosește `DATEDIFF`). Afișează doar împrumuturile care sunt efectiv întârziate (termenul este în trecut). Sortează descrescător după `DaysOverdue`.
 
-**Exercise 10 (Hard)**
-Show a list of distinct genres from `Titles` along with the count of titles in each genre. Use `COUNT` and `GROUP BY`. Sort by count descending.
+**Exercițiul 10 (Dificil)**
+Afișează lista genurilor distincte din `Titles`, împreună cu numărul de titluri din fiecare gen. Folosește `COUNT` și `GROUP BY`. Sortează descrescător după număr.
 
 ---
 
-## Answers
+## Răspunsuri
 
 1. `SELECT Title, Genre FROM Titles WHERE Genre = 'Fiction' ORDER BY Title;`
 2. `SELECT RentalID, ClientID, BookID, DueDate FROM Rentals WHERE ReturnDate IS NULL;`

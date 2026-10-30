@@ -1,14 +1,14 @@
-# Attendance Database — Worksheet 3: INSERT Statements
+# Baza de date Attendance — Fișa de lucru 3: Instrucțiuni INSERT
 
-## Learning Objectives
-- Write INSERT statements for all 5 Attendance database tables
-- Populate tables in the correct FK-respecting order
-- Use INSERT...SELECT and OUTPUT for advanced scenarios
-- Work correctly with IDENTITY columns and multi-row inserts
+## Obiective de învățare
+- Scrierea instrucțiunilor INSERT pentru toate cele 5 tabele ale bazei de date Attendance
+- Popularea tabelelor în ordinea corectă, care respectă cheile străine
+- Folosirea INSERT...SELECT și OUTPUT pentru scenarii avansate
+- Lucrul corect cu coloanele IDENTITY și cu inserările pe mai multe rânduri
 
 ---
 
-## INSERT Syntax
+## Sintaxa INSERT
 
 ```sql
 INSERT INTO table_name (column1, column2, ...)
@@ -17,33 +17,33 @@ VALUES (value1, value2, ...);
 
 ---
 
-## Method 1: INSERT Without a Column List
+## Metoda 1: INSERT fără listă de coloane
 
 ```sql
--- Insert a student without specifying columns
--- Values must match the column order, skipping IDENTITY
+-- Inserăm un elev fără a specifica coloanele
+-- Valorile trebuie să respecte ordinea coloanelor, fără coloana IDENTITY
 INSERT INTO Students
 VALUES ('Maria', 'Popescu', 'maria@school.ro', '2023-09-01', '10A');
 ```
 
-> **Warning:** If a column is added or reordered, this will fail or insert wrong data. Always use the column list form in real applications.
+> **Atenție:** Dacă o coloană este adăugată sau reordonată, acest INSERT va eșua sau va insera date greșite. Folosește întotdeauna forma cu listă de coloane în aplicațiile reale.
 
 ---
 
-## Method 2: INSERT With a Column List (Best Practice)
+## Metoda 2: INSERT cu listă de coloane (bună practică)
 
 ```sql
 INSERT INTO Students (FirstName, LastName, Email, EnrollmentDate, Grade)
 VALUES ('Maria', 'Popescu', 'maria@school.ro', '2023-09-01', '10A');
 
--- Omit nullable columns — they receive NULL automatically
+-- Omitem coloanele care acceptă NULL — primesc automat NULL
 INSERT INTO Students (FirstName, LastName, Email)
 VALUES ('Anonymous', 'Student', 'anon@school.ro');
 ```
 
 ---
 
-## Method 3: Inserting Multiple Rows in One Statement
+## Metoda 3: Inserarea mai multor rânduri într-o singură instrucțiune
 
 ```sql
 INSERT INTO Subjects (SubjectName, Description, Credits)
@@ -57,18 +57,18 @@ VALUES
 
 ---
 
-## Method 4: INSERT … SELECT
+## Metoda 4: INSERT … SELECT
 
-Copy data from another source:
+Copiem date dintr-o altă sursă:
 
 ```sql
--- Enroll all grade-10A students in Mathematics (SubjectID = 1) for Fall 2024
+-- Înscriem toți elevii din clasa 10A la Mathematics (SubjectID = 1) pentru Fall 2024
 INSERT INTO Classes (SubjectID, StudentID, AcademicYear, Semester)
 SELECT 1, StudentID, 2024, 'Fall'
 FROM   Students
 WHERE  Grade = '10A';
 
--- Copy attendance from one date to another (rescheduled class)
+-- Copiem prezența de la o dată la alta (oră reprogramată)
 INSERT INTO Attendance (ClassID, TeacherID, AttendanceDate, Status)
 SELECT ClassID, TeacherID, '2024-09-10', 'Present'
 FROM   Attendance
@@ -76,14 +76,14 @@ WHERE  AttendanceDate = '2024-09-03'
 AND    Status = 'Present';
 ```
 
-Using a CTE:
+Folosind un CTE:
 
 ```sql
--- Enroll all students in all subjects for Fall 2024
+-- Înscriem toți elevii la toate materiile pentru Fall 2024
 WITH Enrollments AS (
     SELECT s.StudentID, sub.SubjectID
     FROM   Students AS s
-    CROSS JOIN Subjects AS sub   -- all combinations
+    CROSS JOIN Subjects AS sub   -- toate combinațiile
 )
 INSERT INTO Classes (SubjectID, StudentID, AcademicYear, Semester)
 SELECT SubjectID, StudentID, 2024, 'Fall'
@@ -92,17 +92,17 @@ FROM   Enrollments;
 
 ---
 
-## IDENTITY Columns
+## Coloane IDENTITY
 
 ```sql
--- Correct: StudentID omitted — SQL Server generates it
+-- Corect: StudentID este omis — SQL Server îl generează
 INSERT INTO Students (FirstName, LastName, Email, Grade)
 VALUES ('Andrei', 'Constantin', 'andrei@school.ro', '10B');
 
--- Retrieve the generated ID
+-- Obținem ID-ul generat
 SELECT SCOPE_IDENTITY() AS NewStudentID;
 
--- Or get the current identity value for a specific table
+-- Sau obținem valoarea IDENTITY curentă pentru un anumit tabel
 SELECT IDENT_CURRENT('Students') AS LatestStudentID;
 ```
 
@@ -110,7 +110,7 @@ SELECT IDENT_CURRENT('Students') AS LatestStudentID;
 
 ## SET IDENTITY_INSERT
 
-Used when you need to insert a specific ID (e.g., data migration):
+Se folosește când trebuie să inserezi un anumit ID (de ex., la migrarea datelor):
 
 ```sql
 SET IDENTITY_INSERT Students ON;
@@ -123,10 +123,10 @@ SET IDENTITY_INSERT Students OFF;
 
 ---
 
-## INSERT with OUTPUT Clause
+## INSERT cu clauza OUTPUT
 
 ```sql
--- Insert a new class enrollment and capture the generated ClassID
+-- Inserăm o înscriere nouă și capturăm valoarea ClassID generată
 DECLARE @NewClasses TABLE (ClassID INT, StudentID INT, SubjectID INT);
 
 INSERT INTO Classes (SubjectID, StudentID, AcademicYear, Semester)
@@ -140,16 +140,16 @@ SELECT * FROM @NewClasses;
 
 ---
 
-## Complete Sample Data Script
+## Script complet cu date de exemplu
 
-Insert in FK-safe order: Students → Teachers → Subjects → Classes → Attendance.
+Inserează într-o ordine sigură față de cheile străine: Students → Teachers → Subjects → Classes → Attendance.
 
 ```sql
 USE AttendanceDB;
 GO
 
 -- ===========================
--- Students (8 rows)
+-- Students (8 rânduri)
 -- ===========================
 INSERT INTO Students (FirstName, LastName, Email, EnrollmentDate, Grade)
 VALUES
@@ -164,7 +164,7 @@ VALUES
 GO
 
 -- ===========================
--- Teachers (5 rows)
+-- Teachers (5 rânduri)
 -- ===========================
 INSERT INTO Teachers (FirstName, LastName, Email, Specialization)
 VALUES
@@ -176,7 +176,7 @@ VALUES
 GO
 
 -- ===========================
--- Subjects (5 rows)
+-- Subjects (5 rânduri)
 -- ===========================
 INSERT INTO Subjects (SubjectName, Description, Credits)
 VALUES
@@ -188,10 +188,10 @@ VALUES
 GO
 
 -- ===========================
--- Classes (10 enrollments)
+-- Classes (10 înscrieri)
 -- ===========================
--- Grade 10A students enroll in Mathematics and Physics
--- Grade 10B students enroll in Mathematics and Literature
+-- Elevii din clasa 10A se înscriu la Mathematics și Physics
+-- Elevii din clasa 10B se înscriu la Mathematics și Literature
 INSERT INTO Classes (SubjectID, StudentID, AcademicYear, Semester)
 VALUES
     (1, 1, 2024, 'Fall'),   -- Maria  → Mathematics
@@ -207,7 +207,7 @@ VALUES
 GO
 
 -- ===========================
--- Attendance (12 records)
+-- Attendance (12 înregistrări)
 -- ===========================
 INSERT INTO Attendance (ClassID, TeacherID, AttendanceDate, Status)
 VALUES
@@ -219,7 +219,7 @@ VALUES
     (4, 2, '2024-09-04', 'Late'),     -- Ion/Physics
     (6, 3, '2024-09-04', 'Present'),  -- Ana/Literature
     (8, 3, '2024-09-04', 'Present'),  -- Mihai/Literature
-    (1, 1, '2024-09-05', 'Present'),  -- Maria/Math (second session)
+    (1, 1, '2024-09-05', 'Present'),  -- Maria/Math (a doua oră)
     (2, 1, '2024-09-05', 'Absent'),   -- Ion/Math
     (9, 4, '2024-09-05', 'Present'),  -- Elena/Chemistry
     (10,5, '2024-09-05', 'Present');  -- Andrei/History
@@ -228,19 +228,19 @@ GO
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Insert a new student: `'Raluca Georgescu'`, email `'raluca@school.ro'`, grade `'10A'`, enrolled today. Retrieve the generated `StudentID`.
+**Exercițiul 1**
+Inserează un elev nou: `'Raluca Georgescu'`, email `'raluca@school.ro'`, clasa `'10A'`, înscris astăzi. Obține valoarea `StudentID` generată.
 
-**Exercise 2**
-In a single INSERT, add 3 new teachers: a Biology teacher, an English teacher, and an Art teacher (use realistic names and emails).
+**Exercițiul 2**
+Într-un singur INSERT, adaugă 3 profesori noi: un profesor de Biology, unul de English și unul de Art (folosește nume și emailuri realiste).
 
-**Exercise 3**
-Using `INSERT ... SELECT`, enroll all grade-10A students (those with `Grade = '10A'`) in the Chemistry subject (`SubjectID = 4`) for Fall 2024.
+**Exercițiul 3**
+Folosind `INSERT ... SELECT`, înscrie toți elevii din clasa 10A (cei cu `Grade = '10A'`) la materia Chemistry (`SubjectID = 4`) pentru Fall 2024.
 
-**Exercise 4**
-Using `INSERT` with `OUTPUT`, add two attendance records for `ClassID = 9` and `ClassID = 10` on `'2024-09-06'` (both Present, `TeacherID` = 4 and 5 respectively). Capture the generated `AttendanceID`s.
+**Exercițiul 4**
+Folosind `INSERT` cu `OUTPUT`, adaugă două înregistrări de prezență pentru `ClassID = 9` și `ClassID = 10` pe `'2024-09-06'` (ambele Present, cu `TeacherID` = 4, respectiv 5). Capturează valorile `AttendanceID` generate.
 
-**Exercise 5**
-Write an `INSERT ... SELECT` that creates attendance records for all classes on `'2024-09-10'` using the teacher from their most recent attendance entry. (Hint: join Classes to the most recent Attendance row per class.)
+**Exercițiul 5**
+Scrie un `INSERT ... SELECT` care creează înregistrări de prezență pentru toate înscrierile pe `'2024-09-10'`, folosind profesorul din cea mai recentă înregistrare de prezență a fiecăreia. (Indiciu: unește Classes cu cel mai recent rând din Attendance pentru fiecare înscriere.)

@@ -1,39 +1,39 @@
-# Library Database — Worksheet 5: SELECT — JOINs
+# Baza de date Library — Fișa de lucru 5: SELECT — JOIN-uri
 
-## Learning Objectives
-- Join multiple library tables to answer real business questions
-- Distinguish between INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN
-- Find missing or unrelated records using the anti-join pattern
-- Write efficient multi-table queries using table aliases
-
----
-
-## Why JOINs?
-
-The Library database stores related data in separate tables. To show a complete rental receipt (who rented which book copy, which title, by which author, from which publisher), we need to join six tables. JOINs reconstruct the full picture at query time without duplicating data.
+## Obiective de învățare
+- Unirea mai multor tabele ale bibliotecii pentru a răspunde la întrebări reale
+- Diferențierea între INNER JOIN, LEFT JOIN, RIGHT JOIN și FULL OUTER JOIN
+- Găsirea înregistrărilor lipsă sau neasociate folosind modelul anti-join
+- Scrierea de interogări eficiente pe mai multe tabele folosind aliasuri de tabel
 
 ---
 
-## JOIN Types — Overview
+## De ce JOIN-uri?
 
-| JOIN | Returns |
+Baza de date Library stochează datele asociate în tabele separate. Pentru a afișa o fișă completă de împrumut (cine a împrumutat ce exemplar, ce titlu, de ce autor, de la ce editură), trebuie să unim șase tabele. JOIN-urile reconstruiesc imaginea completă în momentul interogării, fără a duplica datele.
+
+---
+
+## Tipuri de JOIN — Prezentare generală
+
+| JOIN | Returnează |
 |---|---|
-| `INNER JOIN` | Rows matched in both tables |
-| `LEFT JOIN` | All from left + matches from right (NULL if no match) |
-| `RIGHT JOIN` | All from right + matches from left (NULL if no match) |
-| `FULL OUTER JOIN` | All rows from both tables, NULLs on unmatched sides |
+| `INNER JOIN` | Rândurile care au corespondent în ambele tabele |
+| `LEFT JOIN` | Toate din stânga + corespondentele din dreapta (NULL dacă nu există corespondent) |
+| `RIGHT JOIN` | Toate din dreapta + corespondentele din stânga (NULL dacă nu există corespondent) |
+| `FULL OUTER JOIN` | Toate rândurile din ambele tabele, cu NULL pe partea fără corespondent |
 
 ---
 
-## Table Aliases
+## Aliasuri de tabel
 
 ```sql
--- Without aliases (verbose)
+-- Fără aliasuri (prea lung)
 SELECT Titles.Title, Authors.FirstName, Authors.LastName
 FROM   Titles
 INNER JOIN Authors ON Titles.AuthorID = Authors.AuthorID;
 
--- With aliases (recommended)
+-- Cu aliasuri (recomandat)
 SELECT t.Title, a.FirstName, a.LastName
 FROM   Titles  AS t
 INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID;
@@ -43,7 +43,7 @@ INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID;
 
 ## INNER JOIN
 
-### Example 1 — Titles with their author's full name
+### Exemplul 1 — Titlurile cu numele complet al autorului
 
 ```sql
 SELECT
@@ -58,7 +58,7 @@ INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID
 ORDER BY t.Title;
 ```
 
-### Example 2 — Physical book copies with title and publisher
+### Exemplul 2 — Exemplarele fizice cu titlul și editura
 
 ```sql
 SELECT
@@ -74,7 +74,7 @@ INNER JOIN Publishers AS p ON b.PublisherID = p.PublisherID
 ORDER BY t.Title, b.BookID;
 ```
 
-### Example 3 — Rental history with all details (4 tables)
+### Exemplul 3 — Istoricul împrumuturilor cu toate detaliile (4 tabele)
 
 ```sql
 SELECT
@@ -94,7 +94,7 @@ INNER JOIN Authors    AS a  ON t.AuthorID    = a.AuthorID
 ORDER BY r.RentalDate DESC;
 ```
 
-### Example 4 — Full receipt (all 6 tables)
+### Exemplul 4 — Fișa completă (toate cele 6 tabele)
 
 ```sql
 SELECT
@@ -121,7 +121,7 @@ ORDER BY r.RentalDate DESC;
 
 ## LEFT OUTER JOIN
 
-### Example 1 — Clients and their rentals (including clients who never rented)
+### Exemplul 1 — Clienții și împrumuturile lor (inclusiv clienții care nu au împrumutat niciodată)
 
 ```sql
 SELECT
@@ -135,9 +135,9 @@ LEFT JOIN Rentals AS r ON cl.ClientID = r.ClientID
 ORDER BY cl.ClientID;
 ```
 
-Clients with no rentals appear with NULL in the rental columns.
+Clienții fără împrumuturi apar cu NULL în coloanele de împrumut.
 
-### Example 2 — Titles with their physical copies (including titles with no copies)
+### Exemplul 2 — Titlurile cu exemplarele lor fizice (inclusiv titlurile fără exemplare)
 
 ```sql
 SELECT
@@ -151,7 +151,7 @@ LEFT JOIN Books AS b ON t.TitleID = b.TitleID
 ORDER BY t.Title, b.BookID;
 ```
 
-### Anti-join — Find clients who have NEVER rented a book
+### Anti-join — Găsirea clienților care NU au împrumutat NICIODATĂ o carte
 
 ```sql
 SELECT cl.ClientID, cl.FirstName + ' ' + cl.LastName AS ClientName, cl.Email
@@ -160,7 +160,7 @@ LEFT JOIN Rentals AS r ON cl.ClientID = r.ClientID
 WHERE  r.RentalID IS NULL;
 ```
 
-### Anti-join — Find titles that have no physical copies in the library
+### Anti-join — Găsirea titlurilor care nu au exemplare fizice în bibliotecă
 
 ```sql
 SELECT t.TitleID, t.Title, t.Genre
@@ -174,7 +174,7 @@ WHERE  b.BookID IS NULL;
 ## RIGHT OUTER JOIN
 
 ```sql
--- All publishers, including those whose books are not in the library
+-- Toate editurile, inclusiv cele ale căror cărți nu se află în bibliotecă
 SELECT
     p.PublisherName,
     b.BookID,
@@ -190,7 +190,7 @@ ORDER BY p.PublisherName;
 ## FULL OUTER JOIN
 
 ```sql
--- All titles and all books — show unmatched on both sides
+-- Toate titlurile și toate cărțile — afișăm și rândurile fără corespondent din ambele părți
 SELECT
     t.Title,
     b.BookID,
@@ -202,9 +202,9 @@ ORDER BY t.Title;
 
 ---
 
-## Joining All 6 Tables
+## Unirea celor 6 tabele
 
-A comprehensive catalogue view showing every physical book, its title, author, and publisher:
+O vedere cuprinzătoare a catalogului, care afișează fiecare carte fizică, titlul, autorul și editura sa:
 
 ```sql
 SELECT
@@ -227,62 +227,62 @@ ORDER BY t.Title, b.BookID;
 
 ---
 
-## Common Mistakes
+## Greșeli frecvente
 
 ```sql
--- MISTAKE: Ambiguous column name when both tables have 'Email'
-SELECT ClientID, Email     -- which table? SQL Server will error
+-- GREȘEALĂ: Nume de coloană ambiguu — ambele tabele au 'ClientID'
+SELECT ClientID, Email     -- din ce tabel? SQL Server va da eroare
 FROM   Clients
 INNER JOIN Rentals ON Clients.ClientID = Rentals.ClientID;
 
--- FIX: always qualify with alias
+-- CORECTARE: calificăm întotdeauna cu aliasul
 SELECT cl.ClientID, cl.Email
 FROM   Clients AS cl
 INNER JOIN Rentals AS r ON cl.ClientID = r.ClientID;
 
--- MISTAKE: Joining on the wrong column
--- Books.TitleID matches Titles.TitleID — not Books.BookID!
+-- GREȘEALĂ: JOIN pe coloana greșită
+-- Books.TitleID corespunde cu Titles.TitleID — nu cu Books.BookID!
 SELECT t.Title, b.BookID
 FROM   Titles AS t
-INNER JOIN Books AS b ON t.TitleID = b.BookID;  -- WRONG!
+INNER JOIN Books AS b ON t.TitleID = b.BookID;  -- GREȘIT!
 
--- CORRECT
+-- CORECT
 INNER JOIN Books AS b ON t.TitleID = b.TitleID;
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-List all books (physical copies) with their title and author's full name. Show `BookID`, `Title`, `AuthorName`, and `Condition`.
+**Exercițiul 1 (Ușor)**
+Listează toate cărțile (exemplarele fizice) cu titlul și numele complet al autorului. Afișează `BookID`, `Title`, `AuthorName` și `Condition`.
 
-**Exercise 2 (Easy)**
-Show all rental records with the client's full name. Show `RentalID`, `ClientName`, `BookID`, `RentalDate`, and `ReturnDate`.
+**Exercițiul 2 (Ușor)**
+Afișează toate împrumuturile cu numele complet al clientului. Afișează `RentalID`, `ClientName`, `BookID`, `RentalDate` și `ReturnDate`.
 
-**Exercise 3 (Medium)**
-Find all clients who have **never** rented a book. Show their full name and membership date.
+**Exercițiul 3 (Mediu)**
+Găsește toți clienții care **nu au împrumutat niciodată** o carte. Afișează numele complet și data înscrierii.
 
-**Exercise 4 (Medium)**
-Show all titles that have at least one physical book copy, together with the number of copies available. Group by title. (Hint: join Titles and Books, filter IsAvailable = 1.)
+**Exercițiul 4 (Mediu)**
+Afișează toate titlurile care au cel puțin un exemplar fizic, împreună cu numărul de exemplare disponibile. Grupează după titlu. (Indiciu: unește Titles și Books, filtrează IsAvailable = 1.)
 
-**Exercise 5 (Medium)**
-List all currently unreturned rentals with: client full name, book title, author full name, rental date, due date, and how many days overdue (if past due date, else 0).
+**Exercițiul 5 (Mediu)**
+Listează toate împrumuturile nereturnate în prezent, cu: numele complet al clientului, titlul cărții, numele complet al autorului, data împrumutului, termenul de returnare și numărul de zile de întârziere (dacă termenul a trecut, altfel 0).
 
-**Exercise 6 (Medium)**
-Show all titles from the `'Technology'` genre along with their author's nationality. Use an INNER JOIN between Titles and Authors.
+**Exercițiul 6 (Mediu)**
+Afișează toate titlurile din genul `'Technology'`, împreună cu naționalitatea autorului lor. Folosește un INNER JOIN între Titles și Authors.
 
-**Exercise 7 (Hard)**
-For each client, show their full name, how many times they have rented books, the most recent rental date, and whether they currently have any book not yet returned (show 'Yes'/'No').
+**Exercițiul 7 (Dificil)**
+Pentru fiecare client, afișează numele complet, de câte ori a împrumutat cărți, data celui mai recent împrumut și dacă are în prezent vreo carte nereturnată (afișează 'Yes'/'No').
 
-**Exercise 8 (Hard)**
-Show all books that have been rented more than once. Show `BookID`, `Title`, `Author`, and `RentalCount`. Sort by `RentalCount` descending.
+**Exercițiul 8 (Dificil)**
+Afișează toate cărțile care au fost împrumutate de mai multe ori. Afișează `BookID`, `Title`, `Author` și `RentalCount`. Sortează descrescător după `RentalCount`.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1**
+**Exercițiul 1**
 ```sql
 SELECT b.BookID, t.Title, a.FirstName + ' ' + a.LastName AS AuthorName, b.Condition
 FROM   Books   AS b
@@ -290,7 +290,7 @@ INNER JOIN Titles  AS t ON b.TitleID  = t.TitleID
 INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID;
 ```
 
-**Exercise 2**
+**Exercițiul 2**
 ```sql
 SELECT r.RentalID, cl.FirstName + ' ' + cl.LastName AS ClientName,
        r.BookID, r.RentalDate, r.ReturnDate
@@ -298,7 +298,7 @@ FROM   Rentals AS r
 INNER JOIN Clients AS cl ON r.ClientID = cl.ClientID;
 ```
 
-**Exercise 3**
+**Exercițiul 3**
 ```sql
 SELECT cl.FirstName + ' ' + cl.LastName AS FullName, cl.MembershipDate
 FROM   Clients AS cl
@@ -306,7 +306,7 @@ LEFT JOIN Rentals AS r ON cl.ClientID = r.ClientID
 WHERE  r.RentalID IS NULL;
 ```
 
-**Exercise 4**
+**Exercițiul 4**
 ```sql
 SELECT t.Title, COUNT(b.BookID) AS AvailableCopies
 FROM   Titles AS t
@@ -316,7 +316,7 @@ GROUP BY t.TitleID, t.Title
 ORDER BY AvailableCopies DESC;
 ```
 
-**Exercise 5**
+**Exercițiul 5**
 ```sql
 SELECT cl.FirstName + ' ' + cl.LastName AS ClientName,
        t.Title, a.FirstName + ' ' + a.LastName AS Author,
@@ -331,7 +331,7 @@ WHERE  r.ReturnDate IS NULL
 ORDER BY DaysOverdue DESC;
 ```
 
-**Exercise 6**
+**Exercițiul 6**
 ```sql
 SELECT t.Title, t.Genre, a.FirstName + ' ' + a.LastName AS Author, a.Nationality
 FROM   Titles AS t
@@ -339,7 +339,7 @@ INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID
 WHERE  t.Genre = 'Technology';
 ```
 
-**Exercise 7**
+**Exercițiul 7**
 ```sql
 SELECT cl.FirstName + ' ' + cl.LastName AS FullName,
        COUNT(r.RentalID) AS TotalRentals,
@@ -352,7 +352,7 @@ GROUP BY cl.ClientID, cl.FirstName, cl.LastName
 ORDER BY TotalRentals DESC;
 ```
 
-**Exercise 8**
+**Exercițiul 8**
 ```sql
 SELECT b.BookID, t.Title, a.FirstName + ' ' + a.LastName AS Author,
        COUNT(r.RentalID) AS RentalCount

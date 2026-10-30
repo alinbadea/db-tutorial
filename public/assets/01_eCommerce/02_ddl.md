@@ -1,53 +1,53 @@
-# eCommerce Database — Worksheet 2: DDL — Creating the Database
+# Baza de date eCommerce — Fișa de lucru 2: DDL — Crearea bazei de date
 
-## Learning Objectives
-- Use `CREATE DATABASE` and `CREATE TABLE` to build a database from scratch
-- Define primary keys, foreign keys, and other constraints in T-SQL
-- Use `ALTER TABLE` to add or modify constraints after a table is created
-- Drop tables and databases safely in the correct order
+## Obiective de învățare
+- Folosirea `CREATE DATABASE` și `CREATE TABLE` pentru a construi o bază de date de la zero
+- Definirea cheilor primare, a cheilor străine și a altor constrângeri în T-SQL
+- Folosirea `ALTER TABLE` pentru a adăuga sau modifica constrângeri după crearea unui tabel
+- Ștergerea în siguranță a tabelelor și a bazelor de date, în ordinea corectă
 
 ---
 
-## DDL Overview
+## Prezentare generală DDL
 
-DDL (Data Definition Language) statements define and modify the **structure** of database objects.
+Instrucțiunile DDL (Data Definition Language — limbajul de definire a datelor) definesc și modifică **structura** obiectelor bazei de date.
 
-| Statement | Purpose |
+| Instrucțiune | Scop |
 |---|---|
-| `CREATE` | Creates a new database, table, view, index, etc. |
-| `ALTER` | Modifies an existing structure (add/remove/change columns or constraints) |
-| `DROP` | Permanently removes a database object |
-| `TRUNCATE` | Removes all rows from a table but keeps the structure |
+| `CREATE` | Creează o bază de date nouă, un tabel, o vedere, un index etc. |
+| `ALTER` | Modifică o structură existentă (adaugă/elimină/schimbă coloane sau constrângeri) |
+| `DROP` | Elimină definitiv un obiect al bazei de date |
+| `TRUNCATE` | Elimină toate rândurile dintr-un tabel, dar păstrează structura |
 
 ---
 
-## Step 1: Creating the Database
+## Pasul 1: Crearea bazei de date
 
 ```sql
--- Create the database
+-- Creăm baza de date
 CREATE DATABASE eCommerceDB;
 GO
 
--- Switch to it
+-- Trecem la ea
 USE eCommerceDB;
 GO
 ```
 
-> **Note:** The `GO` keyword is not SQL — it is a batch separator used by SQL Server Management Studio (SSMS) and sqlcmd to send the preceding commands as one batch to the server.
+> **Notă:** Cuvântul-cheie `GO` nu este SQL — este un separator de loturi (batch) folosit de SQL Server Management Studio (SSMS) și de sqlcmd pentru a trimite serverului comenzile precedente ca un singur lot.
 
 ---
 
-## Step 2: Creating the Tables
+## Pasul 2: Crearea tabelelor
 
-Tables must be created **parent tables first**. A child table that references a parent via a foreign key cannot be created before the parent exists.
+Tabelele trebuie create **începând cu tabelele părinte**. Un tabel copil care referă un părinte printr-o cheie străină nu poate fi creat înainte ca părintele să existe.
 
-**Creation order:** Categories → Clients → Products → Orders → OrderDetails
+**Ordinea de creare:** Categories → Clients → Products → Orders → OrderDetails
 
 ---
 
-### Table 1: Categories
+### Tabelul 1: Categories
 
-Stores product categories. This is a parent table with no foreign keys.
+Stochează categoriile de produse. Este un tabel părinte, fără chei străine.
 
 ```sql
 CREATE TABLE Categories (
@@ -63,9 +63,9 @@ GO
 
 ---
 
-### Table 2: Clients
+### Tabelul 2: Clients
 
-Stores registered customers.
+Stochează clienții înregistrați.
 
 ```sql
 CREATE TABLE Clients (
@@ -87,9 +87,9 @@ GO
 
 ---
 
-### Table 3: Products
+### Tabelul 3: Products
 
-Stores items for sale. References `Categories`.
+Stochează articolele de vânzare. Referă `Categories`.
 
 ```sql
 CREATE TABLE Products (
@@ -113,9 +113,9 @@ GO
 
 ---
 
-### Table 4: Orders
+### Tabelul 4: Orders
 
-Stores order headers. References `Clients`.
+Stochează antetele comenzilor. Referă `Clients`.
 
 ```sql
 CREATE TABLE Orders (
@@ -139,9 +139,9 @@ GO
 
 ---
 
-### Table 5: OrderDetails
+### Tabelul 5: OrderDetails
 
-Stores individual line items within an order. References both `Orders` and `Products`.
+Stochează liniile individuale (articolele) dintr-o comandă. Referă atât `Orders`, cât și `Products`.
 
 ```sql
 CREATE TABLE OrderDetails (
@@ -166,24 +166,24 @@ GO
 
 ---
 
-## Step 3: Adding Foreign Keys with ALTER TABLE (Alternative Method)
+## Pasul 3: Adăugarea cheilor străine cu ALTER TABLE (metodă alternativă)
 
-Instead of defining foreign keys inside `CREATE TABLE`, you can add them afterwards:
+În loc să definești cheile străine în interiorul `CREATE TABLE`, le poți adăuga ulterior:
 
 ```sql
--- Add FK to Products after both tables exist
+-- Adăugăm FK în Products după ce ambele tabele există
 ALTER TABLE Products
 ADD CONSTRAINT FK_Products_Categories
     FOREIGN KEY (CategoryID) REFERENCES Categories(CategoryID);
 GO
 
--- Add FK to Orders after both tables exist
+-- Adăugăm FK în Orders după ce ambele tabele există
 ALTER TABLE Orders
 ADD CONSTRAINT FK_Orders_Clients
     FOREIGN KEY (ClientID) REFERENCES Clients(ClientID);
 GO
 
--- Add FKs to OrderDetails
+-- Adăugăm FK-urile în OrderDetails
 ALTER TABLE OrderDetails
 ADD CONSTRAINT FK_OrderDetails_Orders
     FOREIGN KEY (OrderID) REFERENCES Orders(OrderID);
@@ -195,18 +195,18 @@ ADD CONSTRAINT FK_OrderDetails_Products
 GO
 ```
 
-> **When to use this approach:** When you need to create tables whose FK references form a cycle, or when adding constraints to an existing database without rebuilding tables.
+> **Când folosim această abordare:** Când trebuie să creăm tabele ale căror referințe FK formează un ciclu sau când adăugăm constrângeri unei baze de date existente fără a reconstrui tabelele.
 
 ---
 
-## Step 4: Verifying the Schema
+## Pasul 4: Verificarea schemei
 
 ```sql
--- View all columns of a table
+-- Vizualizăm toate coloanele unui tabel
 EXEC sp_help 'Products';
 GO
 
--- List all columns with data types
+-- Listăm toate coloanele cu tipurile lor de date
 SELECT
     TABLE_NAME,
     COLUMN_NAME,
@@ -218,7 +218,7 @@ FROM INFORMATION_SCHEMA.COLUMNS
 WHERE TABLE_NAME = 'Products';
 GO
 
--- List all constraints
+-- Listăm toate constrângerile
 SELECT
     TABLE_NAME,
     CONSTRAINT_NAME,
@@ -227,7 +227,7 @@ FROM INFORMATION_SCHEMA.TABLE_CONSTRAINTS
 ORDER BY TABLE_NAME, CONSTRAINT_TYPE;
 GO
 
--- List foreign key relationships
+-- Listăm relațiile de cheie străină
 SELECT
     fk.name                       AS FK_Name,
     tp.name                       AS Parent_Table,
@@ -247,30 +247,30 @@ GO
 
 ---
 
-## Step 5: Modifying Tables with ALTER TABLE
+## Pasul 5: Modificarea tabelelor cu ALTER TABLE
 
 ```sql
--- Add a new column
+-- Adăugăm o coloană nouă
 ALTER TABLE Clients
 ADD DateOfBirth DATE NULL;
 GO
 
--- Change a column's data type
+-- Schimbăm tipul de date al unei coloane
 ALTER TABLE Clients
 ALTER COLUMN Phone NVARCHAR(30) NULL;
 GO
 
--- Drop a column
+-- Ștergem o coloană
 ALTER TABLE Clients
 DROP COLUMN DateOfBirth;
 GO
 
--- Add a CHECK constraint to an existing table
+-- Adăugăm o constrângere CHECK unui tabel existent
 ALTER TABLE Products
 ADD CONSTRAINT CHK_Products_Name CHECK (LEN(ProductName) >= 2);
 GO
 
--- Drop a constraint
+-- Ștergem o constrângere
 ALTER TABLE Products
 DROP CONSTRAINT CHK_Products_Name;
 GO
@@ -278,12 +278,12 @@ GO
 
 ---
 
-## Step 6: Dropping Tables and the Database
+## Pasul 6: Ștergerea tabelelor și a bazei de date
 
-Tables must be dropped **child tables first** (reverse of creation order).
+Tabelele trebuie șterse **începând cu tabelele copil** (în ordinea inversă creării).
 
 ```sql
--- Drop in reverse dependency order
+-- Ștergem în ordinea inversă a dependențelor
 DROP TABLE IF EXISTS OrderDetails;
 DROP TABLE IF EXISTS Orders;
 DROP TABLE IF EXISTS Products;
@@ -291,7 +291,7 @@ DROP TABLE IF EXISTS Clients;
 DROP TABLE IF EXISTS Categories;
 GO
 
--- Drop the database (must switch away from it first)
+-- Ștergem baza de date (mai întâi trebuie să trecem pe altă bază de date)
 USE master;
 GO
 DROP DATABASE IF EXISTS eCommerceDB;
@@ -300,18 +300,18 @@ GO
 
 ---
 
-## Complete Ready-to-Run Script
+## Script complet, gata de rulat
 
 ```sql
 -- ============================================================
--- eCommerceDB — Full Creation Script
--- Run this script in SSMS to build the database from scratch
+-- eCommerceDB — Script complet de creare
+-- Rulează acest script în SSMS pentru a construi baza de date de la zero
 -- ============================================================
 
 USE master;
 GO
 
--- Drop existing database if present
+-- Ștergem baza de date existentă, dacă există
 IF EXISTS (SELECT name FROM sys.databases WHERE name = 'eCommerceDB')
 BEGIN
     ALTER DATABASE eCommerceDB SET SINGLE_USER WITH ROLLBACK IMMEDIATE;
@@ -397,19 +397,19 @@ GO
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Write the `CREATE TABLE` statement for a new table called `ProductReviews` with the following columns: `ReviewID` (auto-increment PK), `ProductID` (FK to Products), `ClientID` (FK to Clients), `Rating` (integer 1–5, required), `Comment` (up to 1000 characters, optional), `ReviewDate` (date, defaults to today).
+**Exercițiul 1**
+Scrie instrucțiunea `CREATE TABLE` pentru un tabel nou numit `ProductReviews` cu următoarele coloane: `ReviewID` (PK cu auto-incrementare), `ProductID` (FK către Products), `ClientID` (FK către Clients), `Rating` (număr întreg 1–5, obligatoriu), `Comment` (până la 1000 de caractere, opțional), `ReviewDate` (dată, implicit ziua curentă).
 
-**Exercise 2**
-The `Orders` table needs a new column `DiscountAmount` of type `DECIMAL(10,2)` that cannot be negative and defaults to `0`. Write the `ALTER TABLE` statement.
+**Exercițiul 2**
+Tabelul `Orders` are nevoie de o coloană nouă `DiscountAmount` de tip `DECIMAL(10,2)`, care nu poate fi negativă și are valoarea implicită `0`. Scrie instrucțiunea `ALTER TABLE`.
 
-**Exercise 3**
-Write a query using `INFORMATION_SCHEMA` to list every table name and the number of columns each table has.
+**Exercițiul 3**
+Scrie o interogare care folosește `INFORMATION_SCHEMA` pentru a lista numele fiecărui tabel și numărul de coloane ale fiecăruia.
 
-**Exercise 4**
-A developer created the `OrderDetails` table before `Orders` and got an error. Explain what the error is and why it happened.
+**Exercițiul 4**
+Un programator a creat tabelul `OrderDetails` înainte de `Orders` și a primit o eroare. Explică ce eroare este și de ce a apărut.
 
-**Exercise 5**
-Write the statements to safely drop the entire `eCommerceDB` database, including handling the case where it may not exist.
+**Exercițiul 5**
+Scrie instrucțiunile pentru a șterge în siguranță întreaga bază de date `eCommerceDB`, tratând inclusiv cazul în care aceasta nu există.

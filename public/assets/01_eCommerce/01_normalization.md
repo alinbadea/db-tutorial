@@ -1,42 +1,42 @@
-# eCommerce Database — Worksheet 1: Database Normalization (UNF to 3NF)
+# Baza de date eCommerce — Fișa de lucru 1: Normalizarea bazei de date (UNF până la 3NF)
 
-## Learning Objectives
-- Understand why normalization is necessary and what problems it solves
-- Identify repeating groups, partial dependencies, and transitive dependencies
-- Transform a flat unnormalized table through 1NF, 2NF, and 3NF
-- Describe the final eCommerce schema and the relationships between its tables
-
----
-
-## Why Normalize? Data Anomalies
-
-Without normalization, all data lives in one large flat table. This causes three serious problems:
-
-**Insertion Anomaly** — You cannot record a new product category unless you also have a product to go with it. Want to add the "Toys" category before stocking any toys? You can't.
-
-**Update Anomaly** — If the category name "Electronics" appears in 500 product rows and you rename it to "Consumer Electronics", you must update 500 rows. Miss one and your data is inconsistent.
-
-**Deletion Anomaly** — If you delete the only product in the "Books" category, you lose all information about that category entirely, even though the category itself is still valid.
-
-Normalization eliminates redundancy and makes each fact live in exactly one place.
+## Obiective de învățare
+- Înțelegerea motivelor pentru care normalizarea este necesară și a problemelor pe care le rezolvă
+- Identificarea grupurilor repetitive, a dependențelor parțiale și a dependențelor tranzitive
+- Transformarea unui tabel plat, nenormalizat, prin 1NF, 2NF și 3NF
+- Descrierea schemei finale eCommerce și a relațiilor dintre tabelele sale
 
 ---
 
-## The Three Normal Forms — Quick Reference
+## De ce normalizăm? Anomaliile de date
 
-| Normal Form | Rule | Key Question |
+Fără normalizare, toate datele se află într-un singur tabel mare și plat. Acest lucru provoacă trei probleme serioase:
+
+**Anomalia de inserare** — Nu poți înregistra o nouă categorie de produse decât dacă ai și un produs care să-i aparțină. Vrei să adaugi categoria „Toys” înainte de a avea vreo jucărie în stoc? Nu poți.
+
+**Anomalia de actualizare** — Dacă numele de categorie „Electronics” apare în 500 de rânduri de produse și îl redenumești în „Consumer Electronics”, trebuie să actualizezi 500 de rânduri. Dacă ratezi unul, datele devin inconsecvente.
+
+**Anomalia de ștergere** — Dacă ștergi singurul produs din categoria „Books”, pierzi complet toate informațiile despre acea categorie, chiar dacă însăși categoria este încă validă.
+
+Normalizarea elimină redundanța și face ca fiecare informație să existe într-un singur loc.
+
+---
+
+## Cele trei forme normale — Referință rapidă
+
+| Forma normală | Regulă | Întrebare-cheie |
 |---|---|---|
-| **1NF** | Atomic values, no repeating groups, every row uniquely identifiable | "Is every cell a single value? Are there column groups like Product1, Product2?" |
-| **2NF** | 1NF + no partial dependencies on a composite key | "Does every non-key column depend on the *whole* primary key, or just part of it?" |
-| **3NF** | 2NF + no transitive dependencies | "Does any non-key column determine another non-key column?" |
+| **1NF** | Valori atomice, fără grupuri repetitive, fiecare rând identificabil în mod unic | „Conține fiecare celulă o singură valoare? Există grupuri de coloane precum Product1, Product2?” |
+| **2NF** | 1NF + fără dependențe parțiale față de o cheie compusă | „Depinde fiecare coloană non-cheie de *întreaga* cheie primară sau doar de o parte a ei?” |
+| **3NF** | 2NF + fără dependențe tranzitive | „Există vreo coloană non-cheie care determină o altă coloană non-cheie?” |
 
 ---
 
-## Step 1 — Unnormalized Form (UNF)
+## Pasul 1 — Forma nenormalizată (UNF)
 
-Imagine a naive database designer stores every order in a single spreadsheet row, repeating product columns for each item in the order:
+Imaginează-ți un proiectant de baze de date naiv care stochează fiecare comandă într-un singur rând de foaie de calcul, repetând coloanele de produs pentru fiecare articol din comandă:
 
-**Table: order_flat**
+**Tabel: order_flat**
 
 | OrderID | OrderDate | ClientName | ClientEmail | ClientPhone | ClientCity | ProductName1 | Category1 | Price1 | Qty1 | ProductName2 | Category2 | Price2 | Qty2 |
 |---|---|---|---|---|---|---|---|---|---|---|---|---|---|
@@ -47,24 +47,24 @@ Imagine a naive database designer stores every order in a single spreadsheet row
 | 5 | 2024-01-15 | Maria Garcia | maria@mail.com | 555-0202 | Madrid | USB Keyboard | Electronics | 49.99 | 2 | Running Shoes | Sports | 89.99 | 1 |
 | 6 | 2024-01-16 | John Smith | john@mail.com | 555-0101 | London | Cotton T-Shirt | Clothing | 19.99 | 2 | NULL | NULL | NULL | NULL |
 
-**Problems visible here:**
-- Repeating column groups (ProductName1/2, Category1/2, etc.) — what if an order has 10 items?
-- Client data (name, email, phone, city) is duplicated for every order they place
-- "Electronics" appears in multiple rows — one update requires changing many rows
-- Lots of NULL values for orders with fewer than the maximum number of products
+**Probleme vizibile aici:**
+- Grupuri de coloane repetitive (ProductName1/2, Category1/2 etc.) — ce se întâmplă dacă o comandă are 10 articole?
+- Datele clientului (nume, email, telefon, oraș) sunt duplicate pentru fiecare comandă pe care o plasează
+- „Electronics” apare în mai multe rânduri — o singură actualizare necesită modificarea multor rânduri
+- Multe valori NULL pentru comenzile cu mai puține produse decât numărul maxim
 
 ---
 
-## Step 2 — First Normal Form (1NF)
+## Pasul 2 — Prima formă normală (1NF)
 
-**Rules:**
-- Every cell contains a single atomic value (no lists or sets)
-- No repeating column groups
-- Every row must be uniquely identifiable
+**Reguli:**
+- Fiecare celulă conține o singură valoare atomică (fără liste sau mulțimi)
+- Fără grupuri de coloane repetitive
+- Fiecare rând trebuie să fie identificabil în mod unic
 
-**Transformation:** Eliminate the Product1/Product2 column groups by creating one row per product per order.
+**Transformare:** Eliminăm grupurile de coloane Product1/Product2 creând câte un rând pentru fiecare produs din fiecare comandă.
 
-**Table: order_1nf**
+**Tabel: order_1nf**
 
 | OrderID | OrderDate | ClientName | ClientEmail | ClientPhone | ClientCity | ShippingAddress | Status | ProductName | CategoryName | UnitPrice | Quantity |
 |---|---|---|---|---|---|---|---|---|---|---|---|
@@ -75,36 +75,36 @@ Imagine a naive database designer stores every order in a single spreadsheet row
 | 3 | 2024-01-12 | John Smith | john@mail.com | 555-0101 | London | 12 Baker St | Pending | Cotton T-Shirt | Clothing | 19.99 | 3 |
 | 4 | 2024-01-14 | Ana Popescu | ana@mail.com | 555-0303 | Bucharest | Str. Unirii 7 | Delivered | Wireless Mouse | Electronics | 29.99 | 1 |
 
-**Primary key (composite):** `(OrderID, ProductName)`
+**Cheie primară (compusă):** `(OrderID, ProductName)`
 
-**Now in 1NF:** No repeating groups, all values are atomic, every row is unique.
+**Acum în 1NF:** Fără grupuri repetitive, toate valorile sunt atomice, fiecare rând este unic.
 
-**Remaining problems:** Client data still repeats across rows of the same order. Product prices repeat for every order they appear in. These are partial dependencies — the next step fixes them.
+**Probleme rămase:** Datele clientului se repetă încă pe rândurile aceleiași comenzi. Prețurile produselor se repetă pentru fiecare comandă în care apar. Acestea sunt dependențe parțiale — următorul pas le rezolvă.
 
 ---
 
-## Step 3 — Second Normal Form (2NF)
+## Pasul 3 — A doua formă normală (2NF)
 
-**Rules:** Must be in 1NF + every non-key attribute must depend on the **entire** composite primary key, not just part of it.
+**Reguli:** Trebuie să fie în 1NF + fiecare atribut non-cheie trebuie să depindă de **întreaga** cheie primară compusă, nu doar de o parte a ei.
 
-**Identifying partial dependencies** in `order_1nf` with PK = `(OrderID, ProductName)`:
+**Identificarea dependențelor parțiale** în `order_1nf` cu PK = `(OrderID, ProductName)`:
 
-| Column | Depends on OrderID alone? | Depends on ProductName alone? | Depends on BOTH (full)? |
+| Coloană | Depinde doar de OrderID? | Depinde doar de ProductName? | Depinde de AMBELE (complet)? |
 |---|---|---|---|
-| OrderDate | YES — partial dep. | | |
-| ClientName | YES — partial dep. | | |
-| ClientEmail | YES — partial dep. | | |
-| ClientPhone | YES — partial dep. | | |
-| ClientCity | YES — partial dep. | | |
-| ShippingAddress | YES — partial dep. | | |
-| Status | YES — partial dep. | | |
-| CategoryName | | YES — partial dep. | |
-| UnitPrice | | YES — partial dep. | |
-| **Quantity** | | | YES — full dependency |
+| OrderDate | DA — dep. parțială | | |
+| ClientName | DA — dep. parțială | | |
+| ClientEmail | DA — dep. parțială | | |
+| ClientPhone | DA — dep. parțială | | |
+| ClientCity | DA — dep. parțială | | |
+| ShippingAddress | DA — dep. parțială | | |
+| Status | DA — dep. parțială | | |
+| CategoryName | | DA — dep. parțială | |
+| UnitPrice | | DA — dep. parțială | |
+| **Quantity** | | | DA — dependență completă |
 
-**Transformation:** Move partial dependencies to their own tables.
+**Transformare:** Mutăm dependențele parțiale în tabele proprii.
 
-**Table: clients_2nf** (depends only on client identity)
+**Tabel: clients_2nf** (depinde doar de identitatea clientului)
 
 | ClientID | ClientName | ClientEmail | ClientPhone | ClientCity |
 |---|---|---|---|---|
@@ -112,7 +112,7 @@ Imagine a naive database designer stores every order in a single spreadsheet row
 | 2 | Maria Garcia | maria@mail.com | 555-0202 | Madrid |
 | 3 | Ana Popescu | ana@mail.com | 555-0303 | Bucharest |
 
-**Table: orders_2nf** (depends only on OrderID)
+**Tabel: orders_2nf** (depinde doar de OrderID)
 
 | OrderID | OrderDate | ShippingAddress | Status | ClientID |
 |---|---|---|---|---|
@@ -121,7 +121,7 @@ Imagine a naive database designer stores every order in a single spreadsheet row
 | 3 | 2024-01-12 | 12 Baker St | Pending | 1 |
 | 4 | 2024-01-14 | Str. Unirii 7 | Delivered | 3 |
 
-**Table: products_2nf** (depends only on ProductName)
+**Tabel: products_2nf** (depinde doar de ProductName)
 
 | ProductID | ProductName | CategoryName | UnitPrice |
 |---|---|---|---|
@@ -131,7 +131,7 @@ Imagine a naive database designer stores every order in a single spreadsheet row
 | 4 | Running Shoes | Sports | 89.99 |
 | 5 | Cotton T-Shirt | Clothing | 19.99 |
 
-**Table: order_details_2nf** (depends on the full composite key)
+**Tabel: order_details_2nf** (depinde de întreaga cheie compusă)
 
 | OrderID | ProductID | Quantity |
 |---|---|---|
@@ -142,32 +142,32 @@ Imagine a naive database designer stores every order in a single spreadsheet row
 | 3 | 5 | 3 |
 | 4 | 1 | 1 |
 
-No more repeating client data. No more redundant product prices.
+Nu mai avem date de client repetate. Nu mai avem prețuri de produse redundante.
 
 ---
 
-## Step 4 — Third Normal Form (3NF)
+## Pasul 4 — A treia formă normală (3NF)
 
-**Rules:** Must be in 2NF + no transitive dependencies. A transitive dependency exists when a non-key column determines another non-key column.
+**Reguli:** Trebuie să fie în 2NF + fără dependențe tranzitive. O dependență tranzitivă există atunci când o coloană non-cheie determină o altă coloană non-cheie.
 
-**Identifying transitive dependencies** in `products_2nf`:
+**Identificarea dependențelor tranzitive** în `products_2nf`:
 
 ```
 ProductID → CategoryName
 ```
 
-But `CategoryName` is an attribute of the *category*, not of the product itself. If we rename "Electronics" to "Consumer Electronics", we still have to update every row in the products table that references it.
+Dar `CategoryName` este un atribut al *categoriei*, nu al produsului în sine. Dacă redenumim „Electronics” în „Consumer Electronics”, tot trebuie să actualizăm fiecare rând din tabelul de produse care o referă.
 
-The dependency chain is:
+Lanțul de dependențe este:
 ```
 ProductID → CategoryID → CategoryName
 ```
 
-`CategoryName` depends on `CategoryID`, which is a non-key attribute — that is a transitive dependency.
+`CategoryName` depinde de `CategoryID`, care este un atribut non-cheie — aceasta este o dependență tranzitivă.
 
-**Transformation:** Extract `CategoryName` into its own table.
+**Transformare:** Extragem `CategoryName` într-un tabel propriu.
 
-**Table: categories**
+**Tabel: categories**
 
 | CategoryID | CategoryName | Description |
 |---|---|---|
@@ -176,7 +176,7 @@ ProductID → CategoryID → CategoryName
 | 3 | Sports | Sports equipment and clothing |
 | 4 | Clothing | Fashion and apparel |
 
-**Table: products** (updated — CategoryName replaced by CategoryID FK)
+**Tabel: products** (actualizat — CategoryName înlocuit cu FK-ul CategoryID)
 
 | ProductID | ProductName | Description | Price | Stock | CategoryID |
 |---|---|---|---|---|---|
@@ -186,13 +186,13 @@ ProductID → CategoryID → CategoryName
 | 4 | Running Shoes | Lightweight running shoes | 89.99 | 60 | 3 |
 | 5 | Cotton T-Shirt | Classic cotton t-shirt | 19.99 | 200 | 4 |
 
-Now `CategoryName` lives in exactly one place. Renaming a category requires updating one row in `categories`, not every product row.
+Acum `CategoryName` există într-un singur loc. Redenumirea unei categorii necesită actualizarea unui singur rând în `categories`, nu a fiecărui rând de produs.
 
 ---
 
-## Final Schema Summary
+## Rezumatul schemei finale
 
-After full normalization, the eCommerce database has **5 tables**:
+După normalizarea completă, baza de date eCommerce are **5 tabele**:
 
 ```
 Categories
@@ -235,41 +235,41 @@ OrderDetails
   UnitPrice
 ```
 
-**Relationship summary:**
-- `Products` → `Categories` (many-to-one: each product has one category)
-- `Orders` → `Clients` (many-to-one: each order belongs to one client)
-- `OrderDetails` → `Orders` (many-to-one: each detail belongs to one order)
-- `OrderDetails` → `Products` (many-to-one: each detail references one product)
+**Rezumatul relațiilor:**
+- `Products` → `Categories` (mulți-la-unu: fiecare produs are o singură categorie)
+- `Orders` → `Clients` (mulți-la-unu: fiecare comandă aparține unui singur client)
+- `OrderDetails` → `Orders` (mulți-la-unu: fiecare detaliu aparține unei singure comenzi)
+- `OrderDetails` → `Products` (mulți-la-unu: fiecare detaliu referă un singur produs)
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-In the UNF table, what anomaly occurs if you try to add a new category "Garden Tools" before you have any products in that category?
+**Exercițiul 1 (Ușor)**
+În tabelul UNF, ce anomalie apare dacă încerci să adaugi o nouă categorie „Garden Tools” înainte de a avea vreun produs în acea categorie?
 
-**Exercise 2 (Easy)**
-In the 1NF table `order_1nf`, what is the composite primary key? Why is OrderID alone not sufficient?
+**Exercițiul 2 (Ușor)**
+În tabelul 1NF `order_1nf`, care este cheia primară compusă? De ce OrderID singur nu este suficient?
 
-**Exercise 3 (Medium)**
-In the 2NF stage, explain why `ShippingAddress` was moved to the `orders_2nf` table rather than `clients_2nf`, even though both tables were split from orders.
+**Exercițiul 3 (Mediu)**
+În etapa 2NF, explică de ce `ShippingAddress` a fost mutată în tabelul `orders_2nf` și nu în `clients_2nf`, deși ambele tabele au fost separate din comenzi.
 
-**Exercise 4 (Medium)**
-After reaching 3NF, if a product changes its category, how many rows must be updated? How many rows would need updating in the 2NF version?
+**Exercițiul 4 (Mediu)**
+După atingerea 3NF, dacă un produs își schimbă categoria, câte rânduri trebuie actualizate? Câte rânduri ar trebui actualizate în versiunea 2NF?
 
-**Exercise 5 (Hard)**
-A colleague suggests adding a `ClientCity` column directly to the `Orders` table, arguing "the shipping city might differ from the client's registered city." Is this a normalization violation? Justify your answer and describe how you would handle this requirement properly.
+**Exercițiul 5 (Dificil)**
+Un coleg sugerează adăugarea unei coloane `ClientCity` direct în tabelul `Orders`, argumentând că „orașul de livrare poate diferi de orașul înregistrat al clientului”. Este aceasta o încălcare a normalizării? Justifică răspunsul și descrie cum ai trata corect această cerință.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1:** Insertion anomaly. In the UNF table every row must have a product, so a category with no products yet cannot be stored.
+**Exercițiul 1:** Anomalie de inserare. În tabelul UNF fiecare rând trebuie să aibă un produs, deci o categorie care încă nu are produse nu poate fi stocată.
 
-**Exercise 2:** The composite PK is `(OrderID, ProductName)`. OrderID alone is not unique because one order can contain multiple products, each appearing on its own row.
+**Exercițiul 2:** Cheia primară compusă este `(OrderID, ProductName)`. OrderID singur nu este unic deoarece o comandă poate conține mai multe produse, fiecare apărând pe propriul rând.
 
-**Exercise 3:** `ShippingAddress` depends only on `OrderID` (it is the address for *that specific order*) and is therefore a partial dependency on `OrderID`. It belongs in the orders table. It was not moved to `clients` because the client might ship to a different address on each order.
+**Exercițiul 3:** `ShippingAddress` depinde doar de `OrderID` (este adresa pentru *acea comandă anume*) și este, prin urmare, o dependență parțială față de `OrderID`. Locul ei este în tabelul de comenzi. Nu a fost mutată în `clients` deoarece clientul poate livra la o adresă diferită pentru fiecare comandă.
 
-**Exercise 4:** In 3NF, updating a product's category means changing `CategoryID` in one row of the `Products` table. In the 2NF version, `CategoryName` was stored in every product row, so only that one row needed updating too — but if the category *name* changed (in 2NF there is no categories table), you would need to update every product row that has that category name.
+**Exercițiul 4:** În 3NF, actualizarea categoriei unui produs înseamnă modificarea `CategoryID` într-un singur rând din tabelul `Products`. În versiunea 2NF, `CategoryName` era stocat în fiecare rând de produs, deci tot un singur rând trebuia actualizat — dar dacă se schimba *numele* categoriei (în 2NF nu există tabel de categorii), ar fi trebuit să actualizezi fiecare rând de produs care are acel nume de categorie.
 
-**Exercise 5:** This is NOT a normalization violation as described. `ShippingAddress` in `Orders` refers to the address *of that order*, which can legitimately differ from the client's registered address. Storing it there is correct. If you need the client's registered city as well, that already exists in the `Clients` table and can be retrieved via a JOIN. No duplication occurs because the two columns represent two different facts.
+**Exercițiul 5:** Aceasta NU este o încălcare a normalizării în forma descrisă. `ShippingAddress` din `Orders` se referă la adresa *acelei comenzi*, care poate diferi în mod legitim de adresa înregistrată a clientului. Stocarea ei acolo este corectă. Dacă ai nevoie și de orașul înregistrat al clientului, acesta există deja în tabelul `Clients` și poate fi obținut printr-un JOIN. Nu apare nicio duplicare, deoarece cele două coloane reprezintă două informații diferite.

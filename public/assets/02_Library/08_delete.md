@@ -1,71 +1,71 @@
-# Library Database — Worksheet 8: DELETE Statements
+# Baza de date Library — Fișa de lucru 8: Instrucțiuni DELETE
 
-## Learning Objectives
-- Delete specific rows from library tables safely using WHERE
-- Follow the correct FK deletion order across all 6 tables
-- Use DELETE with JOINs to remove rows based on conditions in related tables
-- Understand TRUNCATE vs DELETE and soft-delete patterns
+## Obiective de învățare
+- Ștergerea în siguranță a anumitor rânduri din tabelele bibliotecii folosind WHERE
+- Respectarea ordinii corecte de ștergere impuse de FK în toate cele 6 tabele
+- Folosirea DELETE cu JOIN-uri pentru a elimina rânduri pe baza condițiilor din tabele asociate
+- Înțelegerea diferenței TRUNCATE vs DELETE și a modelului „soft delete”
 
 ---
 
-## DELETE Syntax
+## Sintaxa DELETE
 
 ```sql
 DELETE FROM table_name
 WHERE condition;
 ```
 
-> **WARNING:** A DELETE without a WHERE clause removes **all rows** from the table. Always verify with SELECT first, and consider wrapping in a transaction.
+> **ATENȚIE:** Un DELETE fără clauza WHERE elimină **toate rândurile** din tabel. Verifică întotdeauna mai întâi cu un SELECT și ia în considerare includerea într-o tranzacție.
 
 ---
 
-## Best Practice: Preview Before Deleting
+## Bună practică: previzualizează înainte de ștergere
 
 ```sql
--- Preview: which rentals will be deleted?
+-- Previzualizare: ce împrumuturi vor fi șterse?
 SELECT * FROM Rentals WHERE ClientID = 5;
 
--- Then delete
+-- Apoi ștergem
 DELETE FROM Rentals WHERE ClientID = 5;
 ```
 
 ---
 
-## Basic DELETE — Single Row
+## DELETE de bază — un singur rând
 
 ```sql
--- Remove a specific rental record
+-- Eliminăm un anumit împrumut
 DELETE FROM Rentals WHERE RentalID = 8;
 
--- Remove a book copy that is decommissioned
+-- Eliminăm un exemplar scos din uz
 DELETE FROM Books WHERE BookID = 9;
 
--- Remove a client who never rented and wants to be removed
+-- Eliminăm un client care nu a împrumutat niciodată și dorește să fie șters
 DELETE FROM Clients WHERE ClientID = 6;
 ```
 
 ---
 
-## DELETE Multiple Rows with WHERE
+## DELETE pe mai multe rânduri cu WHERE
 
-### IN clause
+### Clauza IN
 
 ```sql
--- Remove all rentals for specific clients
+-- Eliminăm toate împrumuturile anumitor clienți
 DELETE FROM Rentals WHERE ClientID IN (4, 5);
 
--- Remove all books in 'Poor' condition
+-- Eliminăm toate cărțile în stare 'Poor'
 DELETE FROM Books WHERE Condition = 'Poor';
 
--- Delete Fiction and Mystery titles
--- (only safe if no Books reference these Titles)
+-- Ștergem titlurile Fiction și Mystery
+-- (sigur doar dacă niciun rând din Books nu referă aceste titluri)
 DELETE FROM Titles WHERE Genre IN ('Fiction', 'Mystery');
 ```
 
 ### BETWEEN
 
 ```sql
--- Remove rental records from a specific date range
+-- Eliminăm împrumuturile dintr-un anumit interval de date
 DELETE FROM Rentals
 WHERE RentalDate BETWEEN '2024-01-01' AND '2024-01-15';
 ```
@@ -73,15 +73,15 @@ WHERE RentalDate BETWEEN '2024-01-01' AND '2024-01-15';
 ### LIKE
 
 ```sql
--- Remove test client accounts
+-- Eliminăm conturile de test ale clienților
 DELETE FROM Clients
 WHERE Email LIKE '%@test.com' OR Email LIKE '%@example.com';
 ```
 
-### Compound conditions
+### Condiții compuse
 
 ```sql
--- Remove returned rentals older than 2 years
+-- Eliminăm împrumuturile returnate mai vechi de 2 ani
 DELETE FROM Rentals
 WHERE  ReturnDate IS NOT NULL
 AND    ReturnDate < DATEADD(YEAR, -2, GETDATE());
@@ -89,23 +89,23 @@ AND    ReturnDate < DATEADD(YEAR, -2, GETDATE());
 
 ---
 
-## DELETE with Subquery in WHERE
+## DELETE cu subinterogare în WHERE
 
 ```sql
--- Remove all rentals for books that have been decommissioned (Condition = 'Poor')
+-- Eliminăm toate împrumuturile cărților scoase din uz (Condition = 'Poor')
 DELETE FROM Rentals
 WHERE BookID IN (
     SELECT BookID FROM Books WHERE Condition = 'Poor'
 );
 
--- Remove all books of titles that are out of print (not in catalogue)
--- (Only safe if Rentals for those books are removed first)
+-- Eliminăm toate cărțile ale căror titluri nu mai există (nu sunt în catalog)
+-- (Sigur doar dacă împrumuturile acelor cărți au fost eliminate înainte)
 DELETE FROM Books
 WHERE TitleID NOT IN (
     SELECT TitleID FROM Titles
 );
 
--- Remove clients who have never rented and joined more than 3 years ago
+-- Eliminăm clienții care nu au împrumutat niciodată și s-au înscris acum mai mult de 3 ani
 DELETE FROM Clients
 WHERE ClientID NOT IN (SELECT DISTINCT ClientID FROM Rentals)
 AND   MembershipDate < DATEADD(YEAR, -3, GETDATE());
@@ -113,12 +113,12 @@ AND   MembershipDate < DATEADD(YEAR, -3, GETDATE());
 
 ---
 
-## DELETE with JOIN (T-SQL FROM Clause)
+## DELETE cu JOIN (clauza FROM din T-SQL)
 
-### Example 1 — Delete all rentals for books of a specific author
+### Exemplul 1 — Ștergerea tuturor împrumuturilor pentru cărțile unui anumit autor
 
 ```sql
--- Preview
+-- Previzualizare
 SELECT r.RentalID, r.BookID, t.Title, a.LastName
 FROM   Rentals AS r
 INNER JOIN Books   AS b ON r.BookID   = b.BookID
@@ -126,7 +126,7 @@ INNER JOIN Titles  AS t ON b.TitleID  = t.TitleID
 INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID
 WHERE  a.LastName = 'TestAuthor';
 
--- Delete
+-- Ștergere
 DELETE r
 FROM   Rentals AS r
 INNER JOIN Books   AS b ON r.BookID   = b.BookID
@@ -135,7 +135,7 @@ INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID
 WHERE  a.LastName = 'TestAuthor';
 ```
 
-### Example 2 — Delete all rentals for Technology books that were returned
+### Exemplul 2 — Ștergerea tuturor împrumuturilor returnate pentru cărțile Technology
 
 ```sql
 DELETE r
@@ -146,17 +146,17 @@ WHERE  t.Genre = 'Technology'
 AND    r.ReturnDate IS NOT NULL;
 ```
 
-### Example 3 — Anti-join DELETE: remove books that have never been rented
+### Exemplul 3 — DELETE cu anti-join: eliminarea cărților care nu au fost împrumutate niciodată
 
 ```sql
--- Preview
+-- Previzualizare
 SELECT b.BookID, t.Title, b.Condition
 FROM   Books AS b
 LEFT JOIN Rentals AS r ON b.BookID = r.BookID
 LEFT JOIN Titles  AS t ON b.TitleID = t.TitleID
 WHERE  r.RentalID IS NULL;
 
--- Delete
+-- Ștergere
 DELETE b
 FROM   Books AS b
 LEFT JOIN Rentals AS r ON b.BookID = r.BookID
@@ -165,42 +165,42 @@ WHERE  r.RentalID IS NULL;
 
 ---
 
-## Respecting Foreign Key Constraints
+## Respectarea constrângerilor de cheie străină
 
-You cannot delete a parent row if child rows still reference it. The correct deletion order for LibraryDB is:
+Nu poți șterge un rând părinte dacă există încă rânduri copil care îl referă. Ordinea corectă de ștergere pentru LibraryDB este:
 
 ```
-1. Rentals           (references Clients and Books)
-2. Books             (references Titles and Publishers)
-3. Titles            (references Authors)
-4. Clients           (no child FK dependencies — safe to delete)
-5. Publishers        (no child FK dependencies — safe to delete)
-6. Authors           (no child FK dependencies — safe to delete)
+1. Rentals           (referă Clients și Books)
+2. Books             (referă Titles și Publishers)
+3. Titles            (referă Authors)
+4. Clients           (nu mai are rânduri copil — se poate șterge în siguranță)
+5. Publishers        (nu mai are rânduri copil — se poate șterge în siguranță)
+6. Authors           (nu mai are rânduri copil — se poate șterge în siguranță)
 ```
 
-### Complete removal of a client and all their history
+### Eliminarea completă a unui client și a întregului său istoric
 
 ```sql
--- Step 1: remove the client's rentals
+-- Pasul 1: eliminăm împrumuturile clientului
 DELETE FROM Rentals WHERE ClientID = 2;
 
--- Step 2: now safe to remove the client
+-- Pasul 2: acum putem elimina clientul în siguranță
 DELETE FROM Clients WHERE ClientID = 2;
 ```
 
-### Remove a title and all its physical copies
+### Eliminarea unui titlu și a tuturor exemplarelor sale fizice
 
 ```sql
--- Step 1: remove rentals referencing any copy of this title
+-- Pasul 1: eliminăm împrumuturile care referă orice exemplar al acestui titlu
 DELETE r
 FROM   Rentals AS r
 INNER JOIN Books AS b ON r.BookID = b.BookID
 WHERE  b.TitleID = 3;
 
--- Step 2: remove the physical copies
+-- Pasul 2: eliminăm exemplarele fizice
 DELETE FROM Books WHERE TitleID = 3;
 
--- Step 3: now safe to remove the title
+-- Pasul 3: acum putem elimina titlul în siguranță
 DELETE FROM Titles WHERE TitleID = 3;
 ```
 
@@ -208,31 +208,31 @@ DELETE FROM Titles WHERE TitleID = 3;
 
 ## TRUNCATE TABLE vs DELETE
 
-| Feature | DELETE | TRUNCATE |
+| Caracteristică | DELETE | TRUNCATE |
 |---|---|---|
-| WHERE clause | Supported | Not supported (removes all rows) |
-| Speed | Slower (row-level logging) | Faster (minimal logging) |
-| Resets IDENTITY counter | No | Yes |
-| Can be rolled back | Yes (inside transaction) | Yes (inside transaction) |
-| Works with FK references | Yes (if children deleted first) | No (fails if FK references exist) |
-| Fires DELETE triggers | Yes | No |
+| Clauza WHERE | Suportată | Nesuportată (elimină toate rândurile) |
+| Viteză | Mai lent (jurnalizare la nivel de rând) | Mai rapid (jurnalizare minimă) |
+| Resetează contorul IDENTITY | Nu | Da |
+| Poate fi anulat (rollback) | Da (într-o tranzacție) | Da (într-o tranzacție) |
+| Funcționează cu referințe FK | Da (dacă rândurile copil sunt șterse înainte) | Nu (eșuează dacă există referințe FK) |
+| Declanșează triggerele DELETE | Da | Nu |
 
 ```sql
--- DELETE specific rows
+-- DELETE pe anumite rânduri
 DELETE FROM Rentals WHERE RentalDate < '2020-01-01';
 
--- TRUNCATE removes ALL rows and resets IDENTITY
--- Fails if Books is referenced by Rentals FK
-TRUNCATE TABLE Rentals;   -- OK — Rentals has no child FKs
-TRUNCATE TABLE Books;     -- ERROR if Rentals still references Books
+-- TRUNCATE elimină TOATE rândurile și resetează IDENTITY
+-- Eșuează dacă Books este referit de FK-ul din Rentals
+TRUNCATE TABLE Rentals;   -- OK — Rentals nu este referit de alte tabele
+TRUNCATE TABLE Books;     -- EROARE, deoarece Rentals referă Books
 ```
 
 ---
 
-## DELETE with OUTPUT Clause
+## DELETE cu clauza OUTPUT
 
 ```sql
--- Archive deleted rentals before removing them
+-- Arhivăm împrumuturile șterse înainte de a le elimina
 DECLARE @ArchivedRentals TABLE (
     RentalID   INT,
     ClientID   INT,
@@ -253,31 +253,31 @@ SELECT * FROM @ArchivedRentals;
 
 ---
 
-## Soft Delete Pattern
+## Modelul „Soft Delete”
 
-Instead of physically deleting, mark rows as inactive:
+În loc să ștergi fizic rândurile, marchează-le ca inactive:
 
 ```sql
--- Add IsActive flag
+-- Adăugăm indicatorul IsActive
 ALTER TABLE Clients ADD IsActive BIT NOT NULL DEFAULT 1;
 
--- "Delete" a client (deactivate)
+-- „Ștergem” un client (îl dezactivăm)
 UPDATE Clients SET IsActive = 0 WHERE ClientID = 3;
 
--- Query: only show active clients
+-- Interogare: afișăm doar clienții activi
 SELECT * FROM Clients WHERE IsActive = 1;
 ```
 
-**Trade-offs:** History is preserved, records can be reactivated. All queries must filter on `IsActive = 1`.
+**Compromisuri:** Istoricul este păstrat, iar înregistrările pot fi reactivate. Toate interogările trebuie să filtreze după `IsActive = 1`.
 
 ---
 
-## Transactions for Safety
+## Tranzacții pentru siguranță
 
 ```sql
 BEGIN TRANSACTION;
 
--- Fully remove title TitleID = 4 and all its data
+-- Eliminăm complet titlul cu TitleID = 4 și toate datele sale
 DELETE r
 FROM   Rentals AS r
 INNER JOIN Books AS b ON r.BookID = b.BookID
@@ -286,38 +286,38 @@ WHERE  b.TitleID = 4;
 DELETE FROM Books WHERE TitleID = 4;
 DELETE FROM Titles WHERE TitleID = 4;
 
--- Verify
+-- Verificăm
 SELECT * FROM Titles WHERE TitleID = 4;
 SELECT * FROM Books  WHERE TitleID = 4;
 
 COMMIT TRANSACTION;
--- ROLLBACK TRANSACTION if anything looks wrong
+-- ROLLBACK TRANSACTION dacă ceva pare greșit
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Delete the rental with `RentalID = 7`.
+**Exercițiul 1**
+Șterge împrumutul cu `RentalID = 7`.
 
-**Exercise 2**
-Delete all rental records where the book was returned more than 6 months ago.
+**Exercițiul 2**
+Șterge toate împrumuturile la care cartea a fost returnată acum mai mult de 6 luni.
 
-**Exercise 3**
-Using a subquery in WHERE, delete all books whose condition is `'Poor'` and which have no active (unreturned) rentals.
+**Exercițiul 3**
+Folosind o subinterogare în WHERE, șterge toate cărțile a căror stare este `'Poor'` și care nu au împrumuturi active (nereturnate).
 
-**Exercise 4**
-Write the correct sequence to completely remove a client (`ClientID = 4`) and all related rental records.
+**Exercițiul 4**
+Scrie secvența corectă pentru a elimina complet un client (`ClientID = 4`) și toate împrumuturile asociate.
 
-**Exercise 5**
-Using `DELETE ... FROM ... JOIN`, remove all rentals belonging to clients whose email ends in `'@test.com'`.
+**Exercițiul 5**
+Folosind `DELETE ... FROM ... JOIN`, elimină toate împrumuturile clienților al căror email se termină cu `'@test.com'`.
 
-**Exercise 6**
-Using `DELETE ... FROM ... JOIN`, remove all book copies (from `Books`) of titles published before 1950. Make sure to delete any related `Rentals` first.
+**Exercițiul 6**
+Folosind `DELETE ... FROM ... JOIN`, elimină toate exemplarele (din `Books`) ale titlurilor publicate înainte de 1950. Asigură-te că ștergi mai întâi toate rândurile asociate din `Rentals`.
 
-**Exercise 7**
-Using `DELETE` with `OUTPUT`, remove all rentals that are overdue by more than 60 days (not returned and DueDate < 60 days ago). Capture the deleted rows into a table variable and display them.
+**Exercițiul 7**
+Folosind `DELETE` cu `OUTPUT`, elimină toate împrumuturile întârziate cu mai mult de 60 de zile (nereturnate și cu DueDate mai vechi de 60 de zile). Capturează rândurile șterse într-o variabilă de tip tabel și afișează-le.
 
-**Exercise 8**
-Explain the difference between `DELETE FROM Rentals` and `TRUNCATE TABLE Rentals`. When would you use each? What happens to the IDENTITY counter in each case? Why would `TRUNCATE TABLE Books` fail in this database?
+**Exercițiul 8**
+Explică diferența dintre `DELETE FROM Rentals` și `TRUNCATE TABLE Rentals`. Când ai folosi fiecare variantă? Ce se întâmplă cu contorul IDENTITY în fiecare caz? De ce ar eșua `TRUNCATE TABLE Books` în această bază de date?

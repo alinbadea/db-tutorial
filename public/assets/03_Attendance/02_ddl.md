@@ -1,26 +1,26 @@
-# Attendance Database — Worksheet 2: DDL — Creating the Database
+# Baza de date Attendance — Fișa de lucru 2: DDL — Crearea bazei de date
 
-## Learning Objectives
-- Build the AttendanceDB schema using T-SQL DDL in the correct table order
-- Apply IDENTITY, PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK, and DEFAULT constraints
-- Modify and extend the schema using ALTER TABLE
-- Drop the schema safely in reverse dependency order
+## Obiective de învățare
+- Construirea schemei AttendanceDB folosind DDL T-SQL, în ordinea corectă a tabelelor
+- Aplicarea constrângerilor IDENTITY, PRIMARY KEY, FOREIGN KEY, UNIQUE, CHECK și DEFAULT
+- Modificarea și extinderea schemei folosind ALTER TABLE
+- Ștergerea în siguranță a schemei, în ordinea inversă a dependențelor
 
 ---
 
-## DDL Overview
+## Prezentare generală DDL
 
-| Statement | Purpose |
+| Instrucțiune | Scop |
 |---|---|
-| `CREATE DATABASE` | Creates a new database |
-| `CREATE TABLE` | Defines a table with columns and constraints |
-| `ALTER TABLE` | Adds, modifies, or removes columns and constraints |
-| `DROP TABLE` | Permanently removes a table |
-| `TRUNCATE TABLE` | Removes all rows but keeps the structure |
+| `CREATE DATABASE` | Creează o bază de date nouă |
+| `CREATE TABLE` | Definește un tabel, cu coloane și constrângeri |
+| `ALTER TABLE` | Adaugă, modifică sau elimină coloane și constrângeri |
+| `DROP TABLE` | Elimină definitiv un tabel |
+| `TRUNCATE TABLE` | Elimină toate rândurile, dar păstrează structura |
 
 ---
 
-## Step 1: Creating the Database
+## Pasul 1: Crearea bazei de date
 
 ```sql
 USE master;
@@ -35,16 +35,16 @@ GO
 
 ---
 
-## Step 2: Creating the Tables
+## Pasul 2: Crearea tabelelor
 
-**Creation order (parent tables first):**
+**Ordinea de creare (mai întâi tabelele părinte):**
 Students → Teachers → Subjects → Classes → Attendance
 
 ---
 
-### Table 1: Students
+### Tabelul 1: Students
 
-Stores enrolled students. No FK dependencies.
+Stochează elevii înscriși. Fără dependențe FK.
 
 ```sql
 CREATE TABLE Students (
@@ -63,9 +63,9 @@ GO
 
 ---
 
-### Table 2: Teachers
+### Tabelul 2: Teachers
 
-Stores teaching staff. No FK dependencies.
+Stochează personalul didactic. Fără dependențe FK.
 
 ```sql
 CREATE TABLE Teachers (
@@ -83,9 +83,9 @@ GO
 
 ---
 
-### Table 3: Subjects
+### Tabelul 3: Subjects
 
-Stores academic subjects. No FK dependencies.
+Stochează materiile de studiu. Fără dependențe FK.
 
 ```sql
 CREATE TABLE Subjects (
@@ -103,9 +103,9 @@ GO
 
 ---
 
-### Table 4: Classes
+### Tabelul 4: Classes
 
-Records student-subject enrollments. References `Students` and `Subjects`.
+Înregistrează înscrierile elevilor la materii. Referă `Students` și `Subjects`.
 
 ```sql
 CREATE TABLE Classes (
@@ -125,13 +125,13 @@ CREATE TABLE Classes (
 GO
 ```
 
-> **Note:** The UNIQUE constraint on `(SubjectID, StudentID, AcademicYear, Semester)` prevents a student from being enrolled in the same subject twice in the same semester.
+> **Notă:** Constrângerea UNIQUE pe `(SubjectID, StudentID, AcademicYear, Semester)` împiedică înscrierea unui elev de două ori la aceeași materie în același semestru.
 
 ---
 
-### Table 5: Attendance
+### Tabelul 5: Attendance
 
-Records daily attendance for each class enrollment. References `Classes` and `Teachers`.
+Înregistrează prezența zilnică pentru fiecare înscriere. Referă `Classes` și `Teachers`.
 
 ```sql
 CREATE TABLE Attendance (
@@ -150,14 +150,14 @@ CREATE TABLE Attendance (
 GO
 ```
 
-> **Note:** The UNIQUE constraint on `(ClassID, AttendanceDate)` prevents duplicate attendance entries for the same student-subject enrollment on the same day.
+> **Notă:** Constrângerea UNIQUE pe `(ClassID, AttendanceDate)` împiedică înregistrările de prezență duplicate pentru aceeași înscriere elev-materie în aceeași zi.
 
 ---
 
-## Step 3: Adding Foreign Keys with ALTER TABLE
+## Pasul 3: Adăugarea cheilor străine cu ALTER TABLE
 
 ```sql
--- Add FK to Classes (Subjects reference)
+-- Adăugăm FK în Classes (referința către Subjects)
 ALTER TABLE Classes
 ADD CONSTRAINT FK_Classes_Subjects
     FOREIGN KEY (SubjectID) REFERENCES Subjects(SubjectID);
@@ -168,7 +168,7 @@ ADD CONSTRAINT FK_Classes_Students
     FOREIGN KEY (StudentID) REFERENCES Students(StudentID);
 GO
 
--- Add FKs to Attendance
+-- Adăugăm FK-urile în Attendance
 ALTER TABLE Attendance
 ADD CONSTRAINT FK_Attendance_Classes
     FOREIGN KEY (ClassID) REFERENCES Classes(ClassID);
@@ -182,27 +182,27 @@ GO
 
 ---
 
-## Step 4: Verifying the Schema
+## Pasul 4: Verificarea schemei
 
 ```sql
--- View all details of the Attendance table
+-- Vizualizăm toate detaliile tabelului Attendance
 EXEC sp_help 'Attendance';
 GO
 
--- List all columns with types and nullability
+-- Listăm toate coloanele, cu tipurile lor și dacă acceptă NULL
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
 FROM   INFORMATION_SCHEMA.COLUMNS
 WHERE  TABLE_NAME IN ('Students','Teachers','Subjects','Classes','Attendance')
 ORDER  BY TABLE_NAME, ORDINAL_POSITION;
 GO
 
--- View all constraints
+-- Vizualizăm toate constrângerile
 SELECT TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE
 FROM   INFORMATION_SCHEMA.TABLE_CONSTRAINTS
 ORDER  BY TABLE_NAME, CONSTRAINT_TYPE;
 GO
 
--- List FK relationships
+-- Listăm relațiile FK
 SELECT
     fk.name         AS FK_Name,
     tp.name         AS Child_Table,
@@ -215,30 +215,30 @@ GO
 
 ---
 
-## Step 5: Modifying Tables
+## Pasul 5: Modificarea tabelelor
 
 ```sql
--- Add a 'Notes' column to Attendance for teacher comments
+-- Adăugăm o coloană 'Notes' în Attendance pentru comentariile profesorilor
 ALTER TABLE Attendance
 ADD Notes NVARCHAR(500) NULL;
 GO
 
--- Add a phone column to Students
+-- Adăugăm o coloană pentru telefon în Students
 ALTER TABLE Students
 ADD Phone NVARCHAR(20) NULL;
 GO
 
--- Increase the Grade column length
+-- Mărim lungimea coloanei Grade
 ALTER TABLE Students
 ALTER COLUMN Grade NVARCHAR(20) NULL;
 GO
 
--- Add a CHECK constraint for valid email format
+-- Adăugăm o constrângere CHECK pentru un format de email valid
 ALTER TABLE Teachers
 ADD CONSTRAINT CHK_Teachers_Email CHECK (Email LIKE '%@%');
 GO
 
--- Drop that constraint
+-- Ștergem acea constrângere
 ALTER TABLE Teachers
 DROP CONSTRAINT CHK_Teachers_Email;
 GO
@@ -246,10 +246,10 @@ GO
 
 ---
 
-## Step 6: Dropping Tables and the Database
+## Pasul 6: Ștergerea tabelelor și a bazei de date
 
 ```sql
--- Drop in reverse order (children first)
+-- Ștergem în ordine inversă (mai întâi tabelele copil)
 DROP TABLE IF EXISTS Attendance;
 DROP TABLE IF EXISTS Classes;
 DROP TABLE IF EXISTS Students;
@@ -265,11 +265,11 @@ GO
 
 ---
 
-## Complete Ready-to-Run Script
+## Script complet, gata de rulat
 
 ```sql
 -- ============================================================
--- AttendanceDB — Full Creation Script
+-- AttendanceDB — Script complet de creare
 -- ============================================================
 
 USE master;
@@ -358,19 +358,19 @@ GO
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Write a `CREATE TABLE` statement for an `Exams` table: `ExamID` (auto PK), `ClassID` (FK to Classes), `TeacherID` (FK to Teachers), `ExamDate` (date, required), `Score` (decimal 5,2, must be between 0 and 100), `ExamType` (CHECK: `'Midterm'`, `'Final'`, `'Quiz'`).
+**Exercițiul 1**
+Scrie o instrucțiune `CREATE TABLE` pentru un tabel `Exams`: `ExamID` (PK auto-incrementat), `ClassID` (FK către Classes), `TeacherID` (FK către Teachers), `ExamDate` (dată, obligatorie), `Score` (decimal 5,2, obligatoriu între 0 și 100), `ExamType` (CHECK: `'Midterm'`, `'Final'`, `'Quiz'`).
 
-**Exercise 2**
-Add a `MaxAbsences` column to `Subjects` (INT, default 3, must be >= 0) using `ALTER TABLE`.
+**Exercițiul 2**
+Adaugă în `Subjects`, folosind `ALTER TABLE`, o coloană `MaxAbsences` (INT, implicit 3, obligatoriu >= 0).
 
-**Exercise 3**
-Explain why the UNIQUE constraint `UQ_Classes_Enrollment` on `(SubjectID, StudentID, AcademicYear, Semester)` is important. What would happen without it?
+**Exercițiul 3**
+Explică de ce este importantă constrângerea UNIQUE `UQ_Classes_Enrollment` pe `(SubjectID, StudentID, AcademicYear, Semester)`. Ce s-ar întâmpla fără ea?
 
-**Exercise 4**
-A student tries to insert a Class record where `Semester = 'Winter'`. What constraint will SQL Server enforce and what error will occur?
+**Exercițiul 4**
+Cineva încearcă să insereze în Classes o înregistrare cu `Semester = 'Winter'`. Ce constrângere va aplica SQL Server și ce eroare va apărea?
 
-**Exercise 5**
-Write the full DROP sequence to safely remove the entire AttendanceDB schema and database.
+**Exercițiul 5**
+Scrie secvența completă de DROP pentru a elimina în siguranță întreaga schemă AttendanceDB și baza de date.

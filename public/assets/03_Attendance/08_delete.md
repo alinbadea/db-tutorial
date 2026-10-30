@@ -1,67 +1,67 @@
-# Attendance Database — Worksheet 8: DELETE Statements
+# Baza de date Attendance — Fișa de lucru 8: Instrucțiuni DELETE
 
-## Learning Objectives
-- Delete rows from attendance tables safely with WHERE
-- Delete in the correct FK order to avoid constraint violations
-- Use DELETE with JOINs to remove rows based on conditions in related tables
-- Understand TRUNCATE vs DELETE in the context of an attendance system
+## Obiective de învățare
+- Ștergerea în siguranță a rândurilor din tabelele de prezență, cu WHERE
+- Ștergerea în ordinea corectă impusă de FK, pentru a evita încălcarea constrângerilor
+- Folosirea DELETE cu JOIN-uri pentru a elimina rânduri pe baza condițiilor din tabele asociate
+- Înțelegerea diferenței TRUNCATE vs DELETE în contextul unui sistem de prezență
 
 ---
 
-## DELETE Syntax
+## Sintaxa DELETE
 
 ```sql
 DELETE FROM table_name
 WHERE condition;
 ```
 
-> **WARNING:** Without WHERE, every row in the table is deleted. Always preview with a SELECT first, and consider wrapping destructive operations in a transaction.
+> **ATENȚIE:** Fără WHERE, fiecare rând din tabel este șters. Previzualizează întotdeauna mai întâi cu un SELECT și ia în considerare includerea operațiilor distructive într-o tranzacție.
 
 ---
 
-## Best Practice: Preview Before Deleting
+## Bună practică: previzualizează înainte de ștergere
 
 ```sql
--- Preview: which attendance records will be removed?
+-- Previzualizare: ce înregistrări de prezență vor fi eliminate?
 SELECT * FROM Attendance WHERE ClassID = 5;
 
--- Then delete
+-- Apoi ștergem
 DELETE FROM Attendance WHERE ClassID = 5;
 ```
 
 ---
 
-## Basic DELETE — Single Row
+## DELETE de bază — un singur rând
 
 ```sql
--- Remove a specific attendance record (e.g., data entry error)
+-- Eliminăm o anumită înregistrare de prezență (de ex., o eroare la introducerea datelor)
 DELETE FROM Attendance WHERE AttendanceID = 11;
 
--- Remove a specific class enrollment (student dropped a subject)
+-- Eliminăm o anumită înscriere (elevul a renunțat la o materie)
 DELETE FROM Classes WHERE ClassID = 9;
 
--- Remove a student record (must delete dependent rows first)
+-- Eliminăm un elev (rândurile dependente trebuie șterse înainte)
 DELETE FROM Students WHERE StudentID = 8;
 ```
 
 ---
 
-## DELETE Multiple Rows with WHERE
+## DELETE pe mai multe rânduri cu WHERE
 
-### IN clause
+### Clauza IN
 
 ```sql
--- Remove attendance records for specific classes
+-- Eliminăm înregistrările de prezență pentru anumite înscrieri
 DELETE FROM Attendance WHERE ClassID IN (9, 10);
 
--- Remove all classes for a specific subject
+-- Eliminăm toate înscrierile la o anumită materie
 DELETE FROM Classes WHERE SubjectID = 5;
 ```
 
 ### BETWEEN
 
 ```sql
--- Remove attendance records from a test date range
+-- Eliminăm înregistrările de prezență dintr-un interval de date de test
 DELETE FROM Attendance
 WHERE AttendanceDate BETWEEN '2024-09-01' AND '2024-09-02';
 ```
@@ -69,19 +69,19 @@ WHERE AttendanceDate BETWEEN '2024-09-01' AND '2024-09-02';
 ### LIKE
 
 ```sql
--- Remove test student accounts
+-- Eliminăm conturile de test ale elevilor
 DELETE FROM Students
 WHERE Email LIKE '%@test.ro' OR Email LIKE '%@example.com';
 ```
 
-### Compound conditions
+### Condiții compuse
 
 ```sql
--- Remove old attendance records that are no longer needed
+-- Eliminăm înregistrările vechi de prezență care nu mai sunt necesare
 DELETE FROM Attendance
 WHERE AttendanceDate < DATEADD(YEAR, -5, GETDATE());
 
--- Remove 'Absent' records for a specific date (e.g., holiday — everyone was absent)
+-- Eliminăm înregistrările 'Absent' pentru o anumită dată (de ex., o zi liberă — toată lumea a lipsit)
 DELETE FROM Attendance
 WHERE Status = 'Absent'
 AND   AttendanceDate = '2024-12-25';
@@ -89,10 +89,10 @@ AND   AttendanceDate = '2024-12-25';
 
 ---
 
-## DELETE with Subquery in WHERE
+## DELETE cu subinterogare în WHERE
 
 ```sql
--- Remove all attendance records for students in grade '10B'
+-- Eliminăm toate înregistrările de prezență ale elevilor din clasa '10B'
 DELETE FROM Attendance
 WHERE ClassID IN (
     SELECT cl.ClassID
@@ -101,13 +101,13 @@ WHERE ClassID IN (
     WHERE  s.Grade = '10B'
 );
 
--- Remove class enrollments for a subject that is being discontinued
+-- Eliminăm înscrierile la o materie care nu se mai predă
 DELETE FROM Classes
 WHERE SubjectID = (
     SELECT SubjectID FROM Subjects WHERE SubjectName = 'History'
 );
 
--- Remove students who have no class enrollments
+-- Eliminăm elevii care nu au nicio înscriere
 DELETE FROM Students
 WHERE StudentID NOT IN (
     SELECT DISTINCT StudentID FROM Classes
@@ -116,19 +116,19 @@ WHERE StudentID NOT IN (
 
 ---
 
-## DELETE with JOIN (T-SQL FROM Clause)
+## DELETE cu JOIN (clauza FROM din T-SQL)
 
-### Example 1 — Delete attendance records for a specific subject
+### Exemplul 1 — Ștergerea înregistrărilor de prezență pentru o anumită materie
 
 ```sql
--- Preview
+-- Previzualizare
 SELECT a.AttendanceID, sub.SubjectName, a.AttendanceDate
 FROM   Attendance AS a
 INNER JOIN Classes  AS cl  ON a.ClassID    = cl.ClassID
 INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
 WHERE  sub.SubjectName = 'History';
 
--- Delete
+-- Ștergere
 DELETE a
 FROM   Attendance AS a
 INNER JOIN Classes  AS cl  ON a.ClassID    = cl.ClassID
@@ -136,10 +136,10 @@ INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
 WHERE  sub.SubjectName = 'History';
 ```
 
-### Example 2 — Delete attendance for a specific grade on a specific date
+### Exemplul 2 — Ștergerea prezenței unei anumite clase la o anumită dată
 
 ```sql
--- Delete all attendance for grade 10A on September 5 (cancelled classes)
+-- Ștergem toată prezența clasei 10A din 5 septembrie (ore anulate)
 DELETE a
 FROM   Attendance AS a
 INNER JOIN Classes  AS cl ON a.ClassID    = cl.ClassID
@@ -148,16 +148,16 @@ WHERE  s.Grade           = '10A'
 AND    a.AttendanceDate  = '2024-09-05';
 ```
 
-### Example 3 — Anti-join DELETE: remove classes for subjects that no longer exist
+### Exemplul 3 — DELETE cu anti-join: eliminarea înscrierilor la materii care nu mai există
 
 ```sql
--- Preview orphaned class enrollments
+-- Previzualizăm înscrierile orfane
 SELECT cl.ClassID, cl.SubjectID
 FROM   Classes AS cl
 LEFT JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
 WHERE  sub.SubjectID IS NULL;
 
--- Delete orphaned class enrollments
+-- Ștergem înscrierile orfane
 DELETE cl
 FROM   Classes AS cl
 LEFT JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID
@@ -166,47 +166,47 @@ WHERE  sub.SubjectID IS NULL;
 
 ---
 
-## Respecting Foreign Key Constraints
+## Respectarea constrângerilor de cheie străină
 
-The correct deletion order for AttendanceDB (most-child to most-parent):
+Ordinea corectă de ștergere pentru AttendanceDB (de la tabelele copil la tabelele părinte):
 
 ```
-1. Attendance   (references Classes and Teachers)
-2. Classes      (references Students and Subjects)
-3. Students     (no child FK references — safe)
-4. Teachers     (no child FK references — safe)
-5. Subjects     (no child FK references — safe)
+1. Attendance   (referă Classes și Teachers)
+2. Classes      (referă Students și Subjects)
+3. Students     (nu mai are rânduri copil — sigur)
+4. Teachers     (nu mai are rânduri copil — sigur)
+5. Subjects     (nu mai are rânduri copil — sigur)
 ```
 
-### Complete removal of a student
+### Eliminarea completă a unui elev
 
 ```sql
--- Step 1: Remove attendance records for this student's classes
+-- Pasul 1: Eliminăm înregistrările de prezență pentru înscrierile acestui elev
 DELETE a
 FROM   Attendance AS a
 INNER JOIN Classes AS cl ON a.ClassID = cl.ClassID
 WHERE  cl.StudentID = 3;
 
--- Step 2: Remove the class enrollments
+-- Pasul 2: Eliminăm înscrierile
 DELETE FROM Classes WHERE StudentID = 3;
 
--- Step 3: Remove the student
+-- Pasul 3: Eliminăm elevul
 DELETE FROM Students WHERE StudentID = 3;
 ```
 
-### Complete removal of a subject (retiring a subject)
+### Eliminarea completă a unei materii (retragerea unei materii)
 
 ```sql
--- Step 1: Remove attendance records for all classes of this subject
+-- Pasul 1: Eliminăm înregistrările de prezență pentru toate înscrierile la această materie
 DELETE a
 FROM   Attendance AS a
 INNER JOIN Classes AS cl ON a.ClassID = cl.ClassID
 WHERE  cl.SubjectID = 5;
 
--- Step 2: Remove the class enrollments for this subject
+-- Pasul 2: Eliminăm înscrierile la această materie
 DELETE FROM Classes WHERE SubjectID = 5;
 
--- Step 3: Remove the subject itself
+-- Pasul 3: Eliminăm materia propriu-zisă
 DELETE FROM Subjects WHERE SubjectID = 5;
 ```
 
@@ -214,30 +214,30 @@ DELETE FROM Subjects WHERE SubjectID = 5;
 
 ## TRUNCATE TABLE vs DELETE
 
-| Feature | DELETE | TRUNCATE |
+| Caracteristică | DELETE | TRUNCATE |
 |---|---|---|
-| WHERE clause | Supported | Not supported |
-| Speed | Slower (row logging) | Faster (minimal logging) |
-| Resets IDENTITY counter | No | Yes |
-| Can be rolled back | Yes (in transaction) | Yes (in transaction) |
-| Works with FK references | Yes (if children removed) | No |
-| Fires DELETE triggers | Yes | No |
+| Clauza WHERE | Suportată | Nesuportată |
+| Viteză | Mai lent (jurnalizare pe rând) | Mai rapid (jurnalizare minimă) |
+| Resetează contorul IDENTITY | Nu | Da |
+| Poate fi anulat (rollback) | Da (într-o tranzacție) | Da (într-o tranzacție) |
+| Funcționează cu referințe FK | Da (dacă rândurile copil au fost eliminate) | Nu |
+| Declanșează triggerele DELETE | Da | Nu |
 
 ```sql
--- DELETE: precise, row-by-row
+-- DELETE: precis, rând cu rând
 DELETE FROM Attendance WHERE AttendanceDate < '2020-01-01';
 
--- TRUNCATE: removes ALL rows, resets identity
-TRUNCATE TABLE Attendance;   -- OK — no table has Attendance as a FK target
-TRUNCATE TABLE Classes;      -- ERROR — Attendance references Classes via FK
+-- TRUNCATE: elimină TOATE rândurile, resetează IDENTITY
+TRUNCATE TABLE Attendance;   -- OK — niciun tabel nu referă Attendance printr-o FK
+TRUNCATE TABLE Classes;      -- EROARE — Attendance referă Classes printr-o FK
 ```
 
 ---
 
-## DELETE with OUTPUT Clause
+## DELETE cu clauza OUTPUT
 
 ```sql
--- Archive deleted attendance records before removing them
+-- Arhivăm înregistrările de prezență șterse înainte de a le elimina
 DECLARE @Deleted TABLE (
     AttendanceID   INT,
     ClassID        INT,
@@ -257,29 +257,29 @@ SELECT * FROM @Deleted;
 
 ---
 
-## Soft Delete Pattern
+## Modelul „Soft Delete”
 
-Instead of deleting, deactivate with a flag:
+În loc să ștergi, dezactivează cu un indicator (flag):
 
 ```sql
--- Add IsActive to Students
+-- Adăugăm IsActive în Students
 ALTER TABLE Students ADD IsActive BIT NOT NULL DEFAULT 1;
 
--- "Delete" a student
+-- „Ștergem” un elev
 UPDATE Students SET IsActive = 0 WHERE StudentID = 3;
 
--- Active students only
+-- Doar elevii activi
 SELECT * FROM Students WHERE IsActive = 1;
 ```
 
 ---
 
-## Transactions for Safety
+## Tranzacții pentru siguranță
 
 ```sql
 BEGIN TRANSACTION;
 
--- Fully remove subject 'History' (SubjectID = 5) and all related data
+-- Eliminăm complet materia 'History' (SubjectID = 5) și toate datele asociate
 DELETE a
 FROM   Attendance AS a
 INNER JOIN Classes AS cl ON a.ClassID = cl.ClassID
@@ -288,42 +288,42 @@ WHERE  cl.SubjectID = 5;
 DELETE FROM Classes WHERE SubjectID = 5;
 DELETE FROM Subjects WHERE SubjectID = 5;
 
--- Verify
+-- Verificăm
 SELECT * FROM Subjects WHERE SubjectID = 5;
 SELECT * FROM Classes  WHERE SubjectID = 5;
 
 COMMIT TRANSACTION;
--- ROLLBACK TRANSACTION if something went wrong
+-- ROLLBACK TRANSACTION dacă ceva a mers prost
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Delete the attendance record with `AttendanceID = 12`.
+**Exercițiul 1**
+Șterge înregistrarea de prezență cu `AttendanceID = 12`.
 
-**Exercise 2**
-Delete all attendance records where `Status = 'Late'` on `'2024-09-04'`.
+**Exercițiul 2**
+Șterge toate înregistrările de prezență cu `Status = 'Late'` din `'2024-09-04'`.
 
-**Exercise 3**
-Using a subquery, delete all class enrollments (`Classes` rows) for students in grade `'10B'` — but only after ensuring their attendance records are deleted first.
+**Exercițiul 3**
+Folosind o subinterogare, șterge toate înscrierile (rândurile din `Classes`) ale elevilor din clasa `'10B'` — dar numai după ce te-ai asigurat că înregistrările lor de prezență au fost șterse înainte.
 
-**Exercise 4**
-Write the complete sequence to remove the teacher with `TeacherID = 5` from the system — first update their attendance records to reassign them to `TeacherID = 1`, then (optionally) delete the teacher.
+**Exercițiul 4**
+Scrie secvența completă pentru a elimina din sistem profesorul cu `TeacherID = 5` — mai întâi actualizează înregistrările lui de prezență pentru a le reatribui lui `TeacherID = 1`, apoi (opțional) șterge profesorul.
 
-**Exercise 5**
-Using `DELETE ... FROM ... JOIN`, remove all attendance records for the `'Physics'` subject (join through Attendance → Classes → Subjects).
+**Exercițiul 5**
+Folosind `DELETE ... FROM ... JOIN`, elimină toate înregistrările de prezență pentru materia `'Physics'` (unește pe traseul Attendance → Classes → Subjects).
 
-**Exercise 6**
-Using `DELETE ... FROM ... JOIN`, remove all class enrollments for students whose email ends in `'@test.ro'`. (Join Classes → Students.)
+**Exercițiul 6**
+Folosind `DELETE ... FROM ... JOIN`, elimină toate înscrierile elevilor al căror email se termină cu `'@test.ro'`. (Unește Classes → Students.)
 
-**Exercise 7**
-Using `DELETE` with `OUTPUT`, remove all attendance records from `'2024-09-03'` and capture the deleted rows in a table variable. Display `AttendanceID`, `ClassID`, and `Status`.
+**Exercițiul 7**
+Folosind `DELETE` cu `OUTPUT`, elimină toate înregistrările de prezență din `'2024-09-03'` și capturează rândurile șterse într-o variabilă de tip tabel. Afișează `AttendanceID`, `ClassID` și `Status`.
 
-**Exercise 8**
-Explain the difference between `DELETE FROM Attendance` and `TRUNCATE TABLE Attendance`:
-- What happens to the identity counter in each case?
-- Can you use a WHERE clause with TRUNCATE?
-- Why would `TRUNCATE TABLE Classes` fail if Attendance still contains rows?
-- In what scenario would you use TRUNCATE rather than DELETE?
+**Exercițiul 8**
+Explică diferența dintre `DELETE FROM Attendance` și `TRUNCATE TABLE Attendance`:
+- Ce se întâmplă cu contorul IDENTITY în fiecare caz?
+- Poți folosi o clauză WHERE cu TRUNCATE?
+- De ce ar eșua `TRUNCATE TABLE Classes` dacă Attendance încă mai conține rânduri?
+- În ce scenariu ai folosi TRUNCATE în loc de DELETE?

@@ -1,62 +1,62 @@
-# eCommerce Database — Worksheet 6: SELECT — Grouping and Aggregates
+# Baza de date eCommerce — Fișa de lucru 6: SELECT — Grupare și funcții de agregare
 
-## Learning Objectives
-- Use `COUNT`, `SUM`, `AVG`, `MIN`, and `MAX` to summarise data
-- Group rows with `GROUP BY` using single and multiple columns
-- Filter groups with `HAVING`
-- Combine JOINs with aggregation for meaningful business reports
+## Obiective de învățare
+- Folosirea `COUNT`, `SUM`, `AVG`, `MIN` și `MAX` pentru a sintetiza datele
+- Gruparea rândurilor cu `GROUP BY` după una sau mai multe coloane
+- Filtrarea grupurilor cu `HAVING`
+- Combinarea JOIN-urilor cu agregarea pentru rapoarte de business relevante
 
 ---
 
-## Aggregate Functions
+## Funcții de agregare
 
-Aggregate functions collapse many rows into a single summary value.
+Funcțiile de agregare comprimă mai multe rânduri într-o singură valoare de sinteză.
 
 ### COUNT
 
 ```sql
--- Total number of products
+-- Numărul total de produse
 SELECT COUNT(*) AS TotalProducts FROM Products;
 
--- Number of products that have a description (ignores NULLs)
+-- Numărul de produse care au o descriere (ignoră valorile NULL)
 SELECT COUNT(Description) AS ProductsWithDescription FROM Products;
 
--- Count per category (used with GROUP BY — see below)
+-- Numărare pe categorii (folosit cu GROUP BY — vezi mai jos)
 SELECT CategoryID, COUNT(*) AS ProductCount
 FROM   Products
 GROUP BY CategoryID;
 ```
 
-> **COUNT(\*) vs COUNT(column):** `COUNT(*)` counts every row including NULLs. `COUNT(column)` counts only rows where that column is not NULL.
+> **COUNT(\*) vs COUNT(coloană):** `COUNT(*)` numără fiecare rând, inclusiv cele cu NULL. `COUNT(coloană)` numără doar rândurile în care acea coloană nu este NULL.
 
 ### SUM
 
 ```sql
--- Total stock across all products
+-- Stocul total al tuturor produselor
 SELECT SUM(Stock) AS TotalStock FROM Products;
 
--- Total revenue from all order details
+-- Venitul total din toate detaliile de comandă
 SELECT SUM(Quantity * UnitPrice) AS TotalRevenue FROM OrderDetails;
 ```
 
 ### AVG
 
 ```sql
--- Average product price
+-- Prețul mediu al produselor
 SELECT AVG(Price) AS AveragePrice FROM Products;
 
--- Average order total
+-- Valoarea medie a unei comenzi
 SELECT AVG(TotalAmount) AS AverageOrderValue FROM Orders;
 ```
 
-### MIN and MAX
+### MIN și MAX
 
 ```sql
--- Cheapest and most expensive product
+-- Cel mai ieftin și cel mai scump produs
 SELECT MIN(Price) AS CheapestPrice, MAX(Price) AS MostExpensivePrice
 FROM Products;
 
--- Earliest and most recent order date
+-- Cea mai veche și cea mai recentă dată de comandă
 SELECT MIN(OrderDate) AS FirstOrder, MAX(OrderDate) AS LastOrder
 FROM Orders;
 ```
@@ -65,45 +65,45 @@ FROM Orders;
 
 ## GROUP BY
 
-`GROUP BY` divides rows into groups and applies the aggregate function to each group separately.
+`GROUP BY` împarte rândurile în grupuri și aplică funcția de agregare fiecărui grup în parte.
 
-**Rule:** Every column in the `SELECT` list that is **not** inside an aggregate function **must** appear in the `GROUP BY` clause.
+**Regulă:** Fiecare coloană din lista `SELECT` care **nu** se află într-o funcție de agregare **trebuie** să apară în clauza `GROUP BY`.
 
-### Single Column
+### O singură coloană
 
 ```sql
--- Number of products per category
+-- Numărul de produse pe categorie
 SELECT CategoryID, COUNT(*) AS ProductCount
 FROM   Products
 GROUP BY CategoryID;
 
--- Total quantity sold per product
+-- Cantitatea totală vândută pe produs
 SELECT ProductID, SUM(Quantity) AS TotalSold
 FROM   OrderDetails
 GROUP BY ProductID;
 
--- Number of orders per status
+-- Numărul de comenzi pe status
 SELECT Status, COUNT(*) AS OrderCount
 FROM   Orders
 GROUP BY Status;
 
--- Total revenue per order
+-- Venitul total pe comandă
 SELECT OrderID, SUM(Quantity * UnitPrice) AS OrderTotal
 FROM   OrderDetails
 GROUP BY OrderID
 ORDER BY OrderTotal DESC;
 ```
 
-### Multiple Columns
+### Mai multe coloane
 
 ```sql
--- Number of orders per client per status
+-- Numărul de comenzi pe client și pe status
 SELECT ClientID, Status, COUNT(*) AS Count
 FROM   Orders
 GROUP BY ClientID, Status
 ORDER BY ClientID, Status;
 
--- Revenue per order, per product
+-- Venitul pe comandă și pe produs
 SELECT OrderID, ProductID, SUM(Quantity * UnitPrice) AS LineRevenue
 FROM   OrderDetails
 GROUP BY OrderID, ProductID
@@ -114,38 +114,38 @@ ORDER BY OrderID;
 
 ## HAVING
 
-`HAVING` filters groups after aggregation, the same way `WHERE` filters rows before aggregation.
+`HAVING` filtrează grupurile după agregare, la fel cum `WHERE` filtrează rândurile înainte de agregare.
 
 ```sql
--- WHERE filters rows (before grouping)
+-- WHERE filtrează rânduri (înainte de grupare)
 SELECT CategoryID, COUNT(*) AS ProductCount
 FROM   Products
-WHERE  Price > 20            -- filters individual products first
+WHERE  Price > 20            -- mai întâi filtrează produsele individuale
 GROUP BY CategoryID;
 
--- HAVING filters groups (after grouping)
+-- HAVING filtrează grupuri (după grupare)
 SELECT CategoryID, COUNT(*) AS ProductCount
 FROM   Products
 GROUP BY CategoryID
-HAVING COUNT(*) >= 2;        -- keeps only categories with 2 or more products
+HAVING COUNT(*) >= 2;        -- păstrează doar categoriile cu 2 sau mai multe produse
 ```
 
-### HAVING Examples
+### Exemple HAVING
 
 ```sql
--- Categories whose total stock exceeds 100 units
+-- Categoriile al căror stoc total depășește 100 de unități
 SELECT CategoryID, SUM(Stock) AS TotalStock
 FROM   Products
 GROUP BY CategoryID
 HAVING SUM(Stock) > 100;
 
--- Clients who have placed more than 1 order
+-- Clienții care au plasat mai mult de o comandă
 SELECT ClientID, COUNT(*) AS OrderCount
 FROM   Orders
 GROUP BY ClientID
 HAVING COUNT(*) > 1;
 
--- Products whose average line-item quantity is above 1.5
+-- Produsele a căror cantitate medie pe linie de comandă este peste 1,5
 SELECT ProductID, AVG(CAST(Quantity AS DECIMAL(10,2))) AS AvgQty
 FROM   OrderDetails
 GROUP BY ProductID
@@ -154,16 +154,16 @@ HAVING AVG(CAST(Quantity AS DECIMAL(10,2))) > 1.5;
 
 ---
 
-## GROUP BY with ORDER BY
+## GROUP BY cu ORDER BY
 
 ```sql
--- Categories sorted by most products first
+-- Categoriile sortate începând cu cea cu cele mai multe produse
 SELECT CategoryID, COUNT(*) AS ProductCount
 FROM   Products
 GROUP BY CategoryID
 ORDER BY ProductCount DESC;
 
--- Orders per client sorted by most active client
+-- Comenzile pe client, sortate începând cu clientul cel mai activ
 SELECT ClientID, COUNT(*) AS OrderCount, SUM(TotalAmount) AS TotalSpent
 FROM   Orders
 GROUP BY ClientID
@@ -172,11 +172,11 @@ ORDER BY TotalSpent DESC;
 
 ---
 
-## GROUP BY with JOINs
+## GROUP BY cu JOIN-uri
 
-Join tables first to bring in descriptive columns, then aggregate.
+Mai întâi unește tabelele pentru a aduce coloanele descriptive, apoi agregă.
 
-### Example 1 — Products per category name
+### Exemplul 1 — Produsele pe nume de categorie
 
 ```sql
 SELECT
@@ -191,7 +191,7 @@ GROUP BY c.CategoryID, c.CategoryName
 ORDER BY ProductCount DESC;
 ```
 
-### Example 2 — Total revenue per client
+### Exemplul 2 — Venitul total pe client
 
 ```sql
 SELECT
@@ -206,7 +206,7 @@ GROUP BY cl.ClientID, cl.FirstName, cl.LastName, cl.Country
 ORDER BY TotalRevenue DESC;
 ```
 
-### Example 3 — Top products by revenue with category name
+### Exemplul 3 — Topul produselor după venit, cu numele categoriei
 
 ```sql
 SELECT
@@ -221,7 +221,7 @@ GROUP BY c.CategoryID, c.CategoryName, p.ProductID, p.ProductName
 ORDER BY Revenue DESC;
 ```
 
-### Example 4 — Monthly revenue with HAVING filter
+### Exemplul 4 — Venitul lunar, cu filtru HAVING
 
 ```sql
 SELECT
@@ -238,77 +238,77 @@ ORDER BY OrderYear, OrderMonth;
 
 ---
 
-## NULL Values in Aggregates
+## Valori NULL în agregări
 
-Aggregate functions **ignore NULLs** (except `COUNT(*)`).
+Funcțiile de agregare **ignoră valorile NULL** (cu excepția `COUNT(*)`).
 
 ```sql
--- TotalAmount may be NULL for new orders
+-- TotalAmount poate fi NULL pentru comenzile noi
 SELECT AVG(TotalAmount) AS AvgOrderValue FROM Orders;
--- AVG ignores NULLs — the result is the average of non-NULL rows only
+-- AVG ignoră valorile NULL — rezultatul este media doar a rândurilor non-NULL
 
--- Replace NULLs with 0 before aggregating
+-- Înlocuim valorile NULL cu 0 înainte de agregare
 SELECT SUM(ISNULL(TotalAmount, 0)) AS TotalWithNulls FROM Orders;
 
--- COALESCE is the SQL standard equivalent of ISNULL
+-- COALESCE este echivalentul din standardul SQL al funcției ISNULL
 SELECT AVG(COALESCE(TotalAmount, 0)) AS SafeAvg FROM Orders;
 ```
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-Count the total number of orders in the `Orders` table.
+**Exercițiul 1 (Ușor)**
+Numără totalul comenzilor din tabelul `Orders`.
 
-**Exercise 2 (Easy)**
-Find the average, minimum, and maximum price from the `Products` table.
+**Exercițiul 2 (Ușor)**
+Găsește prețul mediu, minim și maxim din tabelul `Products`.
 
-**Exercise 3 (Easy)**
-Show each `Status` value and how many orders have that status.
+**Exercițiul 3 (Ușor)**
+Afișează fiecare valoare `Status` și câte comenzi au acel status.
 
-**Exercise 4 (Medium)**
-Show each `CategoryID` with the total number of products and the average price of products in that category. Sort by average price descending.
+**Exercițiul 4 (Mediu)**
+Afișează fiecare `CategoryID` cu numărul total de produse și prețul mediu al produselor din acea categorie. Sortează descrescător după prețul mediu.
 
-**Exercise 5 (Medium)**
-List all products that have been ordered more than once (total quantity sold > 1). Show `ProductID` and total quantity sold.
+**Exercițiul 5 (Mediu)**
+Listează toate produsele care au fost comandate de mai multe ori (cantitatea totală vândută > 1). Afișează `ProductID` și cantitatea totală vândută.
 
-**Exercise 6 (Medium)**
-Show each client (`ClientID`) with their total number of orders and total amount spent. Only include clients who have spent more than €100 in total.
+**Exercițiul 6 (Mediu)**
+Afișează fiecare client (`ClientID`) cu numărul total de comenzi și suma totală cheltuită. Include doar clienții care au cheltuit în total mai mult de 100 €.
 
-**Exercise 7 (Medium)**
-Using a JOIN, show each category name alongside the number of products in it and the sum of all stock in that category. Include categories with no products.
+**Exercițiul 7 (Mediu)**
+Folosind un JOIN, afișează numele fiecărei categorii alături de numărul de produse din ea și suma întregului stoc din acea categorie. Include categoriile fără produse.
 
-**Exercise 8 (Hard)**
-For each client, show their full name, total number of distinct orders, total number of product lines ordered (rows in `OrderDetails`), and total amount spent (sum of Quantity × UnitPrice). Sort by total spent descending.
+**Exercițiul 8 (Dificil)**
+Pentru fiecare client, afișează numele complet, numărul total de comenzi distincte, numărul total de linii de produs comandate (rânduri în `OrderDetails`) și suma totală cheltuită (suma Quantity × UnitPrice). Sortează descrescător după suma cheltuită.
 
-**Exercise 9 (Hard)**
-Show the top 3 products by total revenue (Quantity × UnitPrice) along with the product name and category name. Use a JOIN across all relevant tables.
+**Exercițiul 9 (Dificil)**
+Afișează primele 3 produse după venitul total (Quantity × UnitPrice), împreună cu numele produsului și numele categoriei. Folosește un JOIN între toate tabelele relevante.
 
-**Exercise 10 (Hard)**
-Find all clients who have placed orders in at least 2 different months. Show their full name and the count of distinct months in which they ordered.
+**Exercițiul 10 (Dificil)**
+Găsește toți clienții care au plasat comenzi în cel puțin 2 luni diferite. Afișează numele complet și numărul de luni distincte în care au comandat.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1**
+**Exercițiul 1**
 ```sql
 SELECT COUNT(*) AS TotalOrders FROM Orders;
 ```
 
-**Exercise 2**
+**Exercițiul 2**
 ```sql
 SELECT AVG(Price) AS AvgPrice, MIN(Price) AS MinPrice, MAX(Price) AS MaxPrice
 FROM Products;
 ```
 
-**Exercise 3**
+**Exercițiul 3**
 ```sql
 SELECT Status, COUNT(*) AS OrderCount FROM Orders GROUP BY Status;
 ```
 
-**Exercise 4**
+**Exercițiul 4**
 ```sql
 SELECT CategoryID, COUNT(*) AS ProductCount, AVG(Price) AS AvgPrice
 FROM   Products
@@ -316,7 +316,7 @@ GROUP BY CategoryID
 ORDER BY AvgPrice DESC;
 ```
 
-**Exercise 5**
+**Exercițiul 5**
 ```sql
 SELECT ProductID, SUM(Quantity) AS TotalQty
 FROM   OrderDetails
@@ -324,7 +324,7 @@ GROUP BY ProductID
 HAVING SUM(Quantity) > 1;
 ```
 
-**Exercise 6**
+**Exercițiul 6**
 ```sql
 SELECT ClientID, COUNT(*) AS OrderCount, SUM(TotalAmount) AS TotalSpent
 FROM   Orders
@@ -332,7 +332,7 @@ GROUP BY ClientID
 HAVING SUM(TotalAmount) > 100;
 ```
 
-**Exercise 7**
+**Exercițiul 7**
 ```sql
 SELECT c.CategoryName, COUNT(p.ProductID) AS ProductCount, SUM(ISNULL(p.Stock, 0)) AS TotalStock
 FROM   Categories AS c
@@ -340,7 +340,7 @@ LEFT JOIN Products AS p ON c.CategoryID = p.CategoryID
 GROUP BY c.CategoryID, c.CategoryName;
 ```
 
-**Exercise 8**
+**Exercițiul 8**
 ```sql
 SELECT cl.FirstName + ' ' + cl.LastName AS FullName,
        COUNT(DISTINCT o.OrderID)         AS OrderCount,
@@ -353,7 +353,7 @@ GROUP BY cl.ClientID, cl.FirstName, cl.LastName
 ORDER BY TotalSpent DESC;
 ```
 
-**Exercise 9**
+**Exercițiul 9**
 ```sql
 SELECT TOP 3
     p.ProductName,
@@ -366,7 +366,7 @@ GROUP BY p.ProductID, p.ProductName, c.CategoryName
 ORDER BY Revenue DESC;
 ```
 
-**Exercise 10**
+**Exercițiul 10**
 ```sql
 SELECT cl.FirstName + ' ' + cl.LastName AS FullName,
        COUNT(DISTINCT YEAR(o.OrderDate) * 100 + MONTH(o.OrderDate)) AS DistinctMonths

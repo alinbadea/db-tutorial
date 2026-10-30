@@ -1,26 +1,26 @@
-# Library Database — Worksheet 2: DDL — Creating the Database
+# Baza de date Library — Fișa de lucru 2: DDL — Crearea bazei de date
 
-## Learning Objectives
-- Create the LibraryDB schema from scratch using T-SQL DDL statements
-- Define tables in the correct order respecting foreign key dependencies
-- Apply appropriate constraints (PK, FK, UNIQUE, CHECK, DEFAULT, NOT NULL)
-- Modify and drop tables safely
+## Obiective de învățare
+- Crearea schemei LibraryDB de la zero, folosind instrucțiuni DDL T-SQL
+- Definirea tabelelor în ordinea corectă, respectând dependențele de cheie străină
+- Aplicarea constrângerilor potrivite (PK, FK, UNIQUE, CHECK, DEFAULT, NOT NULL)
+- Modificarea și ștergerea în siguranță a tabelelor
 
 ---
 
-## DDL Overview
+## Prezentare generală DDL
 
-| Statement | Purpose |
+| Instrucțiune | Scop |
 |---|---|
-| `CREATE DATABASE` | Creates a new database |
-| `CREATE TABLE` | Defines a new table with columns and constraints |
-| `ALTER TABLE` | Adds, modifies, or drops columns and constraints |
-| `DROP TABLE` | Permanently removes a table and its data |
-| `TRUNCATE TABLE` | Removes all rows but keeps the table structure |
+| `CREATE DATABASE` | Creează o bază de date nouă |
+| `CREATE TABLE` | Definește un tabel nou, cu coloane și constrângeri |
+| `ALTER TABLE` | Adaugă, modifică sau șterge coloane și constrângeri |
+| `DROP TABLE` | Elimină definitiv un tabel și datele sale |
+| `TRUNCATE TABLE` | Elimină toate rândurile, dar păstrează structura tabelului |
 
 ---
 
-## Step 1: Creating the Database
+## Pasul 1: Crearea bazei de date
 
 ```sql
 USE master;
@@ -35,16 +35,16 @@ GO
 
 ---
 
-## Step 2: Creating the Tables
+## Pasul 2: Crearea tabelelor
 
-**Creation order (parent tables first):**
+**Ordinea de creare (mai întâi tabelele părinte):**
 Authors → Publishers → Titles → Books → Clients → Rentals
 
 ---
 
-### Table 1: Authors
+### Tabelul 1: Authors
 
-Stores information about book authors. No FK dependencies.
+Stochează informații despre autorii cărților. Fără dependențe FK.
 
 ```sql
 CREATE TABLE Authors (
@@ -61,9 +61,9 @@ GO
 
 ---
 
-### Table 2: Publishers
+### Tabelul 2: Publishers
 
-Stores publishing company information. No FK dependencies.
+Stochează informații despre edituri. Fără dependențe FK.
 
 ```sql
 CREATE TABLE Publishers (
@@ -81,9 +81,9 @@ GO
 
 ---
 
-### Table 3: Titles
+### Tabelul 3: Titles
 
-Represents a book title (the intellectual work). References `Authors`.
+Reprezintă titlul unei cărți (opera intelectuală). Referă `Authors`.
 
 ```sql
 CREATE TABLE Titles (
@@ -104,9 +104,9 @@ GO
 
 ---
 
-### Table 4: Books
+### Tabelul 4: Books
 
-Represents a physical copy of a title. References both `Titles` and `Publishers`.
+Reprezintă un exemplar fizic al unui titlu. Referă atât `Titles`, cât și `Publishers`.
 
 ```sql
 CREATE TABLE Books (
@@ -127,9 +127,9 @@ GO
 
 ---
 
-### Table 5: Clients
+### Tabelul 5: Clients
 
-Library members who can rent books. No FK dependencies.
+Membrii bibliotecii, care pot împrumuta cărți. Fără dependențe FK.
 
 ```sql
 CREATE TABLE Clients (
@@ -149,9 +149,9 @@ GO
 
 ---
 
-### Table 6: Rentals
+### Tabelul 6: Rentals
 
-Records each rental transaction. References `Clients` and `Books`.
+Înregistrează fiecare tranzacție de împrumut. Referă `Clients` și `Books`.
 
 ```sql
 CREATE TABLE Rentals (
@@ -160,7 +160,7 @@ CREATE TABLE Rentals (
     BookID      INT                   NOT NULL,
     RentalDate  DATE DEFAULT GETDATE() NOT NULL,
     DueDate     DATE                  NOT NULL,
-    ReturnDate  DATE                  NULL,        -- NULL = not yet returned
+    ReturnDate  DATE                  NULL,        -- NULL = încă nereturnată
     RentalDays  INT                   NOT NULL,
 
     CONSTRAINT PK_Rentals          PRIMARY KEY (RentalID),
@@ -175,18 +175,18 @@ GO
 
 ---
 
-## Step 3: Adding Foreign Keys with ALTER TABLE
+## Pasul 3: Adăugarea cheilor străine cu ALTER TABLE
 
-As an alternative to inline FK definitions:
+Ca alternativă la definirea FK direct în tabel:
 
 ```sql
--- Add FK to Titles after both tables exist
+-- Adăugăm FK în Titles după ce ambele tabele există
 ALTER TABLE Titles
 ADD CONSTRAINT FK_Titles_Authors
     FOREIGN KEY (AuthorID) REFERENCES Authors(AuthorID);
 GO
 
--- Add FKs to Books
+-- Adăugăm FK-urile în Books
 ALTER TABLE Books
 ADD CONSTRAINT FK_Books_Titles
     FOREIGN KEY (TitleID) REFERENCES Titles(TitleID);
@@ -197,7 +197,7 @@ ADD CONSTRAINT FK_Books_Publishers
     FOREIGN KEY (PublisherID) REFERENCES Publishers(PublisherID);
 GO
 
--- Add FKs to Rentals
+-- Adăugăm FK-urile în Rentals
 ALTER TABLE Rentals
 ADD CONSTRAINT FK_Rentals_Clients
     FOREIGN KEY (ClientID) REFERENCES Clients(ClientID);
@@ -211,21 +211,21 @@ GO
 
 ---
 
-## Step 4: Verifying the Schema
+## Pasul 4: Verificarea schemei
 
 ```sql
--- View structure of a specific table
+-- Vizualizăm structura unui anumit tabel
 EXEC sp_help 'Rentals';
 GO
 
--- List all tables and their columns
+-- Listăm toate tabelele și coloanele lor
 SELECT TABLE_NAME, COLUMN_NAME, DATA_TYPE, IS_NULLABLE, COLUMN_DEFAULT
 FROM   INFORMATION_SCHEMA.COLUMNS
 WHERE  TABLE_NAME IN ('Authors','Publishers','Titles','Books','Clients','Rentals')
 ORDER  BY TABLE_NAME, ORDINAL_POSITION;
 GO
 
--- List all constraints
+-- Listăm toate constrângerile
 SELECT TABLE_NAME, CONSTRAINT_NAME, CONSTRAINT_TYPE
 FROM   INFORMATION_SCHEMA.TABLE_CONSTRAINTS
 ORDER  BY TABLE_NAME, CONSTRAINT_TYPE;
@@ -234,30 +234,30 @@ GO
 
 ---
 
-## Step 5: Modifying Tables
+## Pasul 5: Modificarea tabelelor
 
 ```sql
--- Add a 'Website' column to Publishers
+-- Adăugăm coloana 'Website' în Publishers
 ALTER TABLE Publishers
 ADD Website NVARCHAR(200) NULL;
 GO
 
--- Change the Genre column length
+-- Schimbăm lungimea coloanei Genre
 ALTER TABLE Titles
 ALTER COLUMN Genre NVARCHAR(150) NULL;
 GO
 
--- Add a CHECK constraint ensuring email contains '@'
+-- Adăugăm o constrângere CHECK care asigură că emailul conține '@'
 ALTER TABLE Clients
 ADD CONSTRAINT CHK_Clients_Email CHECK (Email LIKE '%@%');
 GO
 
--- Remove a constraint
+-- Eliminăm o constrângere
 ALTER TABLE Clients
 DROP CONSTRAINT CHK_Clients_Email;
 GO
 
--- Drop the Website column
+-- Ștergem coloana Website
 ALTER TABLE Publishers
 DROP COLUMN Website;
 GO
@@ -265,10 +265,10 @@ GO
 
 ---
 
-## Step 6: Dropping Tables and the Database
+## Pasul 6: Ștergerea tabelelor și a bazei de date
 
 ```sql
--- Drop in reverse dependency order (child first)
+-- Ștergem în ordinea inversă a dependențelor (mai întâi tabelele copil)
 DROP TABLE IF EXISTS Rentals;
 DROP TABLE IF EXISTS Books;
 DROP TABLE IF EXISTS Titles;
@@ -277,7 +277,7 @@ DROP TABLE IF EXISTS Publishers;
 DROP TABLE IF EXISTS Authors;
 GO
 
--- Drop the database
+-- Ștergem baza de date
 USE master;
 GO
 DROP DATABASE IF EXISTS LibraryDB;
@@ -286,11 +286,11 @@ GO
 
 ---
 
-## Complete Ready-to-Run Script
+## Script complet, gata de rulat
 
 ```sql
 -- ============================================================
--- LibraryDB — Full Creation Script
+-- LibraryDB — Script complet de creare
 -- ============================================================
 
 USE master;
@@ -396,19 +396,19 @@ GO
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1**
-Write a `CREATE TABLE` statement for a `BookReservations` table: `ReservationID` (auto PK), `ClientID` (FK to Clients), `TitleID` (FK to Titles), `ReservationDate` (date, default today), `ExpiryDate` (date, required), `Status` (`'Active'` or `'Expired'`, default `'Active'`).
+**Exercițiul 1**
+Scrie o instrucțiune `CREATE TABLE` pentru un tabel `BookReservations`: `ReservationID` (PK auto-incrementat), `ClientID` (FK către Clients), `TitleID` (FK către Titles), `ReservationDate` (dată, implicit ziua curentă), `ExpiryDate` (dată, obligatorie), `Status` (`'Active'` sau `'Expired'`, implicit `'Active'`).
 
-**Exercise 2**
-Add a `MaxRentalDays` column (INT, default 14, must be between 1 and 60) to the `Clients` table using `ALTER TABLE`.
+**Exercițiul 2**
+Adaugă în tabelul `Clients`, folosind `ALTER TABLE`, o coloană `MaxRentalDays` (INT, implicit 14, cu valori obligatoriu între 1 și 60).
 
-**Exercise 3**
-Write a query using `INFORMATION_SCHEMA` to find all foreign key columns in the LibraryDB — show table name, column name, and referenced table name.
+**Exercițiul 3**
+Scrie o interogare care folosește `INFORMATION_SCHEMA` pentru a găsi toate coloanele de tip cheie străină din LibraryDB — afișează numele tabelului, numele coloanei și numele tabelului referit.
 
-**Exercise 4**
-A junior developer tries to create `Rentals` before `Books`. What error message will SQL Server produce and why?
+**Exercițiul 4**
+Un programator începător încearcă să creeze `Rentals` înainte de `Books`. Ce mesaj de eroare va genera SQL Server și de ce?
 
-**Exercise 5**
-Write the complete DROP sequence to remove all tables from LibraryDB in a safe order, then drop the database itself.
+**Exercițiul 5**
+Scrie secvența completă de DROP pentru a elimina toate tabelele din LibraryDB într-o ordine sigură, apoi șterge baza de date propriu-zisă.

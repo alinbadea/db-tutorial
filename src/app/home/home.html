@@ -1,6 +1,6 @@
 <h1 class="mb-2 text-3xl font-bold text-slate-900">SQL Tutorial</h1>
 <p class="mb-6 text-slate-600">Choose a database to start learning.</p>
-<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-3 select-none">
   @for (db of databases.value() ?? []; track db.id) {
     <a
       [routerLink]="['/', db.id]"

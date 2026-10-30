@@ -1,7 +1,7 @@
 <header class="sticky top-0 z-10 border-b border-slate-200 bg-white/95 backdrop-blur">
   <nav class="mx-auto flex max-w-6xl flex-wrap items-center gap-x-6 gap-y-2 px-4 py-3">
     <a routerLink="/" class="text-lg font-semibold text-slate-900">SQL Tutorial</a>
-    <ul class="flex flex-wrap gap-2">
+    <ul class="flex flex-wrap gap-2 select-none">
       @for (db of databases.value() ?? []; track db.id) {
         <li>
           <a

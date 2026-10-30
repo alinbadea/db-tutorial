@@ -1,58 +1,58 @@
-# eCommerce Database — Worksheet 5: SELECT — JOINs
+# Baza de date eCommerce — Fișa de lucru 5: SELECT — JOIN-uri
 
-## Learning Objectives
-- Understand why JOINs are needed and how they work
-- Write INNER JOIN, LEFT JOIN, RIGHT JOIN, and FULL OUTER JOIN queries
-- Join three or more tables in a single query
-- Use table aliases for cleaner, shorter queries
-- Find records that have no matching rows in a related table
-
----
-
-## Why JOINs?
-
-Normalization splits data across multiple tables to eliminate redundancy. JOINs reassemble that data at query time. Without JOINs, you would have to run separate queries and manually match rows in your application code.
-
-Example of the problem: an `OrderDetails` row stores a `ProductID` but not the product name or price. To see the product name alongside the quantity, you need a JOIN.
+## Obiective de învățare
+- Înțelegerea motivului pentru care avem nevoie de JOIN-uri și a modului în care funcționează
+- Scrierea interogărilor cu INNER JOIN, LEFT JOIN, RIGHT JOIN și FULL OUTER JOIN
+- Unirea a trei sau mai multe tabele într-o singură interogare
+- Folosirea aliasurilor de tabel pentru interogări mai curate și mai scurte
+- Găsirea înregistrărilor care nu au rânduri corespondente într-un tabel asociat
 
 ---
 
-## JOIN Types — Overview
+## De ce JOIN-uri?
 
-| JOIN Type | Returns |
+Normalizarea împarte datele în mai multe tabele pentru a elimina redundanța. JOIN-urile reasamblează aceste date în momentul interogării. Fără JOIN-uri, ar trebui să rulezi interogări separate și să potrivești manual rândurile în codul aplicației.
+
+Exemplu de problemă: un rând din `OrderDetails` stochează un `ProductID`, dar nu și numele sau prețul produsului. Pentru a vedea numele produsului alături de cantitate, ai nevoie de un JOIN.
+
+---
+
+## Tipuri de JOIN — Prezentare generală
+
+| Tip de JOIN | Returnează |
 |---|---|
-| `INNER JOIN` | Only rows with a match in **both** tables |
-| `LEFT JOIN` | All rows from the left table + matching rows from the right (NULL where no match) |
-| `RIGHT JOIN` | All rows from the right table + matching rows from the left (NULL where no match) |
-| `FULL OUTER JOIN` | All rows from both tables, NULLs on whichever side has no match |
+| `INNER JOIN` | Doar rândurile care au corespondent în **ambele** tabele |
+| `LEFT JOIN` | Toate rândurile din tabelul din stânga + rândurile corespondente din dreapta (NULL unde nu există corespondent) |
+| `RIGHT JOIN` | Toate rândurile din tabelul din dreapta + rândurile corespondente din stânga (NULL unde nu există corespondent) |
+| `FULL OUTER JOIN` | Toate rândurile din ambele tabele, cu NULL pe partea care nu are corespondent |
 
 ---
 
-## Table Aliases
+## Aliasuri de tabel
 
-Long table names get tedious when joining. Assign a short alias after the table name:
+Numele lungi de tabele devin obositoare la scrierea JOIN-urilor. Atribuie un alias scurt după numele tabelului:
 
 ```sql
--- Without aliases (hard to read)
+-- Fără aliasuri (greu de citit)
 SELECT Products.ProductName, Categories.CategoryName
 FROM   Products
 INNER JOIN Categories ON Products.CategoryID = Categories.CategoryID;
 
--- With aliases (cleaner)
+-- Cu aliasuri (mai curat)
 SELECT p.ProductName, c.CategoryName
 FROM   Products   AS p
 INNER JOIN Categories AS c ON p.CategoryID = c.CategoryID;
 ```
 
-Always qualify column names with their alias when joining to avoid ambiguity errors.
+Când faci JOIN, califică întotdeauna numele coloanelor cu aliasul tabelului, pentru a evita erorile de ambiguitate.
 
 ---
 
 ## INNER JOIN
 
-Returns only rows where the JOIN condition is true in both tables. Rows from either side with no match are excluded.
+Returnează doar rândurile pentru care condiția de JOIN este adevărată în ambele tabele. Rândurile fără corespondent, din oricare parte, sunt excluse.
 
-### Example 1 — Products with their category name
+### Exemplul 1 — Produsele cu numele categoriei lor
 
 ```sql
 SELECT
@@ -65,7 +65,7 @@ INNER JOIN Categories AS c ON p.CategoryID = c.CategoryID
 ORDER BY c.CategoryName, p.ProductName;
 ```
 
-### Example 2 — Orders with the client's full name
+### Exemplul 2 — Comenzile cu numele complet al clientului
 
 ```sql
 SELECT
@@ -80,7 +80,7 @@ INNER JOIN Clients AS cl ON o.ClientID = cl.ClientID
 ORDER BY o.OrderDate DESC;
 ```
 
-### Example 3 — Order details with product name and order date (3 tables)
+### Exemplul 3 — Detaliile comenzilor cu numele produsului și data comenzii (3 tabele)
 
 ```sql
 SELECT
@@ -96,7 +96,7 @@ INNER JOIN Products  AS p  ON od.ProductID = p.ProductID
 ORDER BY o.OrderID, p.ProductName;
 ```
 
-### Example 4 — Full order receipt (all 4 tables)
+### Exemplul 4 — Bonul complet al comenzii (toate cele 4 tabele)
 
 ```sql
 SELECT
@@ -122,9 +122,9 @@ ORDER BY o.OrderID, p.ProductName;
 
 ## LEFT OUTER JOIN (LEFT JOIN)
 
-Returns **all** rows from the left table. For rows in the left table with no matching row in the right table, right-side columns are filled with `NULL`.
+Returnează **toate** rândurile din tabelul din stânga. Pentru rândurile din tabelul din stânga care nu au corespondent în tabelul din dreapta, coloanele din dreapta sunt completate cu `NULL`.
 
-### Example 1 — Clients and their orders (including clients who never ordered)
+### Exemplul 1 — Clienții și comenzile lor (inclusiv clienții care nu au comandat niciodată)
 
 ```sql
 SELECT
@@ -138,9 +138,9 @@ LEFT JOIN Orders AS o ON cl.ClientID = o.ClientID
 ORDER BY cl.ClientID;
 ```
 
-Clients with no orders will appear with `NULL` in the OrderID, OrderDate, and Status columns.
+Clienții fără comenzi vor apărea cu `NULL` în coloanele OrderID, OrderDate și Status.
 
-### Example 2 — Products and how many times they have been ordered
+### Exemplul 2 — Produsele și de câte ori au fost comandate
 
 ```sql
 SELECT
@@ -153,7 +153,7 @@ GROUP BY p.ProductID, p.ProductName, p.Price
 ORDER BY TimesOrdered DESC;
 ```
 
-### Anti-join — Find clients who have NEVER placed an order
+### Anti-join — Găsirea clienților care NU au plasat NICIODATĂ o comandă
 
 ```sql
 SELECT cl.ClientID, cl.FirstName, cl.LastName, cl.Email
@@ -162,16 +162,16 @@ LEFT JOIN Orders AS o ON cl.ClientID = o.ClientID
 WHERE  o.OrderID IS NULL;
 ```
 
-**How it works:** The LEFT JOIN includes all clients. The `WHERE o.OrderID IS NULL` keeps only those whose match in `Orders` was missing.
+**Cum funcționează:** LEFT JOIN include toți clienții. Condiția `WHERE o.OrderID IS NULL` îi păstrează doar pe cei care nu au avut corespondent în `Orders`.
 
 ---
 
 ## RIGHT OUTER JOIN (RIGHT JOIN)
 
-Returns all rows from the right table. Equivalent to a LEFT JOIN with the tables swapped — most developers prefer LEFT JOINs for consistency.
+Returnează toate rândurile din tabelul din dreapta. Este echivalent cu un LEFT JOIN cu tabelele inversate — majoritatea programatorilor preferă LEFT JOIN pentru consecvență.
 
 ```sql
--- All categories, including those with no products yet
+-- Toate categoriile, inclusiv cele care încă nu au produse
 SELECT
     c.CategoryName,
     p.ProductName,
@@ -181,16 +181,16 @@ RIGHT JOIN Categories AS c ON p.CategoryID = c.CategoryID
 ORDER BY c.CategoryName;
 ```
 
-Categories with no products will appear with `NULL` in `ProductName` and `Price`.
+Categoriile fără produse vor apărea cu `NULL` în `ProductName` și `Price`.
 
 ---
 
 ## FULL OUTER JOIN
 
-Returns all rows from both tables. Rows with no match on either side receive NULLs for the other table's columns.
+Returnează toate rândurile din ambele tabele. Rândurile fără corespondent, din oricare parte, primesc NULL în coloanele celuilalt tabel.
 
 ```sql
--- All products and all categories, showing unmatched on both sides
+-- Toate produsele și toate categoriile, afișând și rândurile fără corespondent din ambele părți
 SELECT
     p.ProductName,
     c.CategoryName
@@ -201,9 +201,9 @@ ORDER BY c.CategoryName, p.ProductName;
 
 ---
 
-## Joining All Tables in One Query
+## Unirea tuturor tabelelor într-o singură interogare
 
-A single comprehensive query reporting every order line with all related details:
+O singură interogare cuprinzătoare care raportează fiecare linie de comandă cu toate detaliile asociate:
 
 ```sql
 SELECT
@@ -229,21 +229,21 @@ ORDER BY o.OrderID, od.OrderDetailID;
 
 ---
 
-## Common Mistakes
+## Greșeli frecvente
 
 ```sql
--- MISTAKE 1: Cartesian product — forgot the ON clause
--- This returns every product combined with every category (dangerous!)
+-- GREȘEALA 1: Produs cartezian — am uitat clauza ON
+-- Aceasta ar returna fiecare produs combinat cu fiecare categorie (periculos!)
 SELECT p.ProductName, c.CategoryName
 FROM   Products AS p
-INNER JOIN Categories AS c;   -- Error: ON clause is required
+INNER JOIN Categories AS c;   -- Eroare: clauza ON este obligatorie
 
--- MISTAKE 2: Ambiguous column name — both tables have 'Email'
-SELECT ClientID, Email          -- Which table? SQL Server will throw an error
+-- GREȘEALA 2: Nume de coloană ambiguu — ambele tabele au 'ClientID'
+SELECT ClientID, Email          -- Din ce tabel? SQL Server va genera o eroare
 FROM   Clients
 INNER JOIN Orders ON Clients.ClientID = Orders.ClientID;
 
--- CORRECT: qualify every column that exists in more than one table
+-- CORECT: calificăm fiecare coloană care există în mai multe tabele
 SELECT cl.ClientID, cl.Email, o.OrderID
 FROM   Clients AS cl
 INNER JOIN Orders AS o ON cl.ClientID = o.ClientID;
@@ -251,37 +251,37 @@ INNER JOIN Orders AS o ON cl.ClientID = o.ClientID;
 
 ---
 
-## Practice Exercises
+## Exerciții practice
 
-**Exercise 1 (Easy)**
-List every product together with its category name. Show `ProductName`, `Price`, and `CategoryName`. Sort by `CategoryName`.
+**Exercițiul 1 (Ușor)**
+Listează fiecare produs împreună cu numele categoriei sale. Afișează `ProductName`, `Price` și `CategoryName`. Sortează după `CategoryName`.
 
-**Exercise 2 (Easy)**
-Show `OrderID`, `OrderDate`, `Status`, and the full name of the client who placed each order.
+**Exercițiul 2 (Ușor)**
+Afișează `OrderID`, `OrderDate`, `Status` și numele complet al clientului care a plasat fiecare comandă.
 
-**Exercise 3 (Medium)**
-For each order detail, show `OrderID`, `ClientName` (full), `ProductName`, `Quantity`, and `LineTotal` (Quantity × UnitPrice). Sort by `OrderID`.
+**Exercițiul 3 (Mediu)**
+Pentru fiecare detaliu de comandă, afișează `OrderID`, `ClientName` (complet), `ProductName`, `Quantity` și `LineTotal` (Quantity × UnitPrice). Sortează după `OrderID`.
 
-**Exercise 4 (Medium)**
-Find all clients who have **never** placed an order. Show their `ClientID`, full name, and `Email`.
+**Exercițiul 4 (Mediu)**
+Găsește toți clienții care **nu au plasat niciodată** o comandă. Afișează `ClientID`, numele complet și `Email`.
 
-**Exercise 5 (Medium)**
-List all categories together with the number of products in each. Include categories that have zero products. Show `CategoryName` and a column called `ProductCount`.
+**Exercițiul 5 (Mediu)**
+Listează toate categoriile împreună cu numărul de produse din fiecare. Include și categoriile care nu au niciun produs. Afișează `CategoryName` și o coloană numită `ProductCount`.
 
-**Exercise 6 (Medium)**
-Show all products together with the total quantity ever sold (sum of `Quantity` from `OrderDetails`). Include products that have never been sold (show 0 or NULL). Sort by total sold descending.
+**Exercițiul 6 (Mediu)**
+Afișează toate produsele împreună cu cantitatea totală vândută vreodată (suma `Quantity` din `OrderDetails`). Include produsele care nu au fost vândute niciodată (afișează 0 sau NULL). Sortează descrescător după totalul vândut.
 
-**Exercise 7 (Hard)**
-Write a query that shows, for each client, their `FullName`, `City`, the number of orders they have placed (`OrderCount`), and the sum of all their order totals (`TotalSpent`). Only include clients who have at least one order. Sort by `TotalSpent` descending.
+**Exercițiul 7 (Dificil)**
+Scrie o interogare care afișează, pentru fiecare client, `FullName`, `City`, numărul de comenzi plasate (`OrderCount`) și suma totalurilor tuturor comenzilor sale (`TotalSpent`). Include doar clienții care au cel puțin o comandă. Sortează descrescător după `TotalSpent`.
 
-**Exercise 8 (Hard)**
-List all order lines where the `UnitPrice` charged differs from the current `Price` in the `Products` table. Show `OrderID`, `ProductName`, `UnitPrice` (as charged), and `CurrentPrice` (from Products). This could indicate price changes since the order was placed.
+**Exercițiul 8 (Dificil)**
+Listează toate liniile de comandă la care `UnitPrice` facturat diferă de `Price` curent din tabelul `Products`. Afișează `OrderID`, `ProductName`, `UnitPrice` (cel facturat) și `CurrentPrice` (din Products). Acest lucru poate indica modificări de preț de la plasarea comenzii.
 
 ---
 
-## Answers
+## Răspunsuri
 
-**Exercise 1**
+**Exercițiul 1**
 ```sql
 SELECT p.ProductName, p.Price, c.CategoryName
 FROM   Products AS p
@@ -289,7 +289,7 @@ INNER JOIN Categories AS c ON p.CategoryID = c.CategoryID
 ORDER BY c.CategoryName;
 ```
 
-**Exercise 2**
+**Exercițiul 2**
 ```sql
 SELECT o.OrderID, o.OrderDate, o.Status,
        cl.FirstName + ' ' + cl.LastName AS ClientName
@@ -297,7 +297,7 @@ FROM   Orders AS o
 INNER JOIN Clients AS cl ON o.ClientID = cl.ClientID;
 ```
 
-**Exercise 3**
+**Exercițiul 3**
 ```sql
 SELECT o.OrderID, cl.FirstName + ' ' + cl.LastName AS ClientName,
        p.ProductName, od.Quantity,
@@ -309,7 +309,7 @@ INNER JOIN Products AS p  ON od.ProductID = p.ProductID
 ORDER BY o.OrderID;
 ```
 
-**Exercise 4**
+**Exercițiul 4**
 ```sql
 SELECT cl.ClientID, cl.FirstName + ' ' + cl.LastName AS FullName, cl.Email
 FROM   Clients AS cl
@@ -317,7 +317,7 @@ LEFT JOIN Orders AS o ON cl.ClientID = o.ClientID
 WHERE  o.OrderID IS NULL;
 ```
 
-**Exercise 5**
+**Exercițiul 5**
 ```sql
 SELECT c.CategoryName, COUNT(p.ProductID) AS ProductCount
 FROM   Categories AS c
@@ -326,7 +326,7 @@ GROUP BY c.CategoryID, c.CategoryName
 ORDER BY ProductCount DESC;
 ```
 
-**Exercise 6**
+**Exercițiul 6**
 ```sql
 SELECT p.ProductName, COALESCE(SUM(od.Quantity), 0) AS TotalSold
 FROM   Products     AS p
@@ -335,7 +335,7 @@ GROUP BY p.ProductID, p.ProductName
 ORDER BY TotalSold DESC;
 ```
 
-**Exercise 7**
+**Exercițiul 7**
 ```sql
 SELECT cl.FirstName + ' ' + cl.LastName AS FullName, cl.City,
        COUNT(o.OrderID)     AS OrderCount,
@@ -346,7 +346,7 @@ GROUP BY cl.ClientID, cl.FirstName, cl.LastName, cl.City
 ORDER BY TotalSpent DESC;
 ```
 
-**Exercise 8**
+**Exercițiul 8**
 ```sql
 SELECT o.OrderID, p.ProductName,
        od.UnitPrice AS ChargedPrice,
