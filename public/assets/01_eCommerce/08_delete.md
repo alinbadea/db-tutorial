@@ -11,13 +11,13 @@
 ## Sintaxa DELETE
 
 ```sql
-DELETE FROM table_name
-WHERE condition;
+DELETE FROM nume_tabel
+WHERE conditie;
 ```
 
 > **ATENȚIE — Fără clauza WHERE = toate rândurile sunt șterse**
 >
-> `DELETE FROM Orders` fără clauza `WHERE` elimină **fiecare rând** din tabelul Orders. Scrie și verifică întotdeauna mai întâi clauza `WHERE`. Previzualizează cu un SELECT înainte de a executa DELETE.
+> `DELETE FROM Comenzi` fără clauza `WHERE` elimină **fiecare rând** din tabelul Comenzi. Scrie și verifică întotdeauna mai întâi clauza `WHERE`. Previzualizează cu un SELECT înainte de a executa DELETE.
 
 ---
 
@@ -26,11 +26,11 @@ WHERE condition;
 Scrie SELECT-ul echivalent pentru a confirma ce rânduri vor fi eliminate:
 
 ```sql
--- Previzualizare: ce detalii de comandă vor fi șterse?
-SELECT * FROM OrderDetails WHERE OrderID = 3;
+-- Previzualizare: ce linii ale comenzii 3 vor fi șterse?
+SELECT * FROM Detalii WHERE IdComanda = 3;
 
 -- Abia apoi ștergem
-DELETE FROM OrderDetails WHERE OrderID = 3;
+DELETE FROM Detalii WHERE IdComanda = 3;
 ```
 
 ---
@@ -38,14 +38,15 @@ DELETE FROM OrderDetails WHERE OrderID = 3;
 ## DELETE de bază — un singur rând
 
 ```sql
--- Ștergem un anumit detaliu de comandă după cheia sa primară
-DELETE FROM OrderDetails WHERE OrderDetailID = 7;
+-- Ștergem o anumită linie de comandă după cheia sa primară compusă
+-- (ambele coloane sunt necesare: doar IdComanda = 3 ar șterge toate liniile comenzii)
+DELETE FROM Detalii WHERE IdComanda = 3 AND IdProdus = 7;
 
--- Ștergem o anumită comandă (sigur doar dacă rândurile din OrderDetails au fost eliminate înainte)
-DELETE FROM Orders WHERE OrderID = 5;
+-- Ștergem o anumită comandă (reușește doar dacă liniile ei din Detalii au fost eliminate înainte)
+DELETE FROM Comenzi WHERE Id = 5;
 
--- Ștergem un produs (sigur doar dacă niciun rând din OrderDetails nu îl referă)
-DELETE FROM Products WHERE ProductID = 8;
+-- Ștergem un produs (reușește doar dacă niciun rând din Detalii nu îl referă)
+DELETE FROM Produse WHERE Id = 9;
 ```
 
 ---
@@ -55,38 +56,38 @@ DELETE FROM Products WHERE ProductID = 8;
 ### Clauza IN
 
 ```sql
--- Ștergem toate detaliile care aparțin comenzilor 4 și 5
-DELETE FROM OrderDetails
-WHERE OrderID IN (4, 5);
+-- Ștergem toate liniile care aparțin comenzilor 4 și 5
+DELETE FROM Detalii
+WHERE IdComanda IN (4, 5);
 
--- Ștergem toate comenzile Cancelled
-DELETE FROM Orders
-WHERE Status = 'Cancelled';
+-- Apoi putem șterge și comenzile
+DELETE FROM Comenzi
+WHERE Id IN (4, 5);
 ```
 
 ### BETWEEN
 
 ```sql
--- Ștergem detaliile de comandă dintr-un interval de valori OrderDetailID
-DELETE FROM OrderDetails
-WHERE OrderDetailID BETWEEN 8 AND 10;
+-- Ștergem liniile unui interval de comenzi
+DELETE FROM Detalii
+WHERE IdComanda BETWEEN 5 AND 7;
 ```
 
 ### LIKE
 
 ```sql
--- Ștergem clienții al căror domeniu de email este '@testdomain.com'
-DELETE FROM Clients
-WHERE Email LIKE '%@testdomain.com';
+-- Ștergem clienții de test creați în timpul dezvoltării aplicației
+DELETE FROM Clienti
+WHERE Nume LIKE 'Test%';
 ```
 
 ### Condiții compuse
 
 ```sql
--- Ștergem comenzile Pending mai vechi de 30 de zile
-DELETE FROM Orders
-WHERE  Status = 'Pending'
-AND    OrderDate < DATEADD(DAY, -30, GETDATE());
+-- Ștergem comenzile goale (fără nicio linie) mai vechi de 30 de zile
+DELETE FROM Comenzi
+WHERE  Data < DATEADD(DAY, -30, GETDATE())
+AND    NOT EXISTS (SELECT 1 FROM Detalii AS d WHERE d.IdComanda = Comenzi.Id);
 ```
 
 ---
@@ -94,22 +95,25 @@ AND    OrderDate < DATEADD(DAY, -30, GETDATE());
 ## DELETE cu subinterogare în WHERE
 
 ```sql
--- Ștergem toate detaliile comenzilor Cancelled
-DELETE FROM OrderDetails
-WHERE OrderID IN (
-    SELECT OrderID FROM Orders WHERE Status = 'Cancelled'
+-- Ștergem toate liniile comenzilor plasate de clienți din Brașov
+DELETE FROM Detalii
+WHERE IdComanda IN (
+    SELECT co.Id
+    FROM   Comenzi AS co
+    INNER JOIN Clienti AS cl ON co.IdClient = cl.Id
+    WHERE  cl.Oras = 'Brasov'
 );
 
 -- Ștergem produsele care nu au fost comandate niciodată
-DELETE FROM Products
-WHERE ProductID NOT IN (
-    SELECT DISTINCT ProductID FROM OrderDetails
+DELETE FROM Produse
+WHERE Id NOT IN (
+    SELECT IdProdus FROM Detalii
 );
 
--- Ștergem clienții înregistrați în urmă cu mai mult de 2 ani care nu au plasat niciodată o comandă
-DELETE FROM Clients
-WHERE ClientID NOT IN (SELECT DISTINCT ClientID FROM Orders)
-AND   CreatedDate < DATEADD(YEAR, -2, GETDATE());
+-- Ștergem clienții fără comenzi și fără număr de telefon
+DELETE FROM Clienti
+WHERE Id NOT IN (SELECT IdClient FROM Comenzi)
+AND   Telefon IS NULL;
 ```
 
 ---
@@ -120,69 +124,69 @@ AND   CreatedDate < DATEADD(YEAR, -2, GETDATE());
 
 **Sintaxă:**
 ```sql
-DELETE alias_of_table_to_delete
-FROM   TableToDelete AS alias_of_table_to_delete
-INNER JOIN OtherTable AS other ON join_condition
-WHERE  optional_filter;
+DELETE alias_tabel_sters
+FROM   TabelSters AS alias_tabel_sters
+INNER JOIN AltTabel AS alt ON conditie_join
+WHERE  filtru_optional;
 ```
 
-### Exemplul 1 — Ștergerea rândurilor OrderDetails pentru toate comenzile Cancelled (varianta cu JOIN)
+### Exemplul 1 — Ștergerea liniilor tuturor comenzilor unui client (varianta cu JOIN)
 
 ```sql
 -- Previzualizare
-SELECT od.OrderDetailID, od.OrderID, o.Status
-FROM   OrderDetails AS od
-INNER JOIN Orders AS o ON od.OrderID = o.OrderID
-WHERE  o.Status = 'Cancelled';
+SELECT d.IdComanda, d.IdProdus, co.IdClient
+FROM   Detalii AS d
+INNER JOIN Comenzi AS co ON d.IdComanda = co.Id
+WHERE  co.IdClient = 5;
 
 -- Ștergere
-DELETE od
-FROM   OrderDetails AS od
-INNER JOIN Orders AS o ON od.OrderID = o.OrderID
-WHERE  o.Status = 'Cancelled';
+DELETE d
+FROM   Detalii AS d
+INNER JOIN Comenzi AS co ON d.IdComanda = co.Id
+WHERE  co.IdClient = 5;
 ```
 
-### Exemplul 2 — Ștergerea comenzilor plasate de clienți dintr-o anumită țară
+### Exemplul 2 — Ștergerea comenzilor plasate de clienți dintr-un anumit oraș
 
 ```sql
--- Mai întâi ștergem rândurile copil (OrderDetails)
-DELETE od
-FROM   OrderDetails AS od
-INNER JOIN Orders   AS o  ON od.OrderID  = o.OrderID
-INNER JOIN Clients  AS cl ON o.ClientID  = cl.ClientID
-WHERE  cl.Country = 'TestCountry';
+-- Mai întâi ștergem rândurile copil (Detalii)
+DELETE d
+FROM   Detalii AS d
+INNER JOIN Comenzi AS co ON d.IdComanda = co.Id
+INNER JOIN Clienti AS cl ON co.IdClient = cl.Id
+WHERE  cl.Oras = 'Timisoara';
 
--- Apoi ștergem rândurile părinte (Orders)
-DELETE o
-FROM   Orders   AS o
-INNER JOIN Clients AS cl ON o.ClientID = cl.ClientID
-WHERE  cl.Country = 'TestCountry';
+-- Apoi ștergem rândurile părinte (Comenzi)
+DELETE co
+FROM   Comenzi AS co
+INNER JOIN Clienti AS cl ON co.IdClient = cl.Id
+WHERE  cl.Oras = 'Timisoara';
 ```
 
-### Exemplul 3 — DELETE cu JOIN: ștergerea produselor care aparțin categoriilor al căror nume începe cu o anumită literă
+### Exemplul 3 — Ștergerea produselor din categoriile al căror nume începe cu o anumită literă
 
 ```sql
--- Ștergem produsele al căror nume de categorie începe cu 'Z'
+-- Ștergem produsele al căror nume de categorie începe cu 'J'
 DELETE p
-FROM   Products    AS p
-INNER JOIN Categories AS c ON p.CategoryID = c.CategoryID
-WHERE  c.CategoryName LIKE 'Z%';
+FROM   Produse AS p
+INNER JOIN Categorii AS c ON p.IdCategorie = c.Id
+WHERE  c.Nume LIKE 'J%';
 ```
 
-### Exemplul 4 — Ștergerea detaliilor de comandă al căror produs nu mai există (curățarea înregistrărilor orfane)
+### Exemplul 4 — Ștergerea liniilor de comandă al căror produs nu mai există (curățarea înregistrărilor orfane)
 
 ```sql
--- Găsim detaliile de comandă orfane (produsul a fost șters ocolind constrângerile FK)
-SELECT od.OrderDetailID
-FROM   OrderDetails AS od
-LEFT JOIN Products AS p ON od.ProductID = p.ProductID
-WHERE  p.ProductID IS NULL;
+-- Găsim liniile orfane (pot apărea doar dacă FK-ul a fost dezactivat sau creat ulterior cu NOCHECK)
+SELECT d.IdComanda, d.IdProdus
+FROM   Detalii AS d
+LEFT JOIN Produse AS p ON d.IdProdus = p.Id
+WHERE  p.Id IS NULL;
 
 -- Le ștergem
-DELETE od
-FROM   OrderDetails AS od
-LEFT JOIN Products AS p ON od.ProductID = p.ProductID
-WHERE  p.ProductID IS NULL;
+DELETE d
+FROM   Detalii AS d
+LEFT JOIN Produse AS p ON d.IdProdus = p.Id
+WHERE  p.Id IS NULL;
 ```
 
 ---
@@ -194,29 +198,50 @@ Nu poți șterge un rând părinte dacă există rânduri copil care îl referă
 **Ordinea corectă de ștergere pentru eCommerceDB (de la tabelele copil la tabelele părinte):**
 
 ```
-1. OrderDetails   (referă Orders și Products)
-2. Orders         (referă Clients)
-3. Products       (referă Categories)
-4. Clients        (nu mai este referit de alte tabele — se poate șterge în siguranță)
-5. Categories     (nu mai este referit de alte tabele — se poate șterge în siguranță)
+1. Detalii     (referă Comenzi și Produse)
+2. Comenzi     (referă Clienti)
+3. Produse     (referă Categorii)
+4. Clienti     (nu mai este referit de alte tabele — se poate șterge în siguranță)
+5. Categorii   (nu mai este referit de alte tabele — se poate șterge în siguranță)
 ```
 
 ### Exemplu complet de eliminare a unui client
 
 ```sql
--- Ștergem în siguranță clientul cu ClientID = 2 și toate datele asociate
--- Pasul 1: ștergem detaliile comenzilor acestui client
-DELETE od
-FROM   OrderDetails AS od
-INNER JOIN Orders AS o ON od.OrderID = o.OrderID
-WHERE  o.ClientID = 2;
+-- Ștergem în siguranță clientul cu Id = 2 și toate datele asociate
+-- Pasul 1: ștergem liniile comenzilor acestui client
+DELETE d
+FROM   Detalii AS d
+INNER JOIN Comenzi AS co ON d.IdComanda = co.Id
+WHERE  co.IdClient = 2;
 
 -- Pasul 2: ștergem comenzile
-DELETE FROM Orders WHERE ClientID = 2;
+DELETE FROM Comenzi WHERE IdClient = 2;
 
 -- Pasul 3: acum putem șterge clientul în siguranță
-DELETE FROM Clients WHERE ClientID = 2;
+DELETE FROM Clienti WHERE Id = 2;
 ```
+
+---
+
+## Alternativa: ON DELETE CASCADE
+
+O cheie străină poate fi definită astfel încât ștergerea părintelui să șteargă automat și rândurile copil. Pentru `Detalii` are sens: liniile unei comenzi nu au nicio valoare fără comandă.
+
+```sql
+-- Recreăm FK-ul dintre Detalii și Comenzi cu ștergere în cascadă
+ALTER TABLE Detalii DROP CONSTRAINT FK_Detalii_Comenzi;
+
+ALTER TABLE Detalii
+ADD CONSTRAINT FK_Detalii_Comenzi
+    FOREIGN KEY (IdComanda) REFERENCES Comenzi(Id)
+    ON DELETE CASCADE;
+
+-- Acum o singură instrucțiune șterge comanda ȘI liniile ei
+DELETE FROM Comenzi WHERE Id = 1;
+```
+
+> **Folosește cu grijă:** `ON DELETE CASCADE` între `Produse` și `Detalii` ar fi o idee proastă — ștergerea unui produs din catalog ar șterge în tăcere liniile din comenzile istorice. Pentru acele relații, eroarea FK este o protecție utilă.
 
 ---
 
@@ -228,16 +253,19 @@ DELETE FROM Clients WHERE ClientID = 2;
 | Viteză | Mai lent (jurnalizare rând cu rând) | Mai rapid (jurnalizare minimă) |
 | Resetează contorul IDENTITY | Nu | Da |
 | Poate fi anulat (rollback) | Da (într-o tranzacție) | Da (într-o tranzacție) |
-| Funcționează cu constrângeri FK | Da (dacă rândurile copil sunt șterse înainte) | Nu (eșuează dacă există referințe FK) |
+| Funcționează cu constrângeri FK | Da (dacă rândurile copil sunt șterse înainte) | Nu (eșuează dacă tabelul este referit de vreo FK, chiar dacă tabelul copil e gol) |
 | Declanșează triggerele `DELETE` | Da | Nu |
 
 ```sql
 -- DELETE: elimină anumite rânduri, păstrează valoarea curentă IDENTITY
-DELETE FROM OrderDetails WHERE OrderID = 99;
+DELETE FROM Detalii WHERE IdComanda = 99;
 
--- TRUNCATE: elimină TOATE rândurile, resetează IDENTITY la valoarea inițială (seed)
-TRUNCATE TABLE OrderDetails;
--- Eroare dacă OrderDetails este referit printr-o FK din alt tabel
+-- TRUNCATE: elimină TOATE rândurile
+-- Funcționează pe Detalii, pentru că niciun alt tabel nu referă Detalii
+TRUNCATE TABLE Detalii;
+
+-- Eșuează pe Comenzi, pentru că Detalii o referă printr-o FK
+TRUNCATE TABLE Comenzi;
 ```
 
 ---
@@ -247,21 +275,20 @@ TRUNCATE TABLE OrderDetails;
 Capturează rândurile șterse înainte să dispară:
 
 ```sql
--- Ștergem comenzile Pending vechi și capturăm ce s-a șters
-DECLARE @Deleted TABLE (
-    OrderID   INT,
-    ClientID  INT,
-    OrderDate DATETIME,
-    Status    NVARCHAR(50)
+-- Ștergem liniile comenzii 6 și păstrăm o copie a ce s-a șters
+DECLARE @LiniiSterse TABLE (
+    IdComanda  INT,
+    IdProdus   INT,
+    Cantitate  INT,
+    Pret       DECIMAL(10, 2)
 );
 
-DELETE FROM Orders
-OUTPUT DELETED.OrderID, DELETED.ClientID, DELETED.OrderDate, DELETED.Status
-INTO   @Deleted
-WHERE  Status = 'Pending'
-AND    OrderDate < DATEADD(DAY, -90, GETDATE());
+DELETE FROM Detalii
+OUTPUT DELETED.IdComanda, DELETED.IdProdus, DELETED.Cantitate, DELETED.Pret
+INTO   @LiniiSterse
+WHERE  IdComanda = 6;
 
-SELECT * FROM @Deleted;
+SELECT * FROM @LiniiSterse;
 ```
 
 ---
@@ -271,17 +298,17 @@ SELECT * FROM @Deleted;
 În loc să elimini fizic rândurile, marchează-le ca șterse cu o coloană indicator (flag). Astfel se păstrează istoricul și se permite recuperarea.
 
 ```sql
--- Adăugăm indicatorul IsDeleted în Clients
-ALTER TABLE Clients ADD IsDeleted BIT NOT NULL DEFAULT 0;
+-- Adăugăm indicatorul EsteSters în Produse
+ALTER TABLE Produse ADD EsteSters BIT NOT NULL DEFAULT 0;
 
--- „Ștergem” un client
-UPDATE Clients SET IsDeleted = 1 WHERE ClientID = 3;
+-- „Ștergem” un produs din catalog — comenzile vechi îl referă în continuare
+UPDATE Produse SET EsteSters = 1 WHERE Id = 8;
 
--- Interogare: afișăm doar clienții activi
-SELECT * FROM Clients WHERE IsDeleted = 0;
+-- Interogare: afișăm doar produsele active
+SELECT * FROM Produse WHERE EsteSters = 0;
 ```
 
-**Compromisuri:** Istoricul este păstrat și înregistrările pot fi recuperate. Totuși, toate interogările trebuie să filtreze după `IsDeleted = 0`, iar tabelul crește la nesfârșit.
+**Compromisuri:** Istoricul este păstrat, înregistrările pot fi recuperate și nu apar erori FK. Totuși, toate interogările trebuie să filtreze după `EsteSters = 0`, iar tabelul crește la nesfârșit.
 
 ---
 
@@ -290,13 +317,13 @@ SELECT * FROM Clients WHERE IsDeleted = 0;
 ```sql
 BEGIN TRANSACTION;
 
--- Ștergem o comandă completă și detaliile ei
-DELETE FROM OrderDetails WHERE OrderID = 1;
-DELETE FROM Orders       WHERE OrderID = 1;
+-- Ștergem o comandă completă și liniile ei
+DELETE FROM Detalii WHERE IdComanda = 1;
+DELETE FROM Comenzi WHERE Id = 1;
 
 -- Verificare: ne asigurăm că ambele au dispărut
-SELECT * FROM Orders       WHERE OrderID = 1;
-SELECT * FROM OrderDetails WHERE OrderID = 1;
+SELECT * FROM Comenzi WHERE Id = 1;
+SELECT * FROM Detalii WHERE IdComanda = 1;
 
 -- Dacă este corect:
 COMMIT TRANSACTION;
@@ -310,20 +337,24 @@ COMMIT TRANSACTION;
 
 ```sql
 -- GREȘEALA 1: Lipsește WHERE (șterge TOATE rândurile)
-DELETE FROM Orders;    -- șterge tot!
+DELETE FROM Comenzi;    -- șterge tot!
 
 -- GREȘEALA 2: Ordine greșită de ștergere (încălcare FK)
-DELETE FROM Orders WHERE OrderID = 1;
+DELETE FROM Comenzi WHERE Id = 1;
 -- Eroare: The DELETE statement conflicted with the REFERENCE constraint
--- "FK_OrderDetails_Orders". Trebuie să ștergi mai întâi din OrderDetails.
+-- "FK_Detalii_Comenzi". Trebuie să ștergi mai întâi din Detalii.
 
 -- CORECT: mai întâi rândurile copil
-DELETE FROM OrderDetails WHERE OrderID = 1;
-DELETE FROM Orders       WHERE OrderID = 1;
+DELETE FROM Detalii WHERE IdComanda = 1;
+DELETE FROM Comenzi WHERE Id = 1;
 
--- GREȘEALA 3: TRUNCATE când există referințe FK active
-TRUNCATE TABLE Orders;
--- Eroare: Cannot truncate table 'Orders' because it is being referenced by a FK.
+-- GREȘEALA 3: Cheie compusă folosită pe jumătate
+DELETE FROM Detalii WHERE IdProdus = 1;
+-- Voiai să ștergi o linie, dar ai șters produsul 1 din TOATE comenzile.
+
+-- GREȘEALA 4: TRUNCATE când există referințe FK
+TRUNCATE TABLE Comenzi;
+-- Eroare: Cannot truncate table 'Comenzi' because it is being referenced by a FOREIGN KEY constraint.
 ```
 
 ---
@@ -331,25 +362,25 @@ TRUNCATE TABLE Orders;
 ## Exerciții practice
 
 **Exercițiul 1**
-Șterge detaliul de comandă cu `OrderDetailID = 10`.
+Șterge linia comenzii 7 care conține produsul 7.
 
 **Exercițiul 2**
-Șterge toate detaliile comenzilor cu `Status = 'Cancelled'`. Folosește o subinterogare în clauza `WHERE`.
+Șterge toate liniile comenzilor plasate de clientul 4. Folosește o subinterogare în clauza `WHERE`.
 
 **Exercițiul 3**
-Folosind `DELETE ... FROM ... JOIN`, șterge toate rândurile din `OrderDetails` pentru comenzile plasate de clienți din `'Germany'`.
+Folosind `DELETE ... FROM ... JOIN`, șterge toate rândurile din `Detalii` pentru comenzile plasate de clienți din `'Cluj-Napoca'`.
 
 **Exercițiul 4**
-Șterge o comandă completă: mai întâi elimină toate rândurile ei din `OrderDetails`, apoi elimină rândul din `Orders`. Folosește `OrderID = 6`.
+Șterge o comandă completă: mai întâi elimină toate rândurile ei din `Detalii`, apoi elimină rândul din `Comenzi`. Folosește comanda `6`.
 
 **Exercițiul 5**
-Șterge toate produsele care nu au apărut niciodată în vreun rând din `OrderDetails`. Folosește o subinterogare.
+Șterge toate produsele care nu au apărut niciodată în vreun rând din `Detalii`. Rezolvă o dată cu `NOT IN` și o dată cu `NOT EXISTS`.
 
 **Exercițiul 6**
-Folosind `DELETE ... FROM ... JOIN`, elimină toți clienții care nu au comenzi ȘI al căror `CreatedDate` este mai vechi de 1 an. (Șterge-i direct — nu există rânduri copil FK de care să-ți faci griji, deoarece nu au comenzi.)
+Folosind `DELETE ... FROM ... LEFT JOIN`, elimină toți clienții care nu au nicio comandă. (Nu există rânduri copil FK de care să-ți faci griji, deoarece nu au comenzi.)
 
 **Exercițiul 7**
-Folosind `DELETE` cu `OUTPUT`, șterge toate comenzile `Pending` și capturează `OrderID`, `ClientID` și `OrderDate` pentru fiecare rând șters într-o variabilă de tip tabel. Afișează rezultatele.
+Folosind `DELETE` cu `OUTPUT`, șterge toate comenzile care nu au nicio linie în `Detalii` și capturează `Id`, `IdClient` și `Data` pentru fiecare rând șters într-o variabilă de tip tabel. Afișează rezultatele.
 
 **Exercițiul 8**
-Explică diferența dintre `DELETE FROM Products` și `TRUNCATE TABLE Products`. În ce situații ai alege fiecare variantă și ce s-ar întâmpla cu contorul IDENTITY în fiecare caz?
+Explică diferența dintre `DELETE FROM Detalii` și `TRUNCATE TABLE Detalii`. În ce situații ai alege fiecare variantă? De ce `TRUNCATE TABLE Produse` eșuează chiar și după ce ai golit tabelul `Detalii`?

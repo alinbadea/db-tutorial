@@ -12,11 +12,11 @@
 
 Fără normalizare, toate datele se află într-un singur tabel mare și plat. Acest lucru provoacă trei probleme serioase:
 
-**Anomalia de inserare** — Nu poți înregistra o nouă categorie de produse decât dacă ai și un produs care să-i aparțină. Vrei să adaugi categoria „Toys” înainte de a avea vreo jucărie în stoc? Nu poți.
+**Anomalia de inserare** — Nu poți înregistra o nouă categorie de produse decât dacă ai și un produs care să-i aparțină. Vrei să adaugi categoria „Jucării” înainte de a avea vreo jucărie în stoc? Nu poți.
 
-**Anomalia de actualizare** — Dacă numele de categorie „Electronics” apare în 500 de rânduri de produse și îl redenumești în „Consumer Electronics”, trebuie să actualizezi 500 de rânduri. Dacă ratezi unul, datele devin inconsecvente.
+**Anomalia de actualizare** — Dacă numele de categorie „Electronice” apare în 500 de rânduri de produse și îl redenumești în „Electronice și IT”, trebuie să actualizezi 500 de rânduri. Dacă ratezi unul, datele devin inconsecvente.
 
-**Anomalia de ștergere** — Dacă ștergi singurul produs din categoria „Books”, pierzi complet toate informațiile despre acea categorie, chiar dacă însăși categoria este încă validă.
+**Anomalia de ștergere** — Dacă ștergi singurul produs din categoria „Cărți”, pierzi complet toate informațiile despre acea categorie, chiar dacă însăși categoria este încă validă.
 
 Normalizarea elimină redundanța și face ca fiecare informație să existe într-un singur loc.
 
@@ -26,7 +26,7 @@ Normalizarea elimină redundanța și face ca fiecare informație să existe în
 
 | Forma normală | Regulă | Întrebare-cheie |
 |---|---|---|
-| **1NF** | Valori atomice, fără grupuri repetitive, fiecare rând identificabil în mod unic | „Conține fiecare celulă o singură valoare? Există grupuri de coloane precum Product1, Product2?” |
+| **1NF** | Valori atomice, fără grupuri repetitive, fiecare rând identificabil în mod unic | „Conține fiecare celulă o singură valoare? Există grupuri de coloane precum Produs1, Produs2?” |
 | **2NF** | 1NF + fără dependențe parțiale față de o cheie compusă | „Depinde fiecare coloană non-cheie de *întreaga* cheie primară sau doar de o parte a ei?” |
 | **3NF** | 2NF + fără dependențe tranzitive | „Există vreo coloană non-cheie care determină o altă coloană non-cheie?” |
 
@@ -36,21 +36,22 @@ Normalizarea elimină redundanța și face ca fiecare informație să existe în
 
 Imaginează-ți un proiectant de baze de date naiv care stochează fiecare comandă într-un singur rând de foaie de calcul, repetând coloanele de produs pentru fiecare articol din comandă:
 
-**Tabel: order_flat**
+**Tabel: comenzi_plat**
 
-| OrderID | OrderDate | ClientName | ClientEmail | ClientPhone | ClientCity | ProductName1 | Category1 | Price1 | Qty1 | ProductName2 | Category2 | Price2 | Qty2 |
-|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 2024-01-10 | John Smith | john@mail.com | 555-0101 | London | Wireless Mouse | Electronics | 29.99 | 2 | USB Keyboard | Electronics | 49.99 | 1 |
-| 2 | 2024-01-11 | Maria Garcia | maria@mail.com | 555-0202 | Madrid | SQL Server 2022 | Books | 59.99 | 1 | NULL | NULL | NULL | NULL |
-| 3 | 2024-01-12 | John Smith | john@mail.com | 555-0101 | London | Running Shoes | Sports | 89.99 | 1 | Cotton T-Shirt | Clothing | 19.99 | 3 |
-| 4 | 2024-01-14 | Ana Popescu | ana@mail.com | 555-0303 | Bucharest | Wireless Mouse | Electronics | 29.99 | 1 | NULL | NULL | NULL | NULL |
-| 5 | 2024-01-15 | Maria Garcia | maria@mail.com | 555-0202 | Madrid | USB Keyboard | Electronics | 49.99 | 2 | Running Shoes | Sports | 89.99 | 1 |
-| 6 | 2024-01-16 | John Smith | john@mail.com | 555-0101 | London | Cotton T-Shirt | Clothing | 19.99 | 2 | NULL | NULL | NULL | NULL |
+| IdComanda | Data | Client | Telefon | Oras | Produs1 | Categorie1 | Pret1 | Cant1 | Produs2 | Categorie2 | Pret2 | Cant2 |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 1 | 2024-01-10 | Popescu Ana | 0721123456 | Bucuresti | Mouse wireless | Electronice | 89.99 | 2 | Tastatura mecanica | Electronice | 349.99 | 1 |
+| 2 | 2024-01-11 | Ionescu Mihai | 0745987654 | Cluj-Napoca | Ghid SQL Server | Carti | 129.99 | 1 | Clean Code | Carti | 99.99 | 2 |
+| 3 | 2024-01-14 | Popescu Ana | 0721123456 | Bucuresti | Pantofi de alergare | Sport | 399.99 | 1 | Tricou din bumbac | Imbracaminte | 49.99 | 3 |
+| 4 | 2024-01-15 | Georgescu Elena | NULL | Iasi | Mouse wireless | Electronice | 89.99 | 1 | Monitor 27 inch | Electronice | 1499.99 | 1 |
+| 5 | 2024-01-17 | Dumitru Andrei | 0733555111 | Timisoara | Tastatura mecanica | Electronice | 349.99 | 2 | NULL | NULL | NULL | NULL |
+| 6 | 2024-01-18 | Stan Ioana | 0766444222 | Brasov | Sapa de gradina | Casa si gradina | 79.99 | 1 | NULL | NULL | NULL | NULL |
 
 **Probleme vizibile aici:**
-- Grupuri de coloane repetitive (ProductName1/2, Category1/2 etc.) — ce se întâmplă dacă o comandă are 10 articole?
-- Datele clientului (nume, email, telefon, oraș) sunt duplicate pentru fiecare comandă pe care o plasează
-- „Electronics” apare în mai multe rânduri — o singură actualizare necesită modificarea multor rânduri
+- Grupuri de coloane repetitive (Produs1/2, Categorie1/2 etc.) — ce se întâmplă dacă o comandă are 10 articole?
+- Coloana `Client` conține două informații (numele de familie și prenumele) — nu este atomică
+- Datele clientului (nume, telefon, oraș) sunt duplicate pentru fiecare comandă pe care o plasează
+- „Electronice” apare în mai multe rânduri — o singură redenumire necesită modificarea multor rânduri
 - Multe valori NULL pentru comenzile cu mai puține produse decât numărul maxim
 
 ---
@@ -62,24 +63,25 @@ Imaginează-ți un proiectant de baze de date naiv care stochează fiecare coman
 - Fără grupuri de coloane repetitive
 - Fiecare rând trebuie să fie identificabil în mod unic
 
-**Transformare:** Eliminăm grupurile de coloane Product1/Product2 creând câte un rând pentru fiecare produs din fiecare comandă.
+**Transformare:** Împărțim `Client` în `Nume` și `Prenume`, apoi eliminăm grupurile de coloane Produs1/Produs2 creând câte un rând pentru fiecare produs din fiecare comandă.
 
-**Tabel: order_1nf**
+**Tabel: comenzi_1nf**
 
-| OrderID | OrderDate | ClientName | ClientEmail | ClientPhone | ClientCity | ShippingAddress | Status | ProductName | CategoryName | UnitPrice | Quantity |
-|---|---|---|---|---|---|---|---|---|---|---|---|
-| 1 | 2024-01-10 | John Smith | john@mail.com | 555-0101 | London | 12 Baker St | Delivered | Wireless Mouse | Electronics | 29.99 | 2 |
-| 1 | 2024-01-10 | John Smith | john@mail.com | 555-0101 | London | 12 Baker St | Delivered | USB Keyboard | Electronics | 49.99 | 1 |
-| 2 | 2024-01-11 | Maria Garcia | maria@mail.com | 555-0202 | Madrid | Calle Mayor 5 | Shipped | SQL Server 2022 | Books | 59.99 | 1 |
-| 3 | 2024-01-12 | John Smith | john@mail.com | 555-0101 | London | 12 Baker St | Pending | Running Shoes | Sports | 89.99 | 1 |
-| 3 | 2024-01-12 | John Smith | john@mail.com | 555-0101 | London | 12 Baker St | Pending | Cotton T-Shirt | Clothing | 19.99 | 3 |
-| 4 | 2024-01-14 | Ana Popescu | ana@mail.com | 555-0303 | Bucharest | Str. Unirii 7 | Delivered | Wireless Mouse | Electronics | 29.99 | 1 |
+| IdComanda | Data | Nume | Prenume | Telefon | Oras | Produs | Categorie | Pret | Cantitate |
+|---|---|---|---|---|---|---|---|---|---|
+| 1 | 2024-01-10 | Popescu | Ana | 0721123456 | Bucuresti | Mouse wireless | Electronice | 89.99 | 2 |
+| 1 | 2024-01-10 | Popescu | Ana | 0721123456 | Bucuresti | Tastatura mecanica | Electronice | 349.99 | 1 |
+| 2 | 2024-01-11 | Ionescu | Mihai | 0745987654 | Cluj-Napoca | Ghid SQL Server | Carti | 129.99 | 1 |
+| 2 | 2024-01-11 | Ionescu | Mihai | 0745987654 | Cluj-Napoca | Clean Code | Carti | 99.99 | 2 |
+| 3 | 2024-01-14 | Popescu | Ana | 0721123456 | Bucuresti | Pantofi de alergare | Sport | 399.99 | 1 |
+| 3 | 2024-01-14 | Popescu | Ana | 0721123456 | Bucuresti | Tricou din bumbac | Imbracaminte | 49.99 | 3 |
+| 4 | 2024-01-15 | Georgescu | Elena | NULL | Iasi | Mouse wireless | Electronice | 89.99 | 1 |
 
-**Cheie primară (compusă):** `(OrderID, ProductName)`
+**Cheie primară (compusă):** `(IdComanda, Produs)`
 
 **Acum în 1NF:** Fără grupuri repetitive, toate valorile sunt atomice, fiecare rând este unic.
 
-**Probleme rămase:** Datele clientului se repetă încă pe rândurile aceleiași comenzi. Prețurile produselor se repetă pentru fiecare comandă în care apar. Acestea sunt dependențe parțiale — următorul pas le rezolvă.
+**Probleme rămase:** Datele clientului se repetă încă pe rândurile aceleiași comenzi. Categoria și prețul produselor se repetă pentru fiecare comandă în care apar. Acestea sunt dependențe parțiale — următorul pas le rezolvă.
 
 ---
 
@@ -87,62 +89,66 @@ Imaginează-ți un proiectant de baze de date naiv care stochează fiecare coman
 
 **Reguli:** Trebuie să fie în 1NF + fiecare atribut non-cheie trebuie să depindă de **întreaga** cheie primară compusă, nu doar de o parte a ei.
 
-**Identificarea dependențelor parțiale** în `order_1nf` cu PK = `(OrderID, ProductName)`:
+**Identificarea dependențelor parțiale** în `comenzi_1nf` cu PK = `(IdComanda, Produs)`:
 
-| Coloană | Depinde doar de OrderID? | Depinde doar de ProductName? | Depinde de AMBELE (complet)? |
+| Coloană | Depinde doar de IdComanda? | Depinde doar de Produs? | Depinde de AMBELE (complet)? |
 |---|---|---|---|
-| OrderDate | DA — dep. parțială | | |
-| ClientName | DA — dep. parțială | | |
-| ClientEmail | DA — dep. parțială | | |
-| ClientPhone | DA — dep. parțială | | |
-| ClientCity | DA — dep. parțială | | |
-| ShippingAddress | DA — dep. parțială | | |
-| Status | DA — dep. parțială | | |
-| CategoryName | | DA — dep. parțială | |
-| UnitPrice | | DA — dep. parțială | |
-| **Quantity** | | | DA — dependență completă |
+| Data | DA — dep. parțială | | |
+| Nume | DA — dep. parțială | | |
+| Prenume | DA — dep. parțială | | |
+| Telefon | DA — dep. parțială | | |
+| Oras | DA — dep. parțială | | |
+| Categorie | | DA — dep. parțială | |
+| **Cantitate** | | | DA — dependență completă |
+| **Pret** | | | DA — vezi nota de mai jos |
 
-**Transformare:** Mutăm dependențele parțiale în tabele proprii.
+> **Nota despre preț:** Prețul *curent* al unui produs depinde doar de produs. Dar prețul *plătit* într-o comandă este prețul de la momentul vânzării — dacă produsul se scumpește mâine, comenzile vechi trebuie să-și păstreze prețul inițial. De aceea vom păstra **două** coloane de preț: `Produse.Pret` (prețul curent, din catalog) și `Detalii.Pret` (prețul facturat pe acea linie de comandă).
 
-**Tabel: clients_2nf** (depinde doar de identitatea clientului)
+**Transformare:** Mutăm dependențele parțiale în tabele proprii. Introducem chei numerice (`Id`) pentru clienți și produse.
 
-| ClientID | ClientName | ClientEmail | ClientPhone | ClientCity |
+**Tabel: clienti_2nf** (depinde doar de identitatea clientului)
+
+| Id | Nume | Prenume | Telefon | Oras |
 |---|---|---|---|---|
-| 1 | John Smith | john@mail.com | 555-0101 | London |
-| 2 | Maria Garcia | maria@mail.com | 555-0202 | Madrid |
-| 3 | Ana Popescu | ana@mail.com | 555-0303 | Bucharest |
+| 1 | Popescu | Ana | 0721123456 | Bucuresti |
+| 2 | Ionescu | Mihai | 0745987654 | Cluj-Napoca |
+| 3 | Georgescu | Elena | NULL | Iasi |
 
-**Tabel: orders_2nf** (depinde doar de OrderID)
+**Tabel: comenzi_2nf** (depinde doar de IdComanda)
 
-| OrderID | OrderDate | ShippingAddress | Status | ClientID |
-|---|---|---|---|---|
-| 1 | 2024-01-10 | 12 Baker St | Delivered | 1 |
-| 2 | 2024-01-11 | Calle Mayor 5 | Shipped | 2 |
-| 3 | 2024-01-12 | 12 Baker St | Pending | 1 |
-| 4 | 2024-01-14 | Str. Unirii 7 | Delivered | 3 |
-
-**Tabel: products_2nf** (depinde doar de ProductName)
-
-| ProductID | ProductName | CategoryName | UnitPrice |
-|---|---|---|---|
-| 1 | Wireless Mouse | Electronics | 29.99 |
-| 2 | USB Keyboard | Electronics | 49.99 |
-| 3 | SQL Server 2022 | Books | 59.99 |
-| 4 | Running Shoes | Sports | 89.99 |
-| 5 | Cotton T-Shirt | Clothing | 19.99 |
-
-**Tabel: order_details_2nf** (depinde de întreaga cheie compusă)
-
-| OrderID | ProductID | Quantity |
+| Id | Data | IdClient |
 |---|---|---|
-| 1 | 1 | 2 |
-| 1 | 2 | 1 |
-| 2 | 3 | 1 |
-| 3 | 4 | 1 |
-| 3 | 5 | 3 |
-| 4 | 1 | 1 |
+| 1 | 2024-01-10 | 1 |
+| 2 | 2024-01-11 | 2 |
+| 3 | 2024-01-14 | 1 |
+| 4 | 2024-01-15 | 3 |
 
-Nu mai avem date de client repetate. Nu mai avem prețuri de produse redundante.
+**Tabel: produse_2nf** (depinde doar de produs)
+
+| Id | Denumire | Categorie | Pret |
+|---|---|---|---|
+| 1 | Mouse wireless | Electronice | 89.99 |
+| 2 | Tastatura mecanica | Electronice | 349.99 |
+| 3 | Monitor 27 inch | Electronice | 1499.99 |
+| 4 | Ghid SQL Server | Carti | 129.99 |
+| 5 | Clean Code | Carti | 99.99 |
+| 6 | Pantofi de alergare | Sport | 399.99 |
+| 7 | Tricou din bumbac | Imbracaminte | 49.99 |
+
+**Tabel: detalii_2nf** (depinde de întreaga cheie compusă)
+
+| IdComanda | IdProdus | Cantitate | Pret |
+|---|---|---|---|
+| 1 | 1 | 2 | 89.99 |
+| 1 | 2 | 1 | 349.99 |
+| 2 | 4 | 1 | 129.99 |
+| 2 | 5 | 2 | 99.99 |
+| 3 | 6 | 1 | 399.99 |
+| 3 | 7 | 3 | 49.99 |
+| 4 | 1 | 1 | 89.99 |
+| 4 | 3 | 1 | 1499.99 |
+
+Nu mai avem date de client repetate. Nu mai avem categorii de produs repetate pe fiecare linie de comandă.
 
 ---
 
@@ -150,43 +156,44 @@ Nu mai avem date de client repetate. Nu mai avem prețuri de produse redundante.
 
 **Reguli:** Trebuie să fie în 2NF + fără dependențe tranzitive. O dependență tranzitivă există atunci când o coloană non-cheie determină o altă coloană non-cheie.
 
-**Identificarea dependențelor tranzitive** în `products_2nf`:
+**Identificarea dependențelor tranzitive** în `produse_2nf`:
 
-```
-ProductID → CategoryName
-```
+Coloana `Categorie` stochează *numele* categoriei direct în tabelul de produse. Dar numele este un atribut al *categoriei*, nu al produsului în sine. Dacă redenumim „Electronice” în „Electronice și IT”, tot trebuie să actualizăm fiecare rând din tabelul de produse care o conține.
 
-Dar `CategoryName` este un atribut al *categoriei*, nu al produsului în sine. Dacă redenumim „Electronics” în „Consumer Electronics”, tot trebuie să actualizăm fiecare rând din tabelul de produse care o referă.
-
-Lanțul de dependențe este:
+Dacă dăm fiecărei categorii un identificator, lanțul de dependențe devine vizibil:
 ```
-ProductID → CategoryID → CategoryName
+Id (produs) → IdCategorie → Nume (categorie)
 ```
 
-`CategoryName` depinde de `CategoryID`, care este un atribut non-cheie — aceasta este o dependență tranzitivă.
+Numele categoriei depinde de `IdCategorie`, care este un atribut non-cheie al produsului — aceasta este o dependență tranzitivă.
 
-**Transformare:** Extragem `CategoryName` într-un tabel propriu.
+**Transformare:** Extragem categoriile într-un tabel propriu.
 
-**Tabel: categories**
+**Tabel: Categorii**
 
-| CategoryID | CategoryName | Description |
-|---|---|---|
-| 1 | Electronics | Electronic devices and accessories |
-| 2 | Books | Books and educational materials |
-| 3 | Sports | Sports equipment and clothing |
-| 4 | Clothing | Fashion and apparel |
+| Id | Nume |
+|---|---|
+| 1 | Electronice |
+| 2 | Carti |
+| 3 | Sport |
+| 4 | Imbracaminte |
+| 5 | Casa si gradina |
 
-**Tabel: products** (actualizat — CategoryName înlocuit cu FK-ul CategoryID)
+**Tabel: Produse** (actualizat — numele categoriei înlocuit cu FK-ul `IdCategorie`; am adăugat și stocul)
 
-| ProductID | ProductName | Description | Price | Stock | CategoryID |
-|---|---|---|---|---|---|
-| 1 | Wireless Mouse | Ergonomic wireless mouse | 29.99 | 150 | 1 |
-| 2 | USB Keyboard | Mechanical keyboard | 49.99 | 80 | 1 |
-| 3 | SQL Server 2022 | Database programming book | 59.99 | 40 | 2 |
-| 4 | Running Shoes | Lightweight running shoes | 89.99 | 60 | 3 |
-| 5 | Cotton T-Shirt | Classic cotton t-shirt | 19.99 | 200 | 4 |
+| Id | IdCategorie | Denumire | Pret | Stoc |
+|---|---|---|---|---|
+| 1 | 1 | Mouse wireless | 89.99 | 150 |
+| 2 | 1 | Tastatura mecanica | 349.99 | 80 |
+| 3 | 1 | Monitor 27 inch | 1499.99 | 30 |
+| 4 | 2 | Ghid SQL Server | 129.99 | 45 |
+| 5 | 2 | Clean Code | 99.99 | 60 |
+| 6 | 3 | Pantofi de alergare | 399.99 | 55 |
+| 7 | 4 | Tricou din bumbac | 49.99 | 200 |
 
-Acum `CategoryName` există într-un singur loc. Redenumirea unei categorii necesită actualizarea unui singur rând în `categories`, nu a fiecărui rând de produs.
+Acum numele categoriei există într-un singur loc. Redenumirea unei categorii necesită actualizarea unui singur rând în `Categorii`, nu a fiecărui rând de produs.
+
+**Verificăm și celelalte tabele:** În `Clienti`, `Comenzi` și `Detalii` nu există nicio coloană non-cheie care să determine o altă coloană non-cheie, deci sunt deja în 3NF.
 
 ---
 
@@ -195,81 +202,74 @@ Acum `CategoryName` există într-un singur loc. Redenumirea unei categorii nece
 După normalizarea completă, baza de date eCommerce are **5 tabele**:
 
 ```
-Categories
-  CategoryID  (PK)
-  CategoryName
-  Description
+Categorii
+  Id            (PK)
+  Nume          (UNIQUE)
 
-Products
-  ProductID   (PK)
-  ProductName
-  Description
-  Price
-  Stock
-  CategoryID  (FK → Categories.CategoryID)
+Produse
+  Id            (PK)
+  IdCategorie   (FK → Categorii.Id)
+  Denumire
+  Pret          -- prețul curent din catalog
+  Stoc
 
-Clients
-  ClientID    (PK)
-  FirstName
-  LastName
-  Email       (UNIQUE)
-  Phone
-  Address
-  City
-  Country
-  CreatedDate
+Clienti
+  Id            (PK)
+  Nume          -- numele de familie
+  Prenume
+  Oras
+  Adresa
+  DataNasterii
+  Telefon
 
-Orders
-  OrderID     (PK)
-  ClientID    (FK → Clients.ClientID)
-  OrderDate
-  ShippingAddress
-  Status
-  TotalAmount
+Comenzi
+  Id            (PK)
+  Data
+  IdClient      (FK → Clienti.Id)
 
-OrderDetails
-  OrderDetailID  (PK)
-  OrderID        (FK → Orders.OrderID)
-  ProductID      (FK → Products.ProductID)
-  Quantity
-  UnitPrice
+Detalii
+  IdComanda     (PK, FK → Comenzi.Id)
+  IdProdus      (PK, FK → Produse.Id)
+  Cantitate
+  Pret          -- prețul plătit la momentul comenzii
 ```
 
 **Rezumatul relațiilor:**
-- `Products` → `Categories` (mulți-la-unu: fiecare produs are o singură categorie)
-- `Orders` → `Clients` (mulți-la-unu: fiecare comandă aparține unui singur client)
-- `OrderDetails` → `Orders` (mulți-la-unu: fiecare detaliu aparține unei singure comenzi)
-- `OrderDetails` → `Products` (mulți-la-unu: fiecare detaliu referă un singur produs)
+- `Produse` → `Categorii` (mulți-la-unu: fiecare produs are o singură categorie)
+- `Comenzi` → `Clienti` (mulți-la-unu: fiecare comandă aparține unui singur client)
+- `Detalii` → `Comenzi` (mulți-la-unu: fiecare linie aparține unei singure comenzi)
+- `Detalii` → `Produse` (mulți-la-unu: fiecare linie referă un singur produs)
+- Prin `Detalii`, între `Comenzi` și `Produse` există o relație **mulți-la-mulți**: o comandă conține mai multe produse, iar un produs apare în mai multe comenzi.
 
 ---
 
 ## Exerciții practice
 
 **Exercițiul 1 (Ușor)**
-În tabelul UNF, ce anomalie apare dacă încerci să adaugi o nouă categorie „Garden Tools” înainte de a avea vreun produs în acea categorie?
+În tabelul UNF, ce anomalie apare dacă încerci să adaugi o nouă categorie „Unelte de grădină” înainte de a avea vreun produs în acea categorie?
 
 **Exercițiul 2 (Ușor)**
-În tabelul 1NF `order_1nf`, care este cheia primară compusă? De ce OrderID singur nu este suficient?
+În tabelul 1NF `comenzi_1nf`, care este cheia primară compusă? De ce `IdComanda` singur nu este suficient?
 
 **Exercițiul 3 (Mediu)**
-În etapa 2NF, explică de ce `ShippingAddress` a fost mutată în tabelul `orders_2nf` și nu în `clients_2nf`, deși ambele tabele au fost separate din comenzi.
+De ce a fost împărțită coloana `Client` în `Nume` și `Prenume` la trecerea în 1NF? Dă un exemplu de interogare care ar fi dificilă dacă numele ar rămâne într-o singură coloană.
 
 **Exercițiul 4 (Mediu)**
-După atingerea 3NF, dacă un produs își schimbă categoria, câte rânduri trebuie actualizate? Câte rânduri ar trebui actualizate în versiunea 2NF?
+După atingerea 3NF, dacă o categorie este redenumită, câte rânduri trebuie actualizate? Câte rânduri ar trebui actualizate în versiunea 2NF?
 
 **Exercițiul 5 (Dificil)**
-Un coleg sugerează adăugarea unei coloane `ClientCity` direct în tabelul `Orders`, argumentând că „orașul de livrare poate diferi de orașul înregistrat al clientului”. Este aceasta o încălcare a normalizării? Justifică răspunsul și descrie cum ai trata corect această cerință.
+Un coleg sugerează adăugarea unei coloane `Oras` direct în tabelul `Comenzi`, completată automat cu orașul clientului, „ca să nu mai facem JOIN cu `Clienti`”. Este aceasta o încălcare a normalizării? Ce s-ar schimba dacă orașul ar fi, de fapt, *orașul de livrare* al comenzii?
 
 ---
 
 ## Răspunsuri
 
-**Exercițiul 1:** Anomalie de inserare. În tabelul UNF fiecare rând trebuie să aibă un produs, deci o categorie care încă nu are produse nu poate fi stocată.
+**Exercițiul 1:** Anomalie de inserare. În tabelul UNF fiecare rând trebuie să aibă o comandă și un produs, deci o categorie care încă nu are produse nu poate fi stocată.
 
-**Exercițiul 2:** Cheia primară compusă este `(OrderID, ProductName)`. OrderID singur nu este unic deoarece o comandă poate conține mai multe produse, fiecare apărând pe propriul rând.
+**Exercițiul 2:** Cheia primară compusă este `(IdComanda, Produs)`. `IdComanda` singur nu este unic, deoarece o comandă poate conține mai multe produse, fiecare apărând pe propriul rând.
 
-**Exercițiul 3:** `ShippingAddress` depinde doar de `OrderID` (este adresa pentru *acea comandă anume*) și este, prin urmare, o dependență parțială față de `OrderID`. Locul ei este în tabelul de comenzi. Nu a fost mutată în `clients` deoarece clientul poate livra la o adresă diferită pentru fiecare comandă.
+**Exercițiul 3:** O valoare precum „Popescu Ana” conține două informații, deci nu este atomică. Dacă vrem, de exemplu, toți clienții cu numele de familie „Popescu” sau o listă sortată după prenume, ar trebui să despărțim textul la fiecare interogare (`SUBSTRING`, `CHARINDEX`), ceea ce este fragil (ce facem cu „Popa-Ionescu Ana Maria”?).
 
-**Exercițiul 4:** În 3NF, actualizarea categoriei unui produs înseamnă modificarea `CategoryID` într-un singur rând din tabelul `Products`. În versiunea 2NF, `CategoryName` era stocat în fiecare rând de produs, deci tot un singur rând trebuia actualizat — dar dacă se schimba *numele* categoriei (în 2NF nu există tabel de categorii), ar fi trebuit să actualizezi fiecare rând de produs care are acel nume de categorie.
+**Exercițiul 4:** În 3NF, redenumirea unei categorii înseamnă modificarea unui singur rând din tabelul `Categorii`. În versiunea 2NF, numele categoriei era stocat în fiecare rând de produs, deci trebuia actualizat fiecare produs din acea categorie (de ex. 3 rânduri pentru „Electronice”).
 
-**Exercițiul 5:** Aceasta NU este o încălcare a normalizării în forma descrisă. `ShippingAddress` din `Orders` se referă la adresa *acelei comenzi*, care poate diferi în mod legitim de adresa înregistrată a clientului. Stocarea ei acolo este corectă. Dacă ai nevoie și de orașul înregistrat al clientului, acesta există deja în tabelul `Clients` și poate fi obținut printr-un JOIN. Nu apare nicio duplicare, deoarece cele două coloane reprezintă două informații diferite.
+**Exercițiul 5:** Dacă `Oras` este doar o copie a orașului clientului, da — este o dependență tranzitivă: `Comenzi.Id → IdClient → Oras`. Orașul ar fi stocat de două ori și ar putea deveni inconsecvent când clientul se mută. Valoarea se obține corect printr-un JOIN cu `Clienti`. Dacă însă coloana reprezintă *orașul de livrare* al acelei comenzi (care poate diferi de cel al clientului), atunci depinde doar de comandă și locul ei este corect în `Comenzi` — este o informație diferită, nu o duplicare.
