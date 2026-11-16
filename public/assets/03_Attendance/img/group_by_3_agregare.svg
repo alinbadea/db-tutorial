@@ -1,0 +1,84 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 756" width="840" height="756" role="img" aria-label="Pasul 3 — funcțiile de agregare">
+<title>Pasul 3 — funcțiile de agregare</title>
+<style>
+  .bg{fill:#ffffff}
+  text{font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+  .sql{font-family:Consolas,'Cascadia Mono',Menlo,'DejaVu Sans Mono',monospace;font-size:14px;fill:#e2e8f0}
+  .kw{fill:#7dd3fc;font-weight:600}
+  .qbox{fill:#0f172a}
+  .qhl{fill:#facc15;fill-opacity:.28;stroke:#facc15;stroke-width:1.2}
+  .pill{fill:#f1f5f9;stroke:#cbd5e1}
+  .pillt{font-size:13px;fill:#64748b;font-weight:600}
+  .pillon{fill:#0f172a}
+  .pillont{font-size:13px;fill:#ffffff;font-weight:700}
+  .arrowt{font-size:20px;fill:#94a3b8}
+  .explain{font-size:15px;fill:#334155}
+  .explainb{font-weight:700;fill:#0f172a}
+  .th{fill:#1e293b}
+  .tht{font-size:12.5px;font-weight:700;fill:#f8fafc}
+  .tht.key{fill:#fde68a}
+  .tht.agg{fill:#a7f3d0}
+  .row{stroke:#ffffff;stroke-width:1}
+  .td{font-size:13px;fill:#1e293b}
+  .keyv,.aggv{font-weight:700}
+  .glabel{font-size:11px;font-weight:700;fill:#ffffff}
+  .note{font-size:11.5px;fill:#475569;font-style:italic}
+  .note.ok{fill:#15803d;font-style:normal;font-weight:600}
+  .note.bad{fill:#b91c1c;font-style:normal;font-weight:600}
+  .okc{fill:#16a34a}.okm{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .badc{fill:#dc2626}.badm{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round}
+  .dim{fill:#ffffff;fill-opacity:.68}
+  .strike{stroke:#dc2626;stroke-width:2}
+  .resframe{fill:none;stroke:#0f172a;stroke-width:2}
+  .restitle{font-size:13px;font-weight:700;fill:#0f172a}
+</style>
+<rect class="bg" width="840" height="756" rx="10"/>
+<rect x="76" y="14" width="128" height="28" rx="14" class="pill"/><text x="140" y="33" class="pillt" text-anchor="middle">1. FROM</text>
+<text x="210" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="216" y="14" width="128" height="28" rx="14" class="pill"/><text x="280" y="33" class="pillt" text-anchor="middle">2. GROUP BY</text>
+<text x="350" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="356" y="14" width="128" height="28" rx="14" class="pill"/><text x="420" y="33" class="pillt" text-anchor="middle">3. Agregare</text>
+<rect x="356" y="14" width="128" height="28" rx="14" class="pillon"/><text x="420" y="33" class="pillont" text-anchor="middle">3. Agregare</text>
+<text x="490" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="496" y="14" width="128" height="28" rx="14" class="pill"/><text x="560" y="33" class="pillt" text-anchor="middle">4. HAVING</text>
+<text x="630" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="636" y="14" width="128" height="28" rx="14" class="pill"/><text x="700" y="33" class="pillt" text-anchor="middle">5. SELECT</text>
+<rect x="24" y="56" width="792" height="106" rx="8" class="qbox"/>
+<rect x="203" y="64" width="207.60000000000002" height="22" rx="4" class="qhl"/><rect x="421.40000000000003" y="64" width="266.40000000000003" height="22" rx="4" class="qhl"/>
+<text class="sql" x="38" y="80" textLength="646.8" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">SELECT</tspan>   TeacherID, <tspan class="kw">COUNT</tspan>(*) <tspan class="kw">AS</tspan> SessionCount, <tspan class="kw">MAX</tspan>(AttendanceDate) <tspan class="kw">AS</tspan> LastDate</text><text class="sql" x="38" y="102" textLength="159.6" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">FROM</tspan>     Attendance</text><text class="sql" x="38" y="124" textLength="151.2" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">GROUP BY</tspan> TeacherID</text><text class="sql" x="38" y="146" textLength="184.8" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">HAVING</tspan>   <tspan class="kw">COUNT</tspan>(*) &gt; 1;</text>
+<text x="420" y="192" class="explain" text-anchor="middle"><tspan class="explainb">Agregare:</tspan> fiecare grup devine un singur rând; COUNT și MAX se calculează pe rândurile grupului.</text>
+<rect x="44" y="214" width="370" height="26" class="th"/><text x="52" y="231" class="tht">AttendanceID</text><text x="156" y="231" class="tht">ClassID</text><text x="222" y="231" class="tht key">TeacherID</text><text x="306" y="231" class="tht">AttendanceDate</text>
+<rect x="36" y="256" width="386" height="168" rx="8" fill="#dbeafe" fill-opacity="0.45" stroke="#2563eb" stroke-width="1.5" stroke-dasharray="5 3"/><rect x="44" y="247" width="99.8" height="17" rx="8" fill="#2563eb"/><text x="51" y="259" class="glabel">TeacherID = 1</text>
+<rect x="36" y="436" width="386" height="64" rx="8" fill="#fef3c7" fill-opacity="0.45" stroke="#d97706" stroke-width="1.5" stroke-dasharray="5 3"/><rect x="44" y="427" width="99.8" height="17" rx="8" fill="#d97706"/><text x="51" y="439" class="glabel">TeacherID = 2</text>
+<rect x="36" y="512" width="386" height="64" rx="8" fill="#d1fae5" fill-opacity="0.45" stroke="#059669" stroke-width="1.5" stroke-dasharray="5 3"/><rect x="44" y="503" width="99.8" height="17" rx="8" fill="#059669"/><text x="51" y="515" class="glabel">TeacherID = 3</text>
+<rect x="36" y="588" width="386" height="64" rx="8" fill="#ede9fe" fill-opacity="0.45" stroke="#7c3aed" stroke-width="1.5" stroke-dasharray="5 3"/><rect x="44" y="579" width="99.8" height="17" rx="8" fill="#7c3aed"/><text x="51" y="591" class="glabel">TeacherID = 4</text>
+<rect x="36" y="664" width="386" height="64" rx="8" fill="#fce7f3" fill-opacity="0.45" stroke="#db2777" stroke-width="1.5" stroke-dasharray="5 3"/><rect x="44" y="655" width="99.8" height="17" rx="8" fill="#db2777"/><text x="51" y="667" class="glabel">TeacherID = 5</text>
+<g transform="translate(0 22)"><rect x="44" y="240" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="240" width="4" height="26" fill="#2563eb"/><text x="52" y="257" class="td">1</text><text x="156" y="257" class="td">1</text><text x="222" y="257" class="td keyv" fill="#2563eb">1</text><text x="306" y="257" class="td">2024-09-03</text></g>
+<g transform="translate(0 22)"><rect x="44" y="266" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="266" width="4" height="26" fill="#2563eb"/><text x="52" y="283" class="td">2</text><text x="156" y="283" class="td">2</text><text x="222" y="283" class="td keyv" fill="#2563eb">1</text><text x="306" y="283" class="td">2024-09-03</text></g>
+<g transform="translate(0 22)"><rect x="44" y="292" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="292" width="4" height="26" fill="#2563eb"/><text x="52" y="309" class="td">3</text><text x="156" y="309" class="td">5</text><text x="222" y="309" class="td keyv" fill="#2563eb">1</text><text x="306" y="309" class="td">2024-09-03</text></g>
+<g transform="translate(0 22)"><rect x="44" y="318" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="318" width="4" height="26" fill="#2563eb"/><text x="52" y="335" class="td">4</text><text x="156" y="335" class="td">7</text><text x="222" y="335" class="td keyv" fill="#2563eb">1</text><text x="306" y="335" class="td">2024-09-03</text></g>
+<g transform="translate(0 -82)"><rect x="44" y="448" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="448" width="4" height="26" fill="#2563eb"/><text x="52" y="465" class="td">9</text><text x="156" y="465" class="td">1</text><text x="222" y="465" class="td keyv" fill="#2563eb">1</text><text x="306" y="465" class="td">2024-09-05</text></g>
+<g transform="translate(0 -82)"><rect x="44" y="474" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="474" width="4" height="26" fill="#2563eb"/><text x="52" y="491" class="td">10</text><text x="156" y="491" class="td">2</text><text x="222" y="491" class="td keyv" fill="#2563eb">1</text><text x="306" y="491" class="td">2024-09-05</text></g>
+<g transform="translate(0 98)"><rect x="44" y="344" width="370" height="26" fill="#fef3c7" class="row"/><rect x="44" y="344" width="4" height="26" fill="#d97706"/><text x="52" y="361" class="td">5</text><text x="156" y="361" class="td">3</text><text x="222" y="361" class="td keyv" fill="#d97706">2</text><text x="306" y="361" class="td">2024-09-04</text></g>
+<g transform="translate(0 98)"><rect x="44" y="370" width="370" height="26" fill="#fef3c7" class="row"/><rect x="44" y="370" width="4" height="26" fill="#d97706"/><text x="52" y="387" class="td">6</text><text x="156" y="387" class="td">4</text><text x="222" y="387" class="td keyv" fill="#d97706">2</text><text x="306" y="387" class="td">2024-09-04</text></g>
+<g transform="translate(0 122)"><rect x="44" y="396" width="370" height="26" fill="#d1fae5" class="row"/><rect x="44" y="396" width="4" height="26" fill="#059669"/><text x="52" y="413" class="td">7</text><text x="156" y="413" class="td">6</text><text x="222" y="413" class="td keyv" fill="#059669">3</text><text x="306" y="413" class="td">2024-09-04</text></g>
+<g transform="translate(0 122)"><rect x="44" y="422" width="370" height="26" fill="#d1fae5" class="row"/><rect x="44" y="422" width="4" height="26" fill="#059669"/><text x="52" y="439" class="td">8</text><text x="156" y="439" class="td">8</text><text x="222" y="439" class="td keyv" fill="#059669">3</text><text x="306" y="439" class="td">2024-09-04</text></g>
+<g transform="translate(0 94)"><rect x="44" y="500" width="370" height="26" fill="#ede9fe" class="row"/><rect x="44" y="500" width="4" height="26" fill="#7c3aed"/><text x="52" y="517" class="td">11</text><text x="156" y="517" class="td">9</text><text x="222" y="517" class="td keyv" fill="#7c3aed">4</text><text x="306" y="517" class="td">2024-09-05</text></g>
+<g transform="translate(0 144)"><rect x="44" y="526" width="370" height="26" fill="#fce7f3" class="row"/><rect x="44" y="526" width="4" height="26" fill="#db2777"/><text x="52" y="543" class="td">12</text><text x="156" y="543" class="td">10</text><text x="222" y="543" class="td keyv" fill="#db2777">5</text><text x="306" y="543" class="td">2024-09-05</text></g>
+<rect x="484" y="214" width="292" height="26" class="th"/><text x="492" y="231" class="tht key">TeacherID</text><text x="576" y="231" class="tht agg">SessionCount</text><text x="684" y="231" class="tht agg">LastDate</text>
+<rect x="484" y="262" width="292" height="26" fill="#dbeafe" class="row"/><rect x="484" y="262" width="4" height="26" fill="#2563eb"/><text x="492" y="279" class="td keyv" fill="#2563eb">1</text><text x="576" y="279" class="td aggv">6</text><text x="684" y="279" class="td aggv">2024-09-05</text>
+<line x1="428" y1="275" x2="474" y2="275" stroke="#2563eb" stroke-width="2"/><path d="M474 270 L482 275 L474 280 Z" fill="#2563eb"/>
+<text x="490" y="302" class="note">COUNT(*) = 6   ·   MAX(AttendanceDate) = 2024-09-05</text>
+<rect x="484" y="442" width="292" height="26" fill="#fef3c7" class="row"/><rect x="484" y="442" width="4" height="26" fill="#d97706"/><text x="492" y="459" class="td keyv" fill="#d97706">2</text><text x="576" y="459" class="td aggv">2</text><text x="684" y="459" class="td aggv">2024-09-04</text>
+<line x1="428" y1="455" x2="474" y2="455" stroke="#d97706" stroke-width="2"/><path d="M474 450 L482 455 L474 460 Z" fill="#d97706"/>
+<text x="490" y="482" class="note">COUNT(*) = 2   ·   MAX(AttendanceDate) = 2024-09-04</text>
+<rect x="484" y="518" width="292" height="26" fill="#d1fae5" class="row"/><rect x="484" y="518" width="4" height="26" fill="#059669"/><text x="492" y="535" class="td keyv" fill="#059669">3</text><text x="576" y="535" class="td aggv">2</text><text x="684" y="535" class="td aggv">2024-09-04</text>
+<line x1="428" y1="531" x2="474" y2="531" stroke="#059669" stroke-width="2"/><path d="M474 526 L482 531 L474 536 Z" fill="#059669"/>
+<text x="490" y="558" class="note">COUNT(*) = 2   ·   MAX(AttendanceDate) = 2024-09-04</text>
+<rect x="484" y="594" width="292" height="26" fill="#ede9fe" class="row"/><rect x="484" y="594" width="4" height="26" fill="#7c3aed"/><text x="492" y="611" class="td keyv" fill="#7c3aed">4</text><text x="576" y="611" class="td aggv">1</text><text x="684" y="611" class="td aggv">2024-09-05</text>
+<line x1="428" y1="607" x2="474" y2="607" stroke="#7c3aed" stroke-width="2"/><path d="M474 602 L482 607 L474 612 Z" fill="#7c3aed"/>
+<text x="490" y="634" class="note">COUNT(*) = 1   ·   MAX(AttendanceDate) = 2024-09-05</text>
+<rect x="484" y="670" width="292" height="26" fill="#fce7f3" class="row"/><rect x="484" y="670" width="4" height="26" fill="#db2777"/><text x="492" y="687" class="td keyv" fill="#db2777">5</text><text x="576" y="687" class="td aggv">1</text><text x="684" y="687" class="td aggv">2024-09-05</text>
+<line x1="428" y1="683" x2="474" y2="683" stroke="#db2777" stroke-width="2"/><path d="M474 678 L482 683 L474 688 Z" fill="#db2777"/>
+<text x="490" y="710" class="note">COUNT(*) = 1   ·   MAX(AttendanceDate) = 2024-09-05</text>
+</svg>

@@ -79,6 +79,30 @@ FROM Clienti;
 
 **Regulă:** Fiecare coloană din lista `SELECT` care **nu** se află într-o funcție de agregare **trebuie** să apară în clauza `GROUP BY`.
 
+### Cum funcționează GROUP BY, vizual
+
+Animația de mai jos urmărește o interogare pe tabelul `Produse` în ordinea logică în care SQL Server o evaluează: citește rândurile (`FROM`), le împarte în grupuri după `IdCategorie` (`GROUP BY`), reduce fiecare grup la un singur rând cu funcțiile de agregare, elimină grupurile care nu respectă condiția din `HAVING` și, la final, returnează coloanele din `SELECT`.
+
+![Animație: GROUP BY, funcții de agregare și HAVING](assets/01_eCommerce/img/group_by_animatie.svg)
+
+> **Sfat:** dă clic pe un pas din bara de sus a animației (de exemplu „3. Agregare”) ca să reiei animația de la acel pas. Butonul din dreapta sus oprește și pornește animația.
+
+Aceiași pași, pe rând:
+
+**Pasul 1 — `FROM`:** se citesc toate rândurile tabelului. Fiecare culoare corespunde unei valori din `IdCategorie`.
+
+![Pasul 1 — tabelul sursă](assets/01_eCommerce/img/group_by_1_tabel.svg)
+
+**Pasul 2 — `GROUP BY`:** rândurile cu aceeași valoare în `IdCategorie` sunt puse în același grup — câte un grup pentru fiecare categorie.
+
+![Pasul 2 — gruparea rândurilor](assets/01_eCommerce/img/group_by_2_grupare.svg)
+
+**Pasul 3 — funcțiile de agregare:** fiecare grup se reduce la **un singur rând**. Funcțiile de agregare se calculează separat, doar pe rândurile din grupul respectiv.
+
+![Pasul 3 — calculul funcțiilor de agregare pe fiecare grup](assets/01_eCommerce/img/group_by_3_agregare.svg)
+
+Pașii 4 și 5 (filtrarea cu `HAVING`) sunt ilustrați în secțiunea `HAVING` de mai jos.
+
 ### O singură coloană
 
 ```sql
@@ -132,6 +156,14 @@ ORDER BY Zi;
 ## HAVING
 
 `HAVING` filtrează grupurile după agregare, la fel cum `WHERE` filtrează rândurile înainte de agregare.
+
+**Pasul 4 — `HAVING`:** condiția se verifică pentru fiecare **grup** (nu pentru fiecare rând). Grupurile pentru care condiția este falsă sunt eliminate în întregime.
+
+![Pasul 4 — HAVING elimină grupurile care nu respectă condiția](assets/01_eCommerce/img/group_by_4_having.svg)
+
+**Pasul 5 — `SELECT`:** rezultatul conține câte un rând pentru fiecare grup rămas.
+
+![Pasul 5 — rezultatul final](assets/01_eCommerce/img/group_by_5_rezultat.svg)
 
 ```sql
 -- WHERE filtrează rânduri (înainte de grupare)

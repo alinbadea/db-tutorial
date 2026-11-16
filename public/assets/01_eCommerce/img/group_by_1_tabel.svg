@@ -1,0 +1,60 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 840 704" width="840" height="704" role="img" aria-label="Pasul 1 — FROM: tabelul sursă">
+<title>Pasul 1 — FROM: tabelul sursă</title>
+<style>
+  .bg{fill:#ffffff}
+  text{font-family:'Segoe UI',Roboto,'Helvetica Neue',Arial,sans-serif}
+  .sql{font-family:Consolas,'Cascadia Mono',Menlo,'DejaVu Sans Mono',monospace;font-size:14px;fill:#e2e8f0}
+  .kw{fill:#7dd3fc;font-weight:600}
+  .qbox{fill:#0f172a}
+  .qhl{fill:#facc15;fill-opacity:.28;stroke:#facc15;stroke-width:1.2}
+  .pill{fill:#f1f5f9;stroke:#cbd5e1}
+  .pillt{font-size:13px;fill:#64748b;font-weight:600}
+  .pillon{fill:#0f172a}
+  .pillont{font-size:13px;fill:#ffffff;font-weight:700}
+  .arrowt{font-size:20px;fill:#94a3b8}
+  .explain{font-size:15px;fill:#334155}
+  .explainb{font-weight:700;fill:#0f172a}
+  .th{fill:#1e293b}
+  .tht{font-size:12.5px;font-weight:700;fill:#f8fafc}
+  .tht.key{fill:#fde68a}
+  .tht.agg{fill:#a7f3d0}
+  .row{stroke:#ffffff;stroke-width:1}
+  .td{font-size:13px;fill:#1e293b}
+  .keyv,.aggv{font-weight:700}
+  .glabel{font-size:11px;font-weight:700;fill:#ffffff}
+  .note{font-size:11.5px;fill:#475569;font-style:italic}
+  .note.ok{fill:#15803d;font-style:normal;font-weight:600}
+  .note.bad{fill:#b91c1c;font-style:normal;font-weight:600}
+  .okc{fill:#16a34a}.okm{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round;stroke-linejoin:round}
+  .badc{fill:#dc2626}.badm{fill:none;stroke:#fff;stroke-width:2.4;stroke-linecap:round}
+  .dim{fill:#ffffff;fill-opacity:.68}
+  .strike{stroke:#dc2626;stroke-width:2}
+  .resframe{fill:none;stroke:#0f172a;stroke-width:2}
+  .restitle{font-size:13px;font-weight:700;fill:#0f172a}
+</style>
+<rect class="bg" width="840" height="704" rx="10"/>
+<rect x="76" y="14" width="128" height="28" rx="14" class="pill"/><text x="140" y="33" class="pillt" text-anchor="middle">1. FROM</text>
+<rect x="76" y="14" width="128" height="28" rx="14" class="pillon"/><text x="140" y="33" class="pillont" text-anchor="middle">1. FROM</text>
+<text x="210" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="216" y="14" width="128" height="28" rx="14" class="pill"/><text x="280" y="33" class="pillt" text-anchor="middle">2. GROUP BY</text>
+<text x="350" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="356" y="14" width="128" height="28" rx="14" class="pill"/><text x="420" y="33" class="pillt" text-anchor="middle">3. Agregare</text>
+<text x="490" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="496" y="14" width="128" height="28" rx="14" class="pill"/><text x="560" y="33" class="pillt" text-anchor="middle">4. HAVING</text>
+<text x="630" y="33" class="arrowt" text-anchor="middle">›</text>
+<rect x="636" y="14" width="128" height="28" rx="14" class="pill"/><text x="700" y="33" class="pillt" text-anchor="middle">5. SELECT</text>
+<rect x="24" y="56" width="792" height="106" rx="8" class="qbox"/>
+<rect x="35" y="86" width="140.4" height="22" rx="4" class="qhl"/>
+<text class="sql" x="38" y="80" textLength="588.0" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">SELECT</tspan>   IdCategorie, <tspan class="kw">COUNT</tspan>(*) <tspan class="kw">AS</tspan> NumarProduse, <tspan class="kw">SUM</tspan>(Stoc) <tspan class="kw">AS</tspan> StocTotal</text><text class="sql" x="38" y="102" textLength="134.4" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">FROM</tspan>     Produse</text><text class="sql" x="38" y="124" textLength="168.0" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">GROUP BY</tspan> IdCategorie</text><text class="sql" x="38" y="146" textLength="193.2" lengthAdjust="spacingAndGlyphs" xml:space="preserve"><tspan class="kw">HAVING</tspan>   <tspan class="kw">COUNT</tspan>(*) &gt;= 2;</text>
+<text x="420" y="192" class="explain" text-anchor="middle"><tspan class="explainb">FROM:</tspan> se citesc toate rândurile din tabelul Produse.</text>
+<rect x="44" y="214" width="370" height="26" class="th"/><text x="52" y="231" class="tht">Id</text><text x="96" y="231" class="tht">Denumire</text><text x="266" y="231" class="tht key">IdCategorie</text><text x="362" y="231" class="tht">Stoc</text>
+<rect x="44" y="240" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="240" width="4" height="26" fill="#2563eb"/><text x="52" y="257" class="td">1</text><text x="96" y="257" class="td">Mouse wireless</text><text x="266" y="257" class="td keyv" fill="#2563eb">1</text><text x="362" y="257" class="td">150</text>
+<rect x="44" y="266" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="266" width="4" height="26" fill="#2563eb"/><text x="52" y="283" class="td">2</text><text x="96" y="283" class="td">Tastatura mecanica</text><text x="266" y="283" class="td keyv" fill="#2563eb">1</text><text x="362" y="283" class="td">80</text>
+<rect x="44" y="292" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="292" width="4" height="26" fill="#2563eb"/><text x="52" y="309" class="td">3</text><text x="96" y="309" class="td">Monitor 27 inch</text><text x="266" y="309" class="td keyv" fill="#2563eb">1</text><text x="362" y="309" class="td">30</text>
+<rect x="44" y="448" width="370" height="26" fill="#dbeafe" class="row"/><rect x="44" y="448" width="4" height="26" fill="#2563eb"/><text x="52" y="465" class="td">9</text><text x="96" y="465" class="td">Casti bluetooth</text><text x="266" y="465" class="td keyv" fill="#2563eb">1</text><text x="362" y="465" class="td">0</text>
+<rect x="44" y="318" width="370" height="26" fill="#fef3c7" class="row"/><rect x="44" y="318" width="4" height="26" fill="#d97706"/><text x="52" y="335" class="td">4</text><text x="96" y="335" class="td">Ghid SQL Server</text><text x="266" y="335" class="td keyv" fill="#d97706">2</text><text x="362" y="335" class="td">45</text>
+<rect x="44" y="344" width="370" height="26" fill="#fef3c7" class="row"/><rect x="44" y="344" width="4" height="26" fill="#d97706"/><text x="52" y="361" class="td">5</text><text x="96" y="361" class="td">Clean Code</text><text x="266" y="361" class="td keyv" fill="#d97706">2</text><text x="362" y="361" class="td">60</text>
+<rect x="44" y="370" width="370" height="26" fill="#d1fae5" class="row"/><rect x="44" y="370" width="4" height="26" fill="#059669"/><text x="52" y="387" class="td">6</text><text x="96" y="387" class="td">Pantofi de alergare</text><text x="266" y="387" class="td keyv" fill="#059669">3</text><text x="362" y="387" class="td">55</text>
+<rect x="44" y="396" width="370" height="26" fill="#ede9fe" class="row"/><rect x="44" y="396" width="4" height="26" fill="#7c3aed"/><text x="52" y="413" class="td">7</text><text x="96" y="413" class="td">Tricou din bumbac</text><text x="266" y="413" class="td keyv" fill="#7c3aed">4</text><text x="362" y="413" class="td">200</text>
+<rect x="44" y="422" width="370" height="26" fill="#fce7f3" class="row"/><rect x="44" y="422" width="4" height="26" fill="#db2777"/><text x="52" y="439" class="td">8</text><text x="96" y="439" class="td">Sapa de gradina</text><text x="266" y="439" class="td keyv" fill="#db2777">5</text><text x="362" y="439" class="td">70</text>
+</svg>
