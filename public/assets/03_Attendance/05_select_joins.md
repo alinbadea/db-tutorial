@@ -45,6 +45,12 @@ INNER JOIN Subjects AS sub ON cl.SubjectID = sub.SubjectID;
 
 ## INNER JOIN
 
+Animația urmărește un `INNER JOIN` între `Students` și `Classes`, pe datele din această bază de date:
+
+![Animație: INNER JOIN între Students și Classes](assets/03_Attendance/img/join_inner_animatie.svg)
+
+> **Sfat:** dă clic pe un pas din bara de sus a animației ca să o reiei de la acel pas; butonul din dreapta sus oprește și pornește animația. Diagrama Venn de lângă interogare arată ce rânduri păstrează fiecare tip de JOIN.
+
 ### Exemplul 1 — Înscrierile cu numele elevilor și ale materiilor
 
 ```sql
@@ -123,6 +129,10 @@ ORDER BY sub.SubjectName, s.LastName;
 
 ## LEFT OUTER JOIN
 
+Animația urmărește un `LEFT JOIN` între `Students` și `Classes`, pe datele din această bază de date:
+
+![Animație: LEFT JOIN între Students și Classes](assets/03_Attendance/img/join_left_animatie.svg)
+
 ### Exemplul 1 — Toți elevii și înregistrările lor de prezență (inclusiv elevii fără nicio înregistrare)
 
 ```sql
@@ -176,6 +186,10 @@ WHERE  cl.ClassID IS NULL;
 
 ## RIGHT OUTER JOIN
 
+Animația urmărește un `RIGHT JOIN` între `Students` și `Classes`, pe datele din această bază de date:
+
+![Animație: RIGHT JOIN între Students și Classes](assets/03_Attendance/img/join_right_animatie.svg)
+
 ```sql
 -- Toți profesorii, inclusiv cei care nu au făcut niciodată prezența
 SELECT
@@ -191,6 +205,10 @@ ORDER BY t.LastName, a.AttendanceDate;
 ---
 
 ## FULL OUTER JOIN
+
+Animația urmărește un `FULL OUTER JOIN` între `Students` și `Classes`, pe datele din această bază de date:
+
+![Animație: FULL OUTER JOIN între Students și Classes](assets/03_Attendance/img/join_full_animatie.svg)
 
 ```sql
 -- Toți elevii și toate înscrierile — afișăm și rândurile fără corespondent din ambele părți

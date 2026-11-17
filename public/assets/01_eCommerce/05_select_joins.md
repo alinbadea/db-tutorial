@@ -61,6 +61,12 @@ Când faci JOIN, califică întotdeauna numele coloanelor cu aliasul tabelului. 
 
 Returnează doar rândurile pentru care condiția de JOIN este adevărată în ambele tabele. Rândurile fără corespondent, din oricare parte, sunt excluse.
 
+Animația urmărește un `INNER JOIN` între `Produse` și `Categorii`, pe datele din această bază de date:
+
+![Animație: INNER JOIN între Produse și Categorii](assets/01_eCommerce/img/join_inner_animatie.svg)
+
+> **Sfat:** dă clic pe un pas din bara de sus a animației ca să o reiei de la acel pas; butonul din dreapta sus oprește și pornește animația. Diagrama Venn de lângă interogare arată ce rânduri păstrează fiecare tip de JOIN.
+
 ### Exemplul 1 — Produsele cu numele categoriei lor
 
 ```sql
@@ -129,6 +135,10 @@ ORDER BY co.Id, p.Denumire;
 ## LEFT OUTER JOIN (LEFT JOIN)
 
 Returnează **toate** rândurile din tabelul din stânga. Pentru rândurile din tabelul din stânga care nu au corespondent în tabelul din dreapta, coloanele din dreapta sunt completate cu `NULL`.
+
+Animația urmărește un `LEFT JOIN` între `Categorii` și `Produse`, pe datele din această bază de date. Aici `Categorii` este în stânga: fiecare produs are o categorie, deci `Produse LEFT JOIN Categorii` nu ar avea niciun rând fără pereche. Invers, categoria „Jucarii” nu are produse, așa că vezi ce se întâmplă cu ea:
+
+![Animație: LEFT JOIN între Categorii și Produse](assets/01_eCommerce/img/join_left_animatie.svg)
 
 ### Exemplul 1 — Clienții și comenzile lor (inclusiv clienții care nu au comandat niciodată)
 
@@ -202,6 +212,10 @@ LEFT JOIN Comenzi AS co ON cl.Id = co.IdClient
 
 Returnează toate rândurile din tabelul din dreapta. Este echivalent cu un LEFT JOIN cu tabelele inversate — majoritatea programatorilor preferă LEFT JOIN pentru consecvență.
 
+Animația urmărește un `RIGHT JOIN` între `Produse` și `Categorii`, pe datele din această bază de date:
+
+![Animație: RIGHT JOIN între Produse și Categorii](assets/01_eCommerce/img/join_right_animatie.svg)
+
 ```sql
 -- Toate categoriile, inclusiv cele care încă nu au produse
 SELECT
@@ -220,6 +234,10 @@ Categoria „Jucarii” nu are produse, deci apare cu `NULL` în `Denumire` și 
 ## FULL OUTER JOIN
 
 Returnează toate rândurile din ambele tabele. Rândurile fără corespondent, din oricare parte, primesc NULL în coloanele celuilalt tabel.
+
+Animația urmărește un `FULL OUTER JOIN` între `Produse` și `Categorii`, pe datele din această bază de date:
+
+![Animație: FULL OUTER JOIN între Produse și Categorii](assets/01_eCommerce/img/join_full_animatie.svg)
 
 ```sql
 -- Toate produsele și toate categoriile, afișând și rândurile fără corespondent din ambele părți

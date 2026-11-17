@@ -29,6 +29,17 @@ public/assets/
 
 URLs use hash routing (`#/db1/01-intro`), so deep links and page refreshes work on GitHub Pages.
 
+### Illustrations (GROUP BY, JOIN)
+
+The SVG illustrations in `public/assets/<db>/img/` are generated from the sample data in each database's `03_insert.md`. To change the data or the wording, edit the script and regenerate:
+
+```bash
+node tools/illustrations/group_by.mjs public/assets   # chapter 6: group_by_*.svg
+node tools/illustrations/join.mjs public/assets       # chapter 5: join_*_animatie.svg
+```
+
+Images whose file name ends in `animatie.svg` are animations with clickable steps. The chapter page swaps them from `<img>` to `<object>` (see `enableInteractiveAnimations()` in `src/app/chapter/chapter.ts`), because scripts don't run inside `<img>`.
+
 ## Deploying to GitHub Pages
 
 1. Push the repo to GitHub, with `main` as the default branch.

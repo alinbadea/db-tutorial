@@ -43,6 +43,12 @@ INNER JOIN Authors AS a ON t.AuthorID = a.AuthorID;
 
 ## INNER JOIN
 
+Animația urmărește un `INNER JOIN` între `Clients` și `Rentals`, pe datele din această bază de date:
+
+![Animație: INNER JOIN între Clients și Rentals](assets/02_Library/img/join_inner_animatie.svg)
+
+> **Sfat:** dă clic pe un pas din bara de sus a animației ca să o reiei de la acel pas; butonul din dreapta sus oprește și pornește animația. Diagrama Venn de lângă interogare arată ce rânduri păstrează fiecare tip de JOIN.
+
 ### Exemplul 1 — Titlurile cu numele complet al autorului
 
 ```sql
@@ -121,6 +127,10 @@ ORDER BY r.RentalDate DESC;
 
 ## LEFT OUTER JOIN
 
+Animația urmărește un `LEFT JOIN` între `Clients` și `Rentals`, pe datele din această bază de date:
+
+![Animație: LEFT JOIN între Clients și Rentals](assets/02_Library/img/join_left_animatie.svg)
+
 ### Exemplul 1 — Clienții și împrumuturile lor (inclusiv clienții care nu au împrumutat niciodată)
 
 ```sql
@@ -173,6 +183,10 @@ WHERE  b.BookID IS NULL;
 
 ## RIGHT OUTER JOIN
 
+Animația urmărește un `RIGHT JOIN` între `Clients` și `Rentals`, pe datele din această bază de date:
+
+![Animație: RIGHT JOIN între Clients și Rentals](assets/02_Library/img/join_right_animatie.svg)
+
 ```sql
 -- Toate editurile, inclusiv cele ale căror cărți nu se află în bibliotecă
 SELECT
@@ -188,6 +202,10 @@ ORDER BY p.PublisherName;
 ---
 
 ## FULL OUTER JOIN
+
+Animația urmărește un `FULL OUTER JOIN` între `Clients` și `Rentals`, pe datele din această bază de date:
+
+![Animație: FULL OUTER JOIN între Clients și Rentals](assets/02_Library/img/join_full_animatie.svg)
 
 ```sql
 -- Toate titlurile și toate cărțile — afișăm și rândurile fără corespondent din ambele părți
